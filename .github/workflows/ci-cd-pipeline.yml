@@ -130,7 +130,7 @@ jobs:
           version: 'latest'
 
       - name: 🚀 Start Minikube (if KUBE_CONFIG not provided)
-        if: ${{ !secrets.KUBE_CONFIG }}
+        if: ${{ secrets.KUBE_CONFIG == '' }}
         run: |
           # Install Minikube
           curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -147,7 +147,7 @@ jobs:
           kubectl get nodes
 
       - name: 🔐 Configure kubectl (if using external cluster)
-        if: ${{ secrets.KUBE_CONFIG }}
+        if: ${{ secrets.KUBE_CONFIG != '' }}
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
@@ -206,7 +206,7 @@ jobs:
           version: 'latest'
 
       - name: 🚀 Start Minikube (if KUBE_CONFIG not provided)
-        if: ${{ !secrets.KUBE_CONFIG }}
+        if: ${{ secrets.KUBE_CONFIG == '' }}
         run: |
           # Install Minikube
           curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -223,7 +223,7 @@ jobs:
           kubectl get nodes
 
       - name: 🔐 Configure kubectl (if using external cluster)
-        if: ${{ secrets.KUBE_CONFIG }}
+        if: ${{ secrets.KUBE_CONFIG != '' }}
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
