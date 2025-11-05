@@ -12,9 +12,20 @@ echo ""
 NAMESPACE="soa-integration"
 VAULT_ADDR="http://localhost:8200"
 
+# Vérifier que kubectl est configuré
+echo "🔍 Vérification de la connexion Kubernetes..."
+if ! kubectl cluster-info &> /dev/null; then
+    echo "❌ Impossible de se connecter au cluster Kubernetes"
+    echo "   Veuillez exécuter : k8s/setup-local-cluster.sh"
+    exit 1
+fi
+echo "✅ Connexion au cluster OK"
+echo ""
+
 # Vérifier que le namespace existe
 echo "📦 Vérification du namespace $NAMESPACE..."
-kubectl create namespace $NAMESPACE 2>/dev/null || echo "Namespace existe déjà"
+kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+echo "✅ Namespace $NAMESPACE prêt"
 
 # Déployer tous les microservices
 echo ""

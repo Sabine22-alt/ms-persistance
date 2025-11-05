@@ -16,24 +16,25 @@ if ($confirmation -ne "oui") {
 # Configuration
 $namespace = "soa-production"
 
-# Vérifier que Minikube est démarré
-Write-Host "📊 Vérification de Minikube..." -ForegroundColor Yellow
-$minikubeStatus = minikube status 2>&1
+# Vérifier que kubectl est configuré
+Write-Host "🔍 Vérification de la connexion Kubernetes..." -ForegroundColor Yellow
+$clusterInfo = kubectl cluster-info 2>&1
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Minikube n'est pas démarré. Démarrage..." -ForegroundColor Red
-    minikube start
+    Write-Host "❌ Impossible de se connecter au cluster Kubernetes" -ForegroundColor Red
+    Write-Host "   Erreur: $clusterInfo" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Solutions:" -ForegroundColor Yellow
+    Write-Host "   1. Démarrez Minikube: minikube start" -ForegroundColor Gray
+    Write-Host "   2. Vérifiez votre configuration kubeconfig" -ForegroundColor Gray
+    exit 1
 }
-Write-Host "✅ Minikube opérationnel" -ForegroundColor Green
+Write-Host "✅ Connexion au cluster OK" -ForegroundColor Green
 Write-Host ""
 
 # Créer le namespace s'il n'existe pas
 Write-Host "📦 Création du namespace $namespace..." -ForegroundColor Yellow
-kubectl create namespace $namespace 2>$null
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Namespace créé" -ForegroundColor Green
-} else {
-    Write-Host "ℹ️  Namespace existe déjà" -ForegroundColor Gray
-}
+kubectl create namespace $namespace --dry-run=client -o yaml | kubectl apply -f -
+Write-Host "✅ Namespace $namespace prêt" -ForegroundColor Green
 Write-Host ""
 
 # Vérifier Vault

@@ -124,22 +124,21 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔧 Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-
       - name: 🚀 Configure Kubernetes Cluster
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         run: |
-          set -x  # Enable debug mode
+          set -e  # Exit on error
           echo "=========================================="
-          echo "🔍 DEBUG: Kubernetes Configuration Start"
+          echo "🔍 Kubernetes Configuration Start"
           echo "=========================================="
-          echo "KUBE_CONFIG variable length: ${#KUBE_CONFIG}"
-          echo "Current user: $(whoami)"
-          echo "Home directory: $HOME"
+          
+          # Install kubectl first
+          echo "⬇️  Installing kubectl..."
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+          rm kubectl
+          echo "✅ kubectl installed"
           
           if [ -z "$KUBE_CONFIG" ]; then
             echo ""
@@ -147,22 +146,21 @@ jobs:
             echo ""
             
             # Install Minikube
-            echo "⬇️  Downloading Minikube..."
+            echo "⬇️  Installing Minikube..."
             curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
             sudo install minikube-linux-amd64 /usr/local/bin/minikube
+            rm minikube-linux-amd64
             
-            echo "🚀 Starting Minikube with Docker driver..."
-            # Start Minikube with Docker driver
-            minikube start --driver=docker --wait=all
+            echo "🚀 Starting Minikube..."
+            minikube start --driver=docker --wait=all --force
             
             echo "⏳ Waiting for cluster to be ready..."
-            # Wait for cluster to be ready
             kubectl wait --for=condition=Ready nodes --all --timeout=300s
             
             echo "✅ Minikube started successfully"
           else
             echo ""
-            echo "🔐 KUBE_CONFIG provided - Using external cluster..."
+            echo "🔐 KUBE_CONFIG provided - Configuring external cluster..."
             echo ""
             
             # Configure kubectl with external cluster
@@ -182,14 +180,26 @@ jobs:
 
       - name: 🚀 Deploy to Integration
         run: |
-          # Use correct path for deployment file
+          echo "📦 Creating namespace if not exists..."
+          kubectl create namespace soa-integration --dry-run=client -o yaml | kubectl apply -f -
+          
+          echo "🚀 Deploying to integration environment..."
           kubectl apply -f k8s/environments/integration/deployment.yaml
+          
+          echo "⏳ Waiting for deployment to complete..."
           kubectl rollout status deployment/recipeyoulove-api -n soa-integration --timeout=5m
+          
+          echo "✅ Deployment completed"
 
       - name: ✅ Verify Deployment
         run: |
+          echo "=== Pods ===" 
           kubectl get pods -n soa-integration -l app=recipeyoulove-api
+          echo ""
+          echo "=== Services ==="
           kubectl get svc -n soa-integration
+          echo ""
+          echo "=== Ingress ==="
           kubectl get ingress -n soa-integration
 
       - name: 🐛 Debug on failure
@@ -223,31 +233,44 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔧 Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-
       - name: 🚀 Configure Kubernetes Cluster
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         run: |
+          set -e  # Exit on error
+          echo "=========================================="
+          echo "🔍 Kubernetes Configuration Start"
+          echo "=========================================="
+          
+          # Install kubectl first
+          echo "⬇️  Installing kubectl..."
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+          rm kubectl
+          echo "✅ kubectl installed"
+          
           if [ -z "$KUBE_CONFIG" ]; then
-            echo "📦 KUBE_CONFIG not provided - Starting Minikube..."
+            echo ""
+            echo "📦 KUBE_CONFIG is empty - Starting Minikube..."
+            echo ""
             
             # Install Minikube
+            echo "⬇️  Installing Minikube..."
             curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
             sudo install minikube-linux-amd64 /usr/local/bin/minikube
+            rm minikube-linux-amd64
             
-            # Start Minikube with Docker driver
-            minikube start --driver=docker --wait=all
+            echo "🚀 Starting Minikube..."
+            minikube start --driver=docker --wait=all --force
             
-            # Wait for cluster to be ready
+            echo "⏳ Waiting for cluster to be ready..."
             kubectl wait --for=condition=Ready nodes --all --timeout=300s
             
             echo "✅ Minikube started successfully"
           else
-            echo "🔐 Using external cluster configuration..."
+            echo ""
+            echo "🔐 KUBE_CONFIG provided - Configuring external cluster..."
+            echo ""
             
             # Configure kubectl with external cluster
             mkdir -p $HOME/.kube
@@ -257,21 +280,35 @@ jobs:
             echo "✅ External cluster configured"
           fi
           
-          # Verify connection
+          echo ""
           echo "🔍 Verifying Kubernetes connection..."
           kubectl cluster-info
           kubectl get nodes
+          echo ""
+          echo "✅ Kubernetes configuration completed"
 
       - name: 🚀 Deploy to Production
         run: |
-          # Use correct path for deployment file
+          echo "📦 Creating namespace if not exists..."
+          kubectl create namespace soa-production --dry-run=client -o yaml | kubectl apply -f -
+          
+          echo "🚀 Deploying to production environment..."
           kubectl apply -f k8s/environments/production/deployment.yaml
+          
+          echo "⏳ Waiting for deployment to complete..."
           kubectl rollout status deployment/recipeyoulove-api -n soa-production --timeout=5m
+          
+          echo "✅ Deployment completed"
 
       - name: ✅ Verify Deployment
         run: |
+          echo "=== Pods ==="
           kubectl get pods -n soa-production -l app=recipeyoulove-api
+          echo ""
+          echo "=== Services ==="
           kubectl get svc -n soa-production
+          echo ""
+          echo "=== Ingress ==="
           kubectl get ingress -n soa-production
 
       - name: 📢 Notify Deployment Success
