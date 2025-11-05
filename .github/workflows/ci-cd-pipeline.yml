@@ -129,33 +129,56 @@ jobs:
         with:
           version: 'latest'
 
-      - name: 🚀 Start Minikube (if KUBE_CONFIG not provided)
-        if: ${{ secrets.KUBE_CONFIG == '' }}
+      - name: 🚀 Configure Kubernetes Cluster
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         run: |
-          # Install Minikube
-          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+          set -x  # Enable debug mode
+          echo "=========================================="
+          echo "🔍 DEBUG: Kubernetes Configuration Start"
+          echo "=========================================="
+          echo "KUBE_CONFIG variable length: ${#KUBE_CONFIG}"
+          echo "Current user: $(whoami)"
+          echo "Home directory: $HOME"
           
-          # Start Minikube with Docker driver
-          minikube start --driver=docker --wait=all
+          if [ -z "$KUBE_CONFIG" ]; then
+            echo ""
+            echo "📦 KUBE_CONFIG is empty - Starting Minikube..."
+            echo ""
+            
+            # Install Minikube
+            echo "⬇️  Downloading Minikube..."
+            curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+            sudo install minikube-linux-amd64 /usr/local/bin/minikube
+            
+            echo "🚀 Starting Minikube with Docker driver..."
+            # Start Minikube with Docker driver
+            minikube start --driver=docker --wait=all
+            
+            echo "⏳ Waiting for cluster to be ready..."
+            # Wait for cluster to be ready
+            kubectl wait --for=condition=Ready nodes --all --timeout=300s
+            
+            echo "✅ Minikube started successfully"
+          else
+            echo ""
+            echo "🔐 KUBE_CONFIG provided - Using external cluster..."
+            echo ""
+            
+            # Configure kubectl with external cluster
+            mkdir -p $HOME/.kube
+            echo "$KUBE_CONFIG" | base64 -d > $HOME/.kube/config
+            chmod 600 $HOME/.kube/config
+            
+            echo "✅ External cluster configured"
+          fi
           
-          # Wait for cluster to be ready
-          kubectl wait --for=condition=Ready nodes --all --timeout=300s
-          
-          # Verify connection
+          echo ""
+          echo "🔍 Verifying Kubernetes connection..."
           kubectl cluster-info
           kubectl get nodes
-
-      - name: 🔐 Configure kubectl (if using external cluster)
-        if: ${{ secrets.KUBE_CONFIG != '' }}
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-          
-          # Verify connection
-          kubectl cluster-info
-          kubectl get nodes
+          echo ""
+          echo "✅ Kubernetes configuration completed"
 
       - name: 🚀 Deploy to Integration
         run: |
@@ -205,31 +228,37 @@ jobs:
         with:
           version: 'latest'
 
-      - name: 🚀 Start Minikube (if KUBE_CONFIG not provided)
-        if: ${{ secrets.KUBE_CONFIG == '' }}
+      - name: 🚀 Configure Kubernetes Cluster
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         run: |
-          # Install Minikube
-          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-          sudo install minikube-linux-amd64 /usr/local/bin/minikube
-          
-          # Start Minikube with Docker driver
-          minikube start --driver=docker --wait=all
-          
-          # Wait for cluster to be ready
-          kubectl wait --for=condition=Ready nodes --all --timeout=300s
+          if [ -z "$KUBE_CONFIG" ]; then
+            echo "📦 KUBE_CONFIG not provided - Starting Minikube..."
+            
+            # Install Minikube
+            curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+            sudo install minikube-linux-amd64 /usr/local/bin/minikube
+            
+            # Start Minikube with Docker driver
+            minikube start --driver=docker --wait=all
+            
+            # Wait for cluster to be ready
+            kubectl wait --for=condition=Ready nodes --all --timeout=300s
+            
+            echo "✅ Minikube started successfully"
+          else
+            echo "🔐 Using external cluster configuration..."
+            
+            # Configure kubectl with external cluster
+            mkdir -p $HOME/.kube
+            echo "$KUBE_CONFIG" | base64 -d > $HOME/.kube/config
+            chmod 600 $HOME/.kube/config
+            
+            echo "✅ External cluster configured"
+          fi
           
           # Verify connection
-          kubectl cluster-info
-          kubectl get nodes
-
-      - name: 🔐 Configure kubectl (if using external cluster)
-        if: ${{ secrets.KUBE_CONFIG != '' }}
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-          
-          # Verify connection
+          echo "🔍 Verifying Kubernetes connection..."
           kubectl cluster-info
           kubectl get nodes
 
