@@ -1,19 +1,16 @@
-# Git attributes pour gérer correctement les fins de ligne
-
-# Par défaut, laisser Git gérer automatiquement les fins de ligne
 * text=auto
 
-# Scripts shell doivent toujours utiliser LF (fins de ligne Unix)
+
 *.sh text eol=lf
 
-# Scripts PowerShell doivent utiliser CRLF (fins de ligne Windows)
+
 *.ps1 text eol=crlf
 
-# Fichiers batch Windows doivent utiliser CRLF
+
 *.bat text eol=crlf
 *.cmd text eol=crlf
 
-# Fichiers YAML et JSON utilisent LF
+
 *.yml text eol=lf
 *.yaml text eol=lf
 *.json text eol=lf
