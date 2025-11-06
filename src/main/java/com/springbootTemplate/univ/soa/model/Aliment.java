@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "aliment")
+@Table(name = "aliments")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +19,18 @@ public class Aliment {
     @Column(nullable = false, unique = true, length = 100)
     private String nom;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 50)
-    private String categorie; // LEGUME, VIANDE, POISSON, CEREALE, FRUIT, EPICE
+    private CategorieAliment categorie;
+
+    public enum CategorieAliment {
+        FRUIT,
+        LEGUME,
+        VIANDE,
+        POISSON,
+        CEREALE,
+        LAITIER,
+        EPICE,
+        GLUTEN
+    }
 }

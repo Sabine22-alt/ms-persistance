@@ -28,17 +28,8 @@ public class AlimentService {
         return alimentRepository.findByNomIgnoreCase(nom);
     }
 
-    public List<Aliment> findByCategorie(String categorie) {
-        return alimentRepository.findByCategorie(categorie);
-    }
-
-    public List<Aliment> searchByNom(String nom) {
-        return alimentRepository.findByNomContainingIgnoreCase(nom);
-    }
-
     @Transactional
     public Aliment save(Aliment aliment) {
-        // IMPORTANT : Forcer l'ID à null pour la création
         aliment.setId(null);
         return alimentRepository.save(aliment);
     }

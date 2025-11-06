@@ -4,11 +4,12 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "feedback")
+@Table(name = "feedbacks")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,14 +19,18 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "utilisateur_id", nullable = false)
+    @JsonBackReference
+    private Utilisateur utilisateur;
 
-    @Column(name = "recette_id", nullable = false)
-    private Long recetteId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recette_id", nullable = false)
+    @JsonBackReference
+    private Recette recette;
 
-    @Column(name = "note", nullable = false)
-    private Integer note; // 1 à 5 étoiles
+    @Column(nullable = false)
+    private Integer evaluation; // 1 à 5
 
     @Column(columnDefinition = "TEXT")
     private String commentaire;
@@ -33,15 +38,17 @@ public class Feedback {
     @Column(name = "date_feedback")
     private LocalDateTime dateFeedback;
 
+    @Column(name = "date_modification")
+    private LocalDateTime dateModification;
+
     @PrePersist
     protected void onCreate() {
-        if (dateFeedback == null) {
-            dateFeedback = LocalDateTime.now();
-        }
+        dateFeedback = LocalDateTime.now();
+        dateModification = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        dateFeedback = LocalDateTime.now();
+        dateModification = LocalDateTime.now();
     }
 }

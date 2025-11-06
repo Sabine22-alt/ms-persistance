@@ -4,204 +4,272 @@ import com.springbootTemplate.univ.soa.dto.RecetteDTO;
 import com.springbootTemplate.univ.soa.mapper.RecetteMapper;
 import com.springbootTemplate.univ.soa.model.Recette;
 import com.springbootTemplate.univ.soa.service.RecetteService;
-import com.springbootTemplate.univ.soa.service.FeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/persistance/recettes")
-@CrossOrigin(origins = "*") // À ajuster selon vos besoins
+@CrossOrigin(origins = "*")
 public class RecetteController {
 
     @Autowired
     private RecetteService recetteService;
 
     @Autowired
-    private FeedbackService feedbackService;
-
-    @Autowired
     private RecetteMapper recetteMapper;
 
     /**
-     * Récupérer toutes les recettes avec filtres optionnels
-     * GET /api/persistance/recettes
-     * GET /api/persistance/recettes?ingredientIds=1,2,3
-     * GET /api/persistance/recettes?titre=pizza
+     * GET /api/persistance/recettes - Récupérer toutes les recettes
      */
     @GetMapping
-    public ResponseEntity<List<RecetteDTO>> getAllRecettes(
-            @RequestParam(required = false) List<Long> ingredientIds,
-            @RequestParam(required = false) String titre) {
-
-        List<Recette> recettes;
-
-        if (ingredientIds != null && !ingredientIds.isEmpty()) {
-            recettes = recetteService.findByIngredients(ingredientIds);
-        } else if (titre != null && !titre.isEmpty()) {
-            recettes = recetteService.searchByTitre(titre);
-        } else {
-            recettes = recetteService.findAll();
-        }
-
-        // Convertir en DTOs et enrichir avec les notes moyennes
-        List<RecetteDTO> dtos = recettes.stream()
-                .map(recette -> {
-                    RecetteDTO dto = recetteMapper.toDTO(recette);
-                    enrichWithFeedbackStats(dto);
-                    return dto;
-                })
+    public ResponseEntity<List<RecetteDTO>> getAllRecettes() {
+        List<RecetteDTO> dtos = recetteService.findAll().stream()
+                .map(recetteMapper::toDTO)
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(dtos);
     }
 
     /**
-     * Récupérer une recette par ID
-     * GET /api/persistance/recettes/1
+     * GET /api/persistance/recettes/{id} - Récupérer une recette par ID
      */
     @GetMapping("/{id}")
     public ResponseEntity<RecetteDTO> getRecetteById(@PathVariable Long id) {
         return recetteService.findById(id)
-                .map(recette -> {
-                    RecetteDTO dto = recetteMapper.toDTO(recette);
-                    enrichWithFeedbackStats(dto);
-                    return ResponseEntity.ok(dto);
-                })
+                .map(recetteMapper::toDTO)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /**
-     * Vérifier si une recette existe
-     * HEAD /api/persistance/recettes/1
-     */
-    @RequestMapping(value = "/{id}", method = RequestMethod.HEAD)
-    public ResponseEntity<Void> checkRecetteExists(@PathVariable Long id) {
-        if (recetteService.findById(id).isPresent()) {
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    /**
-     * Créer une nouvelle recette
-     * POST /api/persistance/recettes
+     * POST /api/persistance/recettes - Créer une nouvelle recette
      */
     @PostMapping
-    public ResponseEntity<RecetteDTO> createRecette(@RequestBody RecetteDTO dto) {
-        Recette recette = recetteMapper.toEntity(dto);
-        Recette saved = recetteService.save(recette);
-        RecetteDTO responseDto = recetteMapper.toDTO(saved);
-        enrichWithFeedbackStats(responseDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    public ResponseEntity<?> createRecette(@RequestBody RecetteDTO dto) {
+        // Validation : titre requis
+        if (dto.getTitre() == null || dto.getTitre().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le titre de la recette est obligatoire"));
+        }
+
+        // Validation : longueur du titre
+        if (dto.getTitre().trim().length() < 3) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le titre doit contenir au moins 3 caractères"));
+        }
+
+        if (dto.getTitre().length() > 200) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le titre ne peut pas dépasser 200 caractères"));
+        }
+
+        // Validation : temps total
+        if (dto.getTempsTotal() != null && dto.getTempsTotal() <= 0) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le temps total doit être supérieur à 0"));
+        }
+
+        if (dto.getTempsTotal() != null && dto.getTempsTotal() > 1440) { // 24h max
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le temps total ne peut pas dépasser 1440 minutes (24h)"));
+        }
+
+        // Validation : kcal
+        if (dto.getKcal() != null && dto.getKcal() < 0) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Les calories ne peuvent pas être négatives"));
+        }
+
+        if (dto.getKcal() != null && dto.getKcal() > 10000) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Les calories semblent excessives (max 10000)"));
+        }
+
+        // Validation : difficulté
+        if (dto.getDifficulte() != null) {
+            try {
+                Recette.Difficulte.valueOf(dto.getDifficulte().name());
+            } catch (Exception e) {
+                return ResponseEntity.badRequest()
+                        .body(createErrorResponse("Difficulté invalide. Valeurs acceptées: FACILE, MOYEN, DIFFICILE"));
+            }
+        }
+
+        // Validation : ingrédients
+        if (dto.getIngredients() != null && !dto.getIngredients().isEmpty()) {
+            for (RecetteDTO.IngredientDTO ingredient : dto.getIngredients()) {
+                // Validation : alimentId requis
+                if (ingredient.getAlimentId() == null) {
+                    return ResponseEntity.badRequest()
+                            .body(createErrorResponse("L'ID de l'aliment est requis pour chaque ingrédient"));
+                }
+
+                // Validation : quantité
+                if (ingredient.getQuantite() != null && ingredient.getQuantite() <= 0) {
+                    return ResponseEntity.badRequest()
+                            .body(createErrorResponse("La quantité doit être supérieure à 0"));
+                }
+
+                // Validation : unité
+                if (ingredient.getUnite() != null && !ingredient.getUnite().isEmpty()) {
+                    try {
+                        com.springbootTemplate.univ.soa.model.Ingredient.Unite.valueOf(ingredient.getUnite());
+                    } catch (Exception e) {
+                        return ResponseEntity.badRequest()
+                                .body(createErrorResponse("Unité invalide pour un ingrédient. Valeurs acceptées: " +
+                                        "GRAMME, KILOGRAMME, LITRE, MILLILITRE, CUILLERE_A_SOUPE, CUILLERE_A_CAFE, SACHET, UNITE"));
+                    }
+                }
+            }
+        }
+
+        // Validation : étapes
+        if (dto.getEtapes() != null && !dto.getEtapes().isEmpty()) {
+            for (RecetteDTO.EtapeDTO etape : dto.getEtapes()) {
+                // Validation : ordre requis
+                if (etape.getOrdre() == null || etape.getOrdre() <= 0) {
+                    return ResponseEntity.badRequest()
+                            .body(createErrorResponse("L'ordre de chaque étape doit être supérieur à 0"));
+                }
+
+                // Validation : texte requis
+                if (etape.getTexte() == null || etape.getTexte().trim().isEmpty()) {
+                    return ResponseEntity.badRequest()
+                            .body(createErrorResponse("Le texte de chaque étape est obligatoire"));
+                }
+
+                // Validation : longueur texte
+                if (etape.getTexte().trim().length() < 5) {
+                    return ResponseEntity.badRequest()
+                            .body(createErrorResponse("Le texte de chaque étape doit contenir au moins 5 caractères"));
+                }
+
+                // Validation : temps étape
+                if (etape.getTemps() != null && etape.getTemps() < 0) {
+                    return ResponseEntity.badRequest()
+                            .body(createErrorResponse("Le temps d'une étape ne peut pas être négatif"));
+                }
+            }
+        }
+
+        try {
+            Recette saved = recetteService.saveFromDTO(dto);
+            RecetteDTO responseDto = recetteMapper.toDTO(saved);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Erreur lors de la création: " + e.getMessage()));
+        }
     }
 
     /**
-     * Mettre à jour une recette existante
-     * PUT /api/persistance/recettes/1
+     * PUT /api/persistance/recettes/{id} - Mettre à jour une recette
      */
     @PutMapping("/{id}")
-    public ResponseEntity<RecetteDTO> updateRecette(
+    public ResponseEntity<?> updateRecette(
             @PathVariable Long id,
             @RequestBody RecetteDTO dto) {
-        Recette recette = recetteMapper.toEntity(dto);
-        Recette updated = recetteService.update(id, recette);
-        RecetteDTO responseDto = recetteMapper.toDTO(updated);
-        enrichWithFeedbackStats(responseDto);
-        return ResponseEntity.ok(responseDto);
+
+        // Vérifier que la recette existe
+        if (recetteService.findById(id).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Recette non trouvée avec l'ID: " + id));
+        }
+
+        // Appliquer les mêmes validations que pour la création
+        if (dto.getTitre() == null || dto.getTitre().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le titre de la recette est obligatoire"));
+        }
+
+        if (dto.getTitre().trim().length() < 3) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le titre doit contenir au moins 3 caractères"));
+        }
+
+        if (dto.getTitre().length() > 200) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le titre ne peut pas dépasser 200 caractères"));
+        }
+
+        if (dto.getTempsTotal() != null && dto.getTempsTotal() <= 0) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le temps total doit être supérieur à 0"));
+        }
+
+        if (dto.getKcal() != null && dto.getKcal() < 0) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Les calories ne peuvent pas être négatives"));
+        }
+
+        // Validation des ingrédients
+        if (dto.getIngredients() != null) {
+            for (RecetteDTO.IngredientDTO ingredient : dto.getIngredients()) {
+                if (ingredient.getAlimentId() == null) {
+                    return ResponseEntity.badRequest()
+                            .body(createErrorResponse("L'ID de l'aliment est requis pour chaque ingrédient"));
+                }
+                if (ingredient.getQuantite() != null && ingredient.getQuantite() <= 0) {
+                    return ResponseEntity.badRequest()
+                            .body(createErrorResponse("La quantité doit être supérieure à 0"));
+                }
+            }
+        }
+
+        // Validation des étapes
+        if (dto.getEtapes() != null) {
+            for (RecetteDTO.EtapeDTO etape : dto.getEtapes()) {
+                if (etape.getOrdre() == null || etape.getOrdre() <= 0) {
+                    return ResponseEntity.badRequest()
+                            .body(createErrorResponse("L'ordre de chaque étape doit être supérieur à 0"));
+                }
+                if (etape.getTexte() == null || etape.getTexte().trim().isEmpty()) {
+                    return ResponseEntity.badRequest()
+                            .body(createErrorResponse("Le texte de chaque étape est obligatoire"));
+                }
+            }
+        }
+
+        try {
+            Recette updated = recetteService.updateFromDTO(id, dto);
+            RecetteDTO responseDto = recetteMapper.toDTO(updated);
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Erreur lors de la mise à jour: " + e.getMessage()));
+        }
     }
 
     /**
-     * Supprimer une recette
-     * DELETE /api/persistance/recettes/1
+     * DELETE /api/persistance/recettes/{id} - Supprimer une recette
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRecette(@PathVariable Long id) {
-        recetteService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * Récupérer les recettes triées par note moyenne
-     * GET /api/persistance/recettes/top-rated?limit=10
-     */
-    @GetMapping("/top-rated")
-    public ResponseEntity<List<RecetteDTO>> getTopRatedRecettes(
-            @RequestParam(defaultValue = "10") int limit) {
-
-        List<RecetteDTO> allRecettes = recetteService.findAll().stream()
-                .map(recette -> {
-                    RecetteDTO dto = recetteMapper.toDTO(recette);
-                    enrichWithFeedbackStats(dto);
-                    return dto;
-                })
-                .filter(dto -> dto.getAverageNote() != null && dto.getAverageNote() > 0)
-                .sorted((a, b) -> Double.compare(b.getAverageNote(), a.getAverageNote()))
-                .limit(limit)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(allRecettes);
-    }
-
-    /**
-     * Recherche avancée de recettes
-     * GET /api/persistance/recettes/search?titre=pizza&minNote=4&maxCookTime=30
-     */
-    @GetMapping("/search")
-    public ResponseEntity<List<RecetteDTO>> searchRecettes(
-            @RequestParam(required = false) String titre,
-            @RequestParam(required = false) Double minNote,
-            @RequestParam(required = false) Integer maxCookTime) {
-
-        List<RecetteDTO> recettes = recetteService.findAll().stream()
-                .map(recette -> {
-                    RecetteDTO dto = recetteMapper.toDTO(recette);
-                    enrichWithFeedbackStats(dto);
-                    return dto;
-                })
-                .filter(dto -> {
-                    // Filtre par titre
-                    if (titre != null && !titre.isEmpty()) {
-                        if (!dto.getTitre().toLowerCase().contains(titre.toLowerCase())) {
-                            return false;
-                        }
-                    }
-
-                    // Filtre par note minimale
-                    if (minNote != null) {
-                        if (dto.getAverageNote() == null || dto.getAverageNote() < minNote) {
-                            return false;
-                        }
-                    }
-
-                    // Filtre par temps de cuisson maximum
-                    if (maxCookTime != null) {
-                        if (dto.getCookTime() == null || dto.getCookTime() > maxCookTime) {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(recettes);
-    }
-
-    /**
-     * Méthode helper pour enrichir le DTO avec les statistiques de feedback
-     */
-    private void enrichWithFeedbackStats(RecetteDTO dto) {
-        if (dto != null && dto.getId() != null) {
-            Double avgNote = feedbackService.getAverageNoteForRecette(dto.getId());
-            Long totalFeedbacks = feedbackService.countFeedbacksForRecette(dto.getId());
-
-            dto.setAverageNote(avgNote);
-            dto.setTotalFeedbacks(totalFeedbacks);
+    public ResponseEntity<?> deleteRecette(@PathVariable Long id) {
+        // Vérifier que la recette existe
+        if (recetteService.findById(id).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Recette non trouvée avec l'ID: " + id));
         }
+
+        try {
+            recetteService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Erreur lors de la suppression: " + e.getMessage()));
+        }
+    }
+
+    // Méthode utilitaire
+    private Map<String, String> createErrorResponse(String message) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", message);
+        return error;
     }
 }

@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 @Component
 public class UtilisateurMapper {
 
-    // Entity -> DTO (sans le mot de passe pour la sécurité)
     public UtilisateurDTO toDTO(Utilisateur utilisateur) {
         if (utilisateur == null) {
             return null;
@@ -18,15 +17,18 @@ public class UtilisateurMapper {
 
         UtilisateurDTO dto = new UtilisateurDTO();
         dto.setId(utilisateur.getId());
-        dto.setEmailAddress(utilisateur.getEmailAddress());
-        dto.setRegimeAlimentaire(utilisateur.getRegimeAlimentaire());
-        dto.setCreatedAt(utilisateur.getCreatedAt());
-        dto.setUpdatedAt(utilisateur.getUpdatedAt());
+        dto.setEmail(utilisateur.getEmail());
+        // Ne jamais renvoyer le mot de passe dans les GET
+        dto.setNom(utilisateur.getNom());
+        dto.setPrenom(utilisateur.getPrenom());
+        dto.setActif(utilisateur.getActif());
+        dto.setRole(utilisateur.getRole());
+        dto.setDateCreation(utilisateur.getDateCreation());
+        dto.setDateModification(utilisateur.getDateModification());
 
-        // Convertir les allergènes en IDs
-        if (utilisateur.getAllergenes() != null) {
-            dto.setAllergeneIds(
-                    utilisateur.getAllergenes().stream()
+        if (utilisateur.getAlimentsExclus() != null) {
+            dto.setAlimentsExclusIds(
+                    utilisateur.getAlimentsExclus().stream()
                             .map(Aliment::getId)
                             .collect(Collectors.toSet())
             );
@@ -35,7 +37,6 @@ public class UtilisateurMapper {
         return dto;
     }
 
-    // DTO -> Entity
     public Utilisateur toEntity(UtilisateurDTO dto) {
         if (dto == null) {
             return null;
@@ -43,9 +44,12 @@ public class UtilisateurMapper {
 
         Utilisateur utilisateur = new Utilisateur();
         utilisateur.setId(dto.getId());
-        utilisateur.setEmailAddress(dto.getEmailAddress());
-        utilisateur.setPassword(dto.getPassword());
-        utilisateur.setRegimeAlimentaire(dto.getRegimeAlimentaire());
+        utilisateur.setEmail(dto.getEmail());
+        utilisateur.setMotDePasse(dto.getMotDePasse());
+        utilisateur.setNom(dto.getNom());
+        utilisateur.setPrenom(dto.getPrenom());
+        utilisateur.setActif(dto.getActif());
+        utilisateur.setRole(dto.getRole());
 
         return utilisateur;
     }

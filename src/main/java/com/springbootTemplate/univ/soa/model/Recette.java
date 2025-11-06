@@ -5,11 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "recette")
+@Table(name = "recettes")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,32 +23,49 @@ public class Recette {
     @Column(nullable = false, length = 200)
     private String titre;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @Column(name = "temps_total")
+    private Integer tempsTotal; // en minutes
 
-    @Column(name = "steps", columnDefinition = "TEXT")
-    private String steps;
-
-    @Column(name = "cook_time")
-    private Integer cookTime; // en minutes
-
-    @Column(name = "kcal")
+    @Column
     private Integer kcal;
 
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Difficulte difficulte;
+
+    @Column(name = "date_creation", updatable = false)
+    private LocalDateTime dateCreation;
+
+    @Column(name = "date_modification")
+    private LocalDateTime dateModification;
+
     @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Ingredient> ingredients = new ArrayList<>();
 
-    // Méthode helper pour ajouter un ingrédient
-    public void addIngredient(Aliment aliment, Integer quantite, String unite, String categorie) {
-        Ingredient ingredient = new Ingredient();
-        ingredient.setRecette(this);
-        ingredient.setAliment(aliment);
-        ingredient.setQuantite(quantite);
-        ingredient.setUnite(unite);
-        ingredient.setCategorie(categorie);
-        ingredients.add(ingredient);
+    @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("ordre ASC")
+    private List<Etape> etapes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Feedback> feedbacks = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        dateCreation = LocalDateTime.now();
+        dateModification = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        dateModification = LocalDateTime.now();
+    }
+
+    public enum Difficulte {
+        FACILE,
+        MOYEN,
+        DIFFICILE
     }
 }

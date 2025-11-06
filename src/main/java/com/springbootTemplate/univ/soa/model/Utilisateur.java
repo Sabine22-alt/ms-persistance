@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "utilisateur")
+@Table(name = "utilisateurs")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,37 +20,58 @@ public class Utilisateur {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "email_address", unique = true, nullable = false, length = 100)
-    private String emailAddress;
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
+
+    @Column(name = "mot_de_passe", nullable = false)
+    private String motDePasse;
+
+    @Column(length = 100)
+    private String nom;
+
+    @Column(length = 100)
+    private String prenom;
 
     @Column(nullable = false)
-    private String password;
+    private Boolean actif = true;
 
-    @Column(name = "regime_alimentaire", length = 50)
-    private String regimeAlimentaire; // VEGETARIEN, VEGETALIEN, GLUTEN_FREE
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Role role = Role.USER;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-            name = "allergene",
+            name = "aliments_exclus",
             joinColumns = @JoinColumn(name = "utilisateur_id"),
             inverseJoinColumns = @JoinColumn(name = "aliment_id")
     )
-    private Set<Aliment> allergenes = new HashSet<>();
+    private Set<Aliment> alimentsExclus = new HashSet<>();
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "date_creation", updatable = false)
+    private LocalDateTime dateCreation;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "date_modification")
+    private LocalDateTime dateModification;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        dateCreation = LocalDateTime.now();
+        dateModification = LocalDateTime.now();
+        if (actif == null) {
+            actif = true;
+        }
+        if (role == null) {
+            role = Role.USER;
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        dateModification = LocalDateTime.now();
+    }
+
+    public enum Role {
+        USER,
+        ADMIN
     }
 }

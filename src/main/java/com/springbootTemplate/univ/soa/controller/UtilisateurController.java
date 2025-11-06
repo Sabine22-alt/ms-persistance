@@ -1,18 +1,9 @@
 package com.springbootTemplate.univ.soa.controller;
 
-import com.springbootTemplate.univ.soa.dto.LoginRequestDTO;
-import com.springbootTemplate.univ.soa.dto.UtilisateurCreateDTO;
 import com.springbootTemplate.univ.soa.dto.UtilisateurDTO;
 import com.springbootTemplate.univ.soa.mapper.UtilisateurMapper;
 import com.springbootTemplate.univ.soa.model.Utilisateur;
 import com.springbootTemplate.univ.soa.service.UtilisateurService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +17,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/persistance/utilisateurs")
 @CrossOrigin(origins = "*")
-@Tag(name = "Utilisateurs", description = "API de gestion des utilisateurs")
 public class UtilisateurController {
 
     @Autowired
@@ -35,8 +25,9 @@ public class UtilisateurController {
     @Autowired
     private UtilisateurMapper utilisateurMapper;
 
-    @Operation(summary = "Récupérer tous les utilisateurs")
-    @ApiResponse(responseCode = "200", description = "Liste des utilisateurs récupérée")
+    /**
+     * GET /api/persistance/utilisateurs - Récupérer tous les utilisateurs
+     */
     @GetMapping
     public ResponseEntity<List<UtilisateurDTO>> getAllUtilisateurs() {
         List<UtilisateurDTO> dtos = utilisateurService.findAll().stream()
@@ -45,162 +36,173 @@ public class UtilisateurController {
         return ResponseEntity.ok(dtos);
     }
 
-    @Operation(summary = "Récupérer un utilisateur par ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Utilisateur trouvé"),
-            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé")
-    })
+    /**
+     * GET /api/persistance/utilisateurs/{id} - Récupérer un utilisateur par ID
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<UtilisateurDTO> getUtilisateurById(
-            @Parameter(description = "ID de l'utilisateur") @PathVariable Long id) {
+    public ResponseEntity<UtilisateurDTO> getUtilisateurById(@PathVariable Long id) {
         return utilisateurService.findById(id)
                 .map(utilisateurMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Récupérer un utilisateur par email")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Utilisateur trouvé"),
-            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé")
-    })
-    @GetMapping("/email/{email}")
-    public ResponseEntity<UtilisateurDTO> getUtilisateurByEmail(
-            @Parameter(description = "Email de l'utilisateur") @PathVariable String email) {
-        return utilisateurService.findByEmail(email)
-                .map(utilisateurMapper::toDTO)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @Operation(summary = "Créer un nouvel utilisateur (inscription)",
-            description = "Le mot de passe sera automatiquement hashé avec BCrypt")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Utilisateur créé avec succès",
-                    content = @Content(schema = @Schema(implementation = UtilisateurDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Données invalides"),
-            @ApiResponse(responseCode = "409", description = "Email déjà utilisé")
-    })
+    /**
+     * POST /api/persistance/utilisateurs - Créer un nouvel utilisateur
+     */
     @PostMapping
-    public ResponseEntity<?> createUtilisateur(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Données du nouvel utilisateur (mot de passe sera hashé)",
-                    required = true
-            )
-            @RequestBody UtilisateurCreateDTO createDTO) {
-
-        // Vérifier si l'email existe déjà
-        if (utilisateurService.findByEmail(createDTO.getEmailAddress()).isPresent()) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Un utilisateur avec cet email existe déjà");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    public ResponseEntity<?> createUtilisateur(@RequestBody UtilisateurDTO dto) {
+        // Validation : email requis
+        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("L'email est obligatoire"));
         }
 
-        // Convertir CreateDTO vers Entity
-        Utilisateur utilisateur = new Utilisateur();
-        utilisateur.setEmailAddress(createDTO.getEmailAddress());
-        utilisateur.setPassword(createDTO.getPassword()); // Sera hashé dans le service
-        utilisateur.setRegimeAlimentaire(createDTO.getRegimeAlimentaire());
+        // Validation : format email
+        if (!isValidEmail(dto.getEmail())) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Format d'email invalide"));
+        }
 
-        // Sauvegarder avec les allergènes
-        Utilisateur saved = utilisateurService.createWithAllergenes(
-                utilisateur,
-                createDTO.getAllergeneIds()
-        );
+        // Validation : email unique
+        if (utilisateurService.findByEmail(dto.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(createErrorResponse("Un utilisateur avec cet email existe déjà"));
+        }
 
-        UtilisateurDTO responseDTO = utilisateurMapper.toDTO(saved);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+        // Validation : mot de passe requis
+        if (dto.getMotDePasse() == null || dto.getMotDePasse().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le mot de passe est obligatoire"));
+        }
+
+        // Validation : longueur mot de passe
+        if (dto.getMotDePasse().length() < 6) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le mot de passe doit contenir au moins 6 caractères"));
+        }
+
+        // Validation : nom et prénom requis
+        if (dto.getNom() == null || dto.getNom().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le nom est obligatoire"));
+        }
+
+        if (dto.getPrenom() == null || dto.getPrenom().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le prénom est obligatoire"));
+        }
+
+        // Validation : role valide
+        if (dto.getRole() != null &&
+                dto.getRole() != Utilisateur.Role.USER &&
+                dto.getRole() != Utilisateur.Role.ADMIN) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le rôle doit être USER ou ADMIN"));
+        }
+
+        try {
+            Utilisateur saved = utilisateurService.saveFromDTO(dto);
+            UtilisateurDTO responseDto = utilisateurMapper.toDTO(saved);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Erreur lors de la création: " + e.getMessage()));
+        }
     }
 
-    @Operation(summary = "Connexion d'un utilisateur",
-            description = "Vérifie l'email et le mot de passe hashé")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Connexion réussie",
-                    content = @Content(schema = @Schema(implementation = UtilisateurDTO.class))),
-            @ApiResponse(responseCode = "401", description = "Email ou mot de passe incorrect")
-    })
-    @PostMapping("/login")
-    public ResponseEntity<?> login(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Identifiants de connexion",
-                    required = true
-            )
-            @RequestBody LoginRequestDTO loginRequest) {
-
-        return utilisateurService.authenticate(
-                        loginRequest.getEmailAddress(),
-                        loginRequest.getPassword()
-                )
-                .map(utilisateur -> {
-                    UtilisateurDTO dto = utilisateurMapper.toDTO(utilisateur);
-                    return ResponseEntity.ok((Object) dto);
-                })
-                .orElseGet(() -> {
-                    Map<String, String> error = new HashMap<>();
-                    error.put("error", "Email ou mot de passe incorrect");
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-                });
-    }
-
-    @Operation(summary = "Mettre à jour un utilisateur",
-            description = "Si un nouveau mot de passe est fourni, il sera hashé automatiquement")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Utilisateur mis à jour"),
-            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé")
-    })
+    /**
+     * PUT /api/persistance/utilisateurs/{id} - Mettre à jour un utilisateur
+     */
     @PutMapping("/{id}")
-    public ResponseEntity<UtilisateurDTO> updateUtilisateur(
-            @Parameter(description = "ID de l'utilisateur") @PathVariable Long id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Nouvelles données de l'utilisateur",
-                    required = true
-            )
-            @RequestBody UtilisateurCreateDTO updateDTO) {
+    public ResponseEntity<?> updateUtilisateur(
+            @PathVariable Long id,
+            @RequestBody UtilisateurDTO dto) {
 
-        Utilisateur utilisateur = new Utilisateur();
-        utilisateur.setEmailAddress(updateDTO.getEmailAddress());
-        utilisateur.setPassword(updateDTO.getPassword()); // Sera hashé dans le service si fourni
-        utilisateur.setRegimeAlimentaire(updateDTO.getRegimeAlimentaire());
+        // Vérifier que l'utilisateur existe
+        if (utilisateurService.findById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-        Utilisateur updated = utilisateurService.update(id, utilisateur);
-        return ResponseEntity.ok(utilisateurMapper.toDTO(updated));
+        // Validation : email requis
+        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("L'email est obligatoire"));
+        }
+
+        // Validation : format email
+        if (!isValidEmail(dto.getEmail())) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Format d'email invalide"));
+        }
+
+        // Validation : email unique (sauf pour l'utilisateur actuel)
+        utilisateurService.findByEmail(dto.getEmail()).ifPresent(existingUser -> {
+            if (!existingUser.getId().equals(id)) {
+                throw new IllegalStateException("Un autre utilisateur utilise déjà cet email");
+            }
+        });
+
+        // Validation : si mot de passe fourni, vérifier la longueur
+        if (dto.getMotDePasse() != null && !dto.getMotDePasse().trim().isEmpty()) {
+            if (dto.getMotDePasse().length() < 6) {
+                return ResponseEntity.badRequest()
+                        .body(createErrorResponse("Le mot de passe doit contenir au moins 6 caractères"));
+            }
+        }
+
+        // Validation : nom et prénom requis
+        if (dto.getNom() == null || dto.getNom().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le nom est obligatoire"));
+        }
+
+        if (dto.getPrenom() == null || dto.getPrenom().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le prénom est obligatoire"));
+        }
+
+        try {
+            Utilisateur updated = utilisateurService.updateFromDTO(id, dto);
+            UtilisateurDTO responseDto = utilisateurMapper.toDTO(updated);
+            return ResponseEntity.ok(responseDto);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Erreur lors de la mise à jour: " + e.getMessage()));
+        }
     }
 
-    @Operation(summary = "Supprimer un utilisateur")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Utilisateur supprimé"),
-            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé")
-    })
+    /**
+     * DELETE /api/persistance/utilisateurs/{id} - Supprimer un utilisateur
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUtilisateur(
-            @Parameter(description = "ID de l'utilisateur") @PathVariable Long id) {
-        utilisateurService.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deleteUtilisateur(@PathVariable Long id) {
+        // Vérifier que l'utilisateur existe
+        if (utilisateurService.findById(id).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Utilisateur non trouvé avec l'ID: " + id));
+        }
+
+        try {
+            utilisateurService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Erreur lors de la suppression: " + e.getMessage()));
+        }
     }
 
-    @Operation(summary = "Ajouter un allergène à un utilisateur")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Allergène ajouté"),
-            @ApiResponse(responseCode = "404", description = "Utilisateur ou aliment non trouvé")
-    })
-    @PostMapping("/{userId}/allergenes/{alimentId}")
-    public ResponseEntity<Void> addAllergene(
-            @Parameter(description = "ID de l'utilisateur") @PathVariable Long userId,
-            @Parameter(description = "ID de l'aliment allergène") @PathVariable Long alimentId) {
-        utilisateurService.addAllergene(userId, alimentId);
-        return ResponseEntity.ok().build();
+    // Méthodes utilitaires
+    private boolean isValidEmail(String email) {
+        return email != null && email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
 
-    @Operation(summary = "Retirer un allergène d'un utilisateur")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Allergène retiré"),
-            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé")
-    })
-    @DeleteMapping("/{userId}/allergenes/{alimentId}")
-    public ResponseEntity<Void> removeAllergene(
-            @Parameter(description = "ID de l'utilisateur") @PathVariable Long userId,
-            @Parameter(description = "ID de l'aliment allergène") @PathVariable Long alimentId) {
-        utilisateurService.removeAllergene(userId, alimentId);
-        return ResponseEntity.noContent().build();
+    private Map<String, String> createErrorResponse(String message) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", message);
+        return error;
     }
 }

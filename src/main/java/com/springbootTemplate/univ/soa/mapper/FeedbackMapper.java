@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class FeedbackMapper {
 
-    // Entity -> DTO
     public FeedbackDTO toDTO(Feedback feedback) {
         if (feedback == null) {
             return null;
@@ -15,26 +14,22 @@ public class FeedbackMapper {
 
         FeedbackDTO dto = new FeedbackDTO();
         dto.setId(feedback.getId());
-        dto.setUserId(feedback.getUserId());
-        dto.setRecetteId(feedback.getRecetteId());
-        dto.setNote(feedback.getNote());
+        dto.setEvaluation(feedback.getEvaluation());
         dto.setCommentaire(feedback.getCommentaire());
         dto.setDateFeedback(feedback.getDateFeedback());
+        dto.setDateModification(feedback.getDateModification());
 
-        return dto;
-    }
-
-    // Entity -> DTO enrichi (avec email et titre)
-    public FeedbackDTO toDTOEnriched(Feedback feedback, String userEmail, String recetteTitre) {
-        FeedbackDTO dto = toDTO(feedback);
-        if (dto != null) {
-            dto.setUserEmail(userEmail);
-            dto.setRecetteTitre(recetteTitre);
+        if (feedback.getUtilisateur() != null) {
+            dto.setUtilisateurId(feedback.getUtilisateur().getId());
         }
+
+        if (feedback.getRecette() != null) {
+            dto.setRecetteId(feedback.getRecette().getId());
+        }
+
         return dto;
     }
 
-    // DTO -> Entity
     public Feedback toEntity(FeedbackDTO dto) {
         if (dto == null) {
             return null;
@@ -42,12 +37,10 @@ public class FeedbackMapper {
 
         Feedback feedback = new Feedback();
         feedback.setId(dto.getId());
-        feedback.setUserId(dto.getUserId());
-        feedback.setRecetteId(dto.getRecetteId());
-        feedback.setNote(dto.getNote());
+        feedback.setEvaluation(dto.getEvaluation());
         feedback.setCommentaire(dto.getCommentaire());
         feedback.setDateFeedback(dto.getDateFeedback());
-
+        feedback.setDateModification(dto.getDateModification());
         return feedback;
     }
 }

@@ -12,29 +12,10 @@ import java.time.LocalDateTime;
 public class FeedbackDTO {
 
     private Long id;
-    private Long userId;
-    private String userEmail; // Email de l'utilisateur (pour affichage)
+    private Long utilisateurId;
     private Long recetteId;
-    private String recetteTitre; // Titre de la recette (pour affichage)
-    private Integer note;
+    private Integer evaluation;
     private String commentaire;
     private LocalDateTime dateFeedback;
-
-    // Constructeur pour la création (sans ID et sans date)
-    public FeedbackDTO(Long userId, Long recetteId, Integer note, String commentaire) {
-        this.userId = userId;
-        this.recetteId = recetteId;
-        this.note = note;
-        this.commentaire = commentaire;
-    }
-
-    // Constructeur simplifié (les plus utilisés)
-    public FeedbackDTO(Long id, Long userId, Long recetteId, Integer note, String commentaire, LocalDateTime dateFeedback) {
-        this.id = id;
-        this.userId = userId;
-        this.recetteId = recetteId;
-        this.note = note;
-        this.commentaire = commentaire;
-        this.dateFeedback = dateFeedback;
-    }
+    private LocalDateTime dateModification;
 }

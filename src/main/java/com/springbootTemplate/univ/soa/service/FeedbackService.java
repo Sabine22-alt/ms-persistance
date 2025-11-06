@@ -2,12 +2,15 @@ package com.springbootTemplate.univ.soa.service;
 
 import com.springbootTemplate.univ.soa.exception.ResourceNotFoundException;
 import com.springbootTemplate.univ.soa.model.Feedback;
+import com.springbootTemplate.univ.soa.model.Recette;
+import com.springbootTemplate.univ.soa.model.Utilisateur;
 import com.springbootTemplate.univ.soa.repository.FeedbackRepository;
+import com.springbootTemplate.univ.soa.repository.RecetteRepository;
+import com.springbootTemplate.univ.soa.repository.UtilisateurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +20,12 @@ public class FeedbackService {
     @Autowired
     private FeedbackRepository feedbackRepository;
 
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
+
+    @Autowired
+    private RecetteRepository recetteRepository;
+
     public List<Feedback> findAll() {
         return feedbackRepository.findAll();
     }
@@ -25,34 +34,27 @@ public class FeedbackService {
         return feedbackRepository.findById(id);
     }
 
-    public List<Feedback> findByUserId(Long userId) {
-        return feedbackRepository.findByUserId(userId);
+    public List<Feedback> findByUtilisateurId(Long utilisateurId) {
+        return feedbackRepository.findByUtilisateurId(utilisateurId);
     }
 
     public List<Feedback> findByRecetteId(Long recetteId) {
         return feedbackRepository.findByRecetteId(recetteId);
     }
 
-    public Optional<Feedback> findByUserIdAndRecetteId(Long userId, Long recetteId) {
-        return feedbackRepository.findByUserIdAndRecetteId(userId, recetteId);
-    }
-
-    public Double getAverageNoteForRecette(Long recetteId) {
-        return feedbackRepository.calculateAverageNoteForRecette(recetteId);
-    }
-
-    public Long countFeedbacksForRecette(Long recetteId) {
-        return feedbackRepository.countByRecetteId(recetteId);
-    }
-
     @Transactional
-    public Feedback save(Feedback feedback) {
-        // IMPORTANT : Forcer l'ID à null pour la création
+    public Feedback save(Feedback feedback, Long utilisateurId, Long recetteId) {
         feedback.setId(null);
 
-        if (feedback.getDateFeedback() == null) {
-            feedback.setDateFeedback(LocalDateTime.now());
-        }
+        Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + utilisateurId));
+
+        Recette recette = recetteRepository.findById(recetteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
+
+        feedback.setUtilisateur(utilisateur);
+        feedback.setRecette(recette);
+
         return feedbackRepository.save(feedback);
     }
 
@@ -61,9 +63,8 @@ public class FeedbackService {
         Feedback existing = feedbackRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Feedback non trouvé avec l'ID: " + id));
 
-        existing.setNote(feedback.getNote());
+        existing.setEvaluation(feedback.getEvaluation());
         existing.setCommentaire(feedback.getCommentaire());
-        existing.setDateFeedback(LocalDateTime.now());
 
         return feedbackRepository.save(existing);
     }

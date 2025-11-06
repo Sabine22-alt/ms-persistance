@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
-@Table(name = "ingredients")
+@Table(name = "etapes")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Ingredient {
+public class Etape {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,28 +22,12 @@ public class Ingredient {
     @JsonBackReference
     private Recette recette;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "aliment_id", nullable = false)
-    private Aliment aliment;
+    @Column(nullable = false)
+    private Integer ordre;
 
     @Column
-    private Float quantite;
+    private Integer temps; // en minutes
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 30)
-    private Unite unite;
-
-    @Column
-    private Boolean principal = false;
-
-    public enum Unite {
-        GRAMME,
-        KILOGRAMME,
-        LITRE,
-        MILLILITRE,
-        CUILLERE_A_SOUPE,
-        CUILLERE_A_CAFE,
-        SACHET,
-        UNITE
-    }
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String texte;
 }
