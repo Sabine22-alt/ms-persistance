@@ -21,7 +21,7 @@ on:
 
 env:
   OCI_REGION: eu-paris-1
-  OCI_REGISTRY: fra.ocir.io
+  OCI_REGISTRY: cdg.ocir.io
 
 jobs:
   build-docker:
