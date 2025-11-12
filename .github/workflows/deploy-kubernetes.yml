@@ -81,8 +81,19 @@ jobs:
           ~/bin/oci --version
 
       - name: Configure OCI CLI
-        if: secrets.OCI_CLI_USER != ''
+        env:
+          OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+          OCI_CLI_REGION: ${{ secrets.OCI_CLI_REGION }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
         run: |
+          if [ -z "$OCI_CLI_USER" ]; then
+            echo "⚠️  OCI_CLI_USER non défini, configuration OCI CLI ignorée"
+            echo "Le kubeconfig doit utiliser un token au lieu d'exec plugin"
+            exit 0
+          fi
+          
           echo "Configuration d'OCI CLI..."
           mkdir -p ~/.oci
           chmod 700 ~/.oci
@@ -90,17 +101,17 @@ jobs:
           # Créer le fichier de configuration
           cat > ~/.oci/config << EOF
           [DEFAULT]
-          user=${{ secrets.OCI_CLI_USER }}
-          fingerprint=${{ secrets.OCI_CLI_FINGERPRINT }}
-          tenancy=${{ secrets.OCI_CLI_TENANCY }}
-          region=${{ secrets.OCI_CLI_REGION }}
+          user=$OCI_CLI_USER
+          fingerprint=$OCI_CLI_FINGERPRINT
+          tenancy=$OCI_CLI_TENANCY
+          region=$OCI_CLI_REGION
           key_file=~/.oci/oci_api_key.pem
           EOF
           
           chmod 600 ~/.oci/config
           
           # Créer la clé privée
-          echo "${{ secrets.OCI_CLI_KEY_CONTENT }}" > ~/.oci/oci_api_key.pem
+          echo "$OCI_CLI_KEY_CONTENT" > ~/.oci/oci_api_key.pem
           chmod 600 ~/.oci/oci_api_key.pem
           
           echo "✅ OCI CLI configuré"
