@@ -117,13 +117,66 @@ jobs:
           echo "✅ OCI CLI configuré"
 
       - name: Configure OKE Kubernetes context
+        env:
+          OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.OCI_KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
           
+          # Vérifier si le kubeconfig utilise exec plugin
+          if grep -q "exec:" ~/.kube/config && grep -q "oci" ~/.kube/config; then
+            echo "⚠️  Le kubeconfig utilise l'exec plugin OCI CLI"
+            
+            if [ -z "$OCI_CLI_USER" ]; then
+              echo ""
+              echo "╔═══════════════════════════════════════════════════════════════════════════╗"
+              echo "║  ❌ ERREUR: OCI CLI non configuré                                         ║"
+              echo "╚═══════════════════════════════════════════════════════════════════════════╝"
+              echo ""
+              echo "Le kubeconfig utilise l'exec plugin OCI qui nécessite une configuration"
+              echo "OCI CLI complète avec API keys."
+              echo ""
+              echo "SOLUTION: Créez ces 5 secrets dans GitHub:"
+              echo "  https://github.com/${{ github.repository }}/settings/secrets/actions"
+              echo ""
+              echo "  1. OCI_CLI_USER          - OCID de votre utilisateur OCI"
+              echo "  2. OCI_CLI_FINGERPRINT   - Fingerprint de votre API key"
+              echo "  3. OCI_CLI_TENANCY       - OCID de votre tenancy"
+              echo "  4. OCI_CLI_REGION        - Région (eu-paris-1)"
+              echo "  5. OCI_CLI_KEY_CONTENT   - Contenu complet de votre clé privée .pem"
+              echo ""
+              echo "Pour obtenir ces valeurs, dans OCI Cloud Shell:"
+              echo "  cat ~/.oci/config"
+              echo "  cat ~/.oci/oci_api_key.pem"
+              echo ""
+              echo "Voir le fichier VOS_VALEURS_SECRETS_GITHUB.txt dans le repo pour vos valeurs."
+              echo ""
+              exit 1
+            fi
+            
+            echo "✅ OCI CLI est configuré, l'exec plugin devrait fonctionner"
+          else
+            echo "✅ Le kubeconfig utilise un token (pas d'exec plugin)"
+          fi
+          
+          echo ""
           echo "Vérification de la connexion au cluster..."
-          kubectl cluster-info
+          if ! kubectl cluster-info; then
+            echo ""
+            echo "❌ Échec de connexion au cluster Kubernetes"
+            echo ""
+            echo "Vérifiez:"
+            echo "  1. Le secret OCI_KUBECONFIG est-il correctement encodé en base64?"
+            echo "  2. Si le kubeconfig utilise exec plugin, OCI CLI est-il configuré?"
+            echo "  3. Le cluster OKE est-il accessible?"
+            echo ""
+            exit 1
+          fi
+          
+          echo ""
+          echo "✅ Connexion au cluster réussie"
+          echo ""
           kubectl get nodes
 
       - name: Créer le namespace si nécessaire
