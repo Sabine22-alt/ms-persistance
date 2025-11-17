@@ -57,68 +57,49 @@ jobs:
       - name: Debug - Vérifier les secrets
         run: |
           echo "Vérification des secrets OCIR..."
-          if [ -z "$OCI_USERNAME" ]; then
-            echo "❌ OCI_USERNAME est vide!"
+          
+          if [ -z "$OCI_TENANCY_NAMESPACE" ]; then
+            echo "❌ OCI_TENANCY_NAMESPACE manquant"
             exit 1
-          else
-            echo "✅ OCI_USERNAME est défini (longueur: ${#OCI_USERNAME})"
+          fi
+          
+          if [ -z "$OCI_USERNAME" ]; then
+            echo "❌ OCI_USERNAME manquant"
+            exit 1
           fi
           
           if [ -z "$OCI_AUTH_TOKEN" ]; then
-            echo "❌ OCI_AUTH_TOKEN est vide!"
+            echo "❌ OCI_AUTH_TOKEN manquant"
             exit 1
-          else
-            echo "✅ OCI_AUTH_TOKEN est défini"
           fi
           
-          if [ -z "$OCI_TENANCY_NAMESPACE" ]; then
-            echo "❌ OCI_TENANCY_NAMESPACE est vide!"
-            exit 1
-          else
-            echo "✅ OCI_TENANCY_NAMESPACE est défini: $OCI_TENANCY_NAMESPACE"
-          fi
-          
+          echo "✅ Tous les secrets sont définis"
           echo "Registry: ${{ env.OCI_REGISTRY }}"
-          echo "Format attendu pour OCI_USERNAME: <tenancy-namespace>/<username>"
+          echo "Namespace: $OCI_TENANCY_NAMESPACE"
 
       - name: Login to Oracle Cloud Container Registry (OCIR)
         run: |
           echo "Connexion à OCIR..."
           echo "Registry: ${{ env.OCI_REGISTRY }}"
           
-          # Le username doit avoir le format: <tenancy-namespace>/<username>
+          # Format OCIR username: namespace/username
           FULL_USERNAME="${OCI_TENANCY_NAMESPACE}/${OCI_USERNAME}"
           
-          echo "Tentative de connexion à OCIR..."
+          echo "Tentative de connexion..."
           echo "Registry: ${{ env.OCI_REGISTRY }}"
-          echo "Tenancy Namespace: $OCI_TENANCY_NAMESPACE"
-          echo "Username: ${FULL_USERNAME%%/*}/***"
+          echo "Namespace: ${OCI_TENANCY_NAMESPACE}"
           
-          # Connexion avec gestion d'erreur
+          # Connexion à OCIR
           if echo "$OCI_AUTH_TOKEN" | docker login ${{ env.OCI_REGISTRY }} -u "$FULL_USERNAME" --password-stdin 2>&1; then
             echo "✅ Connexion réussie à OCIR"
           else
             echo ""
             echo "❌ ÉCHEC DE CONNEXION À OCIR"
             echo ""
-            echo "Vérifications à faire :"
-            echo "1. Vérifiez que OCI_USERNAME contient UNIQUEMENT votre nom d'utilisateur (pas le namespace)"
-            echo "   Valeur actuelle de OCI_USERNAME: $OCI_USERNAME"
-            echo "   Format attendu: 'abdelmoughitboutchi4@gmail.com'"
-            echo ""
-            echo "2. Vérifiez OCI_TENANCY_NAMESPACE"
-            echo "   Valeur actuelle: $OCI_TENANCY_NAMESPACE"
-            echo "   Format attendu: 'axfuowvuxal7' (avec 'f')"
-            echo ""
-            echo "3. Le repository 'smartdish/${{ inputs.microservice-name }}' existe-t-il dans OCIR ?"
-            echo "   → Console OCI > Developer Services > Container Registry"
-            echo ""
-            echo "4. Votre utilisateur a-t-il les permissions IAM pour OCIR ?"
-            echo "   → Console OCI > Identity > Policies"
-            echo "   → Policy requise : Allow group <votre-groupe> to manage repos in tenancy"
-            echo ""
-            echo "5. L'Auth Token est-il valide ?"
-            echo "   → Console OCI > User Settings > Auth Tokens"
+            echo "Vérifiez que dans GitHub Secrets:"
+            echo "• OCI_USERNAME = abdelmoughitboutchi4@gmail.com (SANS le namespace)"
+            echo "• OCI_TENANCY_NAMESPACE = axfuowvuxal7"
+            echo "• OCI_AUTH_TOKEN = votre token valide"
             echo ""
             exit 1
           fi
