@@ -187,7 +187,7 @@ jobs:
           export NAMESPACE="${{ env.NAMESPACE }}"
           export VERSION="${{ env.IMAGE_TAG }}"
           export IMAGE_TAG="${{ env.IMAGE_TAG }}"
-          export IMAGE_URL="fra.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/smartdish/$MICROSERVICE_NAME_SANITIZED"
+          export IMAGE_URL="cdg.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/smartdish/$MICROSERVICE_NAME_SANITIZED"
           
           # Déterminer le nombre de replicas selon l'environnement
           if [ "${{ inputs.environment }}" == "production" ]; then

@@ -46,11 +46,16 @@ jobs:
       - name: Préparer le nom de l'image
         id: image
         run: |
+          # Sanitiser le nom du microservice (remplacer points par tirets, minuscules)
+          MICROSERVICE_NAME_SANITIZED=$(echo "${{ inputs.microservice-name }}" | tr '.' '-' | tr '[:upper:]' '[:lower:]')
+          
           TENANCY_NAMESPACE="${{ secrets.OCI_TENANCY_NAMESPACE }}"
-          REPO_NAME="smartdish/${{ inputs.microservice-name }}"
+          REPO_NAME="smartdish/${MICROSERVICE_NAME_SANITIZED}"
           IMAGE_REF="${{ env.OCI_REGISTRY }}/${TENANCY_NAMESPACE}/${REPO_NAME}:${{ inputs.image-tag }}"
           
           echo "image-ref=${IMAGE_REF}" >> $GITHUB_OUTPUT
+          echo "Microservice original: ${{ inputs.microservice-name }}"
+          echo "Microservice sanitized: ${MICROSERVICE_NAME_SANITIZED}"
           echo "Image à scanner: ${IMAGE_REF}"
 
       - name: Vérifier que l'image existe
