@@ -1,404 +1,212 @@
-name: Déploiement Kubernetes
+name: CD - Deploy to Kubernetes
 
 on:
-  workflow_call:
-    inputs:
-      environment:
-        description: "Environnement cible (integration/production)"
-        required: true
-        type: string
-      namespace:
-        description: "Namespace Kubernetes"
-        required: true
-        type: string
-      microservice-name:
-        description: "Nom du microservice"
-        required: true
-        type: string
-      image-tag:
-        description: "Tag de l'image Docker"
-        required: true
-        type: string
-    secrets:
-      OCI_USERNAME:
-        required: true
-      OCI_AUTH_TOKEN:
-        required: true
-      OCI_TENANCY_NAMESPACE:
-        required: true
-      OCI_KUBECONFIG:
-        required: true
-      OCI_CLI_USER:
-        required: false
-      OCI_CLI_FINGERPRINT:
-        required: false
-      OCI_CLI_TENANCY:
-        required: false
-      OCI_CLI_REGION:
-        required: false
-      OCI_CLI_KEY_CONTENT:
-        required: false
-      MYSQL_HOST:
-        required: false
-      MYSQL_USER:
-        required: false
-      MYSQL_PASSWORD:
-        required: false
-      MYSQL_ROOT_PASSWORD:
-        required: false
-
-env:
-  OCI_REGION: eu-paris-1
-  OCI_REGISTRY: cdg.ocir.io
+  workflow_run:
+    workflows: ["CI - Build and Push"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
-    name: Déployer sur ${{ inputs.environment }}
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'latest'
-
       - name: Install OCI CLI
         run: |
           echo "Installation d'OCI CLI..."
-          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install-oci-cli.sh
-          bash install-oci-cli.sh --accept-all-defaults
-          
-          # Ajouter au PATH pour les prochains steps
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
+          chmod +x install.sh
+          ./install.sh --accept-all-defaults
           echo "$HOME/bin" >> $GITHUB_PATH
-          
-          # Export pour ce step
-          export PATH="$HOME/bin:$PATH"
-          
-          # Vérifier l'installation
-          oci --version
-          
           echo "✅ OCI CLI installé"
 
       - name: Configure OCI CLI
-        env:
-          OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
-          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
-          OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
-          OCI_CLI_REGION: ${{ secrets.OCI_CLI_REGION }}
-          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
-          SUPPRESS_LABEL_WARNING: "True"
         run: |
-          if [ -z "$OCI_CLI_USER" ]; then
-            echo "⚠️  OCI_CLI_USER non défini, configuration OCI CLI ignorée"
-            echo "Le kubeconfig doit utiliser un token au lieu d'exec plugin"
-            exit 0
-          fi
-          
           echo "Configuration d'OCI CLI..."
+          
+          # Créer le répertoire de configuration
           mkdir -p ~/.oci
-          chmod 700 ~/.oci
           
-          # Créer le fichier de configuration avec echo pour éviter les problèmes YAML
-          echo "[DEFAULT]" > ~/.oci/config
-          echo "user=$OCI_CLI_USER" >> ~/.oci/config
-          echo "fingerprint=$OCI_CLI_FINGERPRINT" >> ~/.oci/config
-          echo "tenancy=$OCI_CLI_TENANCY" >> ~/.oci/config
-          echo "region=$OCI_CLI_REGION" >> ~/.oci/config
-          echo "key_file=~/.oci/oci_api_key.pem" >> ~/.oci/config
+          # Écrire la clé privée (préserver les retours à la ligne)
+          echo "${{ secrets.OCI_API_KEY }}" > ~/.oci/oci_api_key.pem
           
-          chmod 600 ~/.oci/config
-          
-          # Créer la clé privée avec le bon format
-          echo "$OCI_CLI_KEY_CONTENT" > ~/.oci/oci_api_key.pem
-          
-          # Vérifier le format de la clé
-          echo "Vérification du format de la clé privée..."
-          if ! grep -q "BEGIN.*PRIVATE KEY" ~/.oci/oci_api_key.pem; then
-            echo "❌ La clé privée ne contient pas de header BEGIN"
-            echo "Premiers caractères de OCI_CLI_KEY_CONTENT:"
-            echo "$OCI_CLI_KEY_CONTENT" | head -c 100
+          # Vérification du format de la clé
+          if ! grep -q "BEGIN RSA PRIVATE KEY" ~/.oci/oci_api_key.pem; then
+            echo "❌ Erreur: Format de clé OCI invalide"
+            echo "La clé doit commencer par '-----BEGIN RSA PRIVATE KEY-----'"
             exit 1
           fi
           
-          # Vérifier si la clé a déjà la ligne OCI_API_KEY
-          if ! grep -q "OCI_API_KEY" ~/.oci/oci_api_key.pem; then
-            echo "Ajout de la ligne OCI_API_KEY..."
-            echo "OCI_API_KEY" >> ~/.oci/oci_api_key.pem
+          if ! grep -q "END RSA PRIVATE KEY" ~/.oci/oci_api_key.pem; then
+            echo "❌ Erreur: Format de clé OCI invalide"
+            echo "La clé doit se terminer par '-----END RSA PRIVATE KEY-----'"
+            exit 1
           fi
           
-          # S'assurer que la clé se termine par une nouvelle ligne
-          echo "" >> ~/.oci/oci_api_key.pem
-          
+          # Permissions strictes (obligatoire pour OCI)
           chmod 600 ~/.oci/oci_api_key.pem
           
-          # Vérifier la structure de la clé
-          echo "Structure de la clé:"
-          head -n 1 ~/.oci/oci_api_key.pem
-          echo "..."
-          tail -n 2 ~/.oci/oci_api_key.pem
+          # Créer le fichier de configuration OCI
+          cat > ~/.oci/config << EOF
+          [DEFAULT]
+          user=${{ secrets.OCI_CLI_USER }}
+          fingerprint=${{ secrets.OCI_CLI_FINGERPRINT }}
+          tenancy=${{ secrets.OCI_CLI_TENANCY }}
+          region=${{ secrets.OCI_CLI_REGION }}
+          key_file=~/.oci/oci_api_key.pem
+          EOF
           
-          echo "✅ OCI CLI configuré"
+          # Permissions pour le fichier de config
+          chmod 600 ~/.oci/config
           
-          # Vérifier que la configuration fonctionne
-          echo "Test de la configuration OCI CLI..."
-          TEST_OUTPUT=$(oci iam region list --limit 1 2>&1)
-          TEST_EXIT_CODE=$?
+          echo "✅ Configuration OCI créée"
           
-          if [ $TEST_EXIT_CODE -eq 0 ]; then
-            echo "✅ OCI CLI fonctionne correctement"
-          else
-            echo "❌ OCI CLI ne fonctionne pas correctement"
-            echo ""
-            echo "Sortie d'erreur:"
-            echo "$TEST_OUTPUT"
-            echo ""
-            echo "Contenu de ~/.oci/config:"
-            cat ~/.oci/config
-            echo ""
-            echo "Taille de la clé privée: $(wc -c < ~/.oci/oci_api_key.pem) bytes"
-            echo "Nombre de lignes: $(wc -l < ~/.oci/oci_api_key.pem)"
-            echo ""
-            echo "Vérification du fingerprint de la clé:"
-            openssl rsa -pubout -outform DER -in ~/.oci/oci_api_key.pem 2>&1 | openssl md5 -c || echo "Impossible de calculer le fingerprint"
-            echo ""
-            exit 1
-          fi
-
-      - name: Configure OKE Kubernetes context
+          # Afficher la config (sans données sensibles)
+          echo "Configuration OCI (masquée) :"
+          echo "- User: ${OCI_CLI_USER:0:20}..."
+          echo "- Tenancy: ${OCI_CLI_TENANCY:0:20}..."
+          echo "- Region: ${{ secrets.OCI_CLI_REGION }}"
         env:
           OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+
+      - name: Test OCI CLI Connection
         run: |
+          echo "Test de la connexion OCI..."
+          
+          # Test avec timeout
+          timeout 30s oci iam region list --query "data[0].name" --raw-output || {
+            echo "❌ Échec du test de connexion OCI"
+            echo ""
+            echo "🔍 Vérifications nécessaires :"
+            echo "1. OCI_CLI_USER : OCID de l'utilisateur"
+            echo "2. OCI_CLI_FINGERPRINT : Fingerprint de la clé API"
+            echo "3. OCI_CLI_TENANCY : OCID du tenancy"
+            echo "4. OCI_CLI_REGION : Région OCI (ex: eu-frankfurt-1)"
+            echo "5. OCI_API_KEY : Clé privée au format PEM avec retours à la ligne"
+            echo ""
+            echo "📚 Documentation :"
+            echo "https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm"
+            exit 1
+          }
+          
+          echo "✅ Connexion OCI établie avec succès"
+
+      - name: Setup Kubernetes Config
+        run: |
+          echo "Configuration de kubectl pour OKE..."
+          
+          # Créer le kubeconfig avec OCI CLI
           mkdir -p ~/.kube
-          echo "${{ secrets.OCI_KUBECONFIG }}" | base64 -d > ~/.kube/config
+          
+          oci ce cluster create-kubeconfig \
+            --cluster-id "${{ secrets.OKE_CLUSTER_ID }}" \
+            --file ~/.kube/config \
+            --region "${{ secrets.OCI_CLI_REGION }}" \
+            --token-version 2.0.0 \
+            --kube-endpoint PUBLIC_ENDPOINT
+          
           chmod 600 ~/.kube/config
           
-          # Vérifier si le kubeconfig utilise exec plugin
-          if grep -q "exec:" ~/.kube/config && grep -q "oci" ~/.kube/config; then
-            echo "⚠️  Le kubeconfig utilise l'exec plugin OCI CLI"
-            
-            if [ -z "$OCI_CLI_USER" ]; then
-              echo "❌ ERREUR: OCI CLI non configuré"
-              echo "Créez les 5 secrets OCI_CLI_* dans GitHub"
-              exit 1
-            fi
-            
-            echo "✅ OCI CLI est configuré"
-            echo "Génération d'un token Kubernetes..."
-            
-            # Extraire l'ID du cluster depuis le kubeconfig
-            CLUSTER_ID=$(grep -A 10 "exec:" ~/.kube/config | grep "cluster-id" | sed 's/.*cluster-id//' | tr -d ' -' | head -1)
-            
-            if [ -z "$CLUSTER_ID" ]; then
-              echo "❌ Impossible d'extraire l'ID du cluster depuis le kubeconfig"
-              cat ~/.kube/config
-              exit 1
-            fi
-            
-            echo "Cluster ID: $CLUSTER_ID"
-            
-            # Générer un token avec OCI CLI
-            TOKEN_OUTPUT=$(oci ce cluster generate-token --cluster-id "$CLUSTER_ID" --region ${{ env.OCI_REGION }} 2>&1)
-            
-            if [ $? -ne 0 ]; then
-              echo "❌ Échec de génération du token:"
-              echo "$TOKEN_OUTPUT"
-              echo ""
-              echo "Vérification de la configuration OCI:"
-              cat ~/.oci/config
-              echo ""
-              echo "Test de connexion OCI:"
-              oci iam region list --limit 1 || true
-              exit 1
-            fi
-            
-            # Extraire le token du JSON
-            TOKEN=$(echo "$TOKEN_OUTPUT" | jq -r '.token // .data.token // .status.token // empty' 2>/dev/null)
-            
-            if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-              echo "⚠️  Impossible d'extraire le token du JSON, essai d'une approche alternative..."
-              
-              # Remplacer l'exec plugin par un appel direct dans le kubeconfig
-              echo "Modification du kubeconfig pour utiliser l'exec plugin correctement..."
-              
-              # S'assurer que l'environnement SUPPRESS_LABEL_WARNING est défini pour l'exec
-              sed -i '/exec:/a\      env:\n      - name: SUPPRESS_LABEL_WARNING\n        value: "True"' ~/.kube/config
-            else
-              echo "✅ Token généré avec succès (longueur: ${#TOKEN})"
-              
-              # Extraire le serveur depuis le kubeconfig
-              SERVER=$(grep "server:" ~/.kube/config | head -1 | awk '{print $2}')
-              
-              # Extraire le nom du cluster et de l'utilisateur
-              CLUSTER_NAME=$(grep -A 2 "clusters:" ~/.kube/config | grep "name:" | head -1 | awk '{print $2}')
-              USER_NAME=$(grep -A 2 "users:" ~/.kube/config | grep "name:" | head -1 | awk '{print $2}')
-              CONTEXT_NAME=$(grep "current-context:" ~/.kube/config | awk '{print $2}')
-              
-              # Créer un nouveau kubeconfig avec le token
-              echo "apiVersion: v1" > ~/.kube/config
-              echo "clusters:" >> ~/.kube/config
-              echo "- cluster:" >> ~/.kube/config
-              echo "    insecure-skip-tls-verify: true" >> ~/.kube/config
-              echo "    server: $SERVER" >> ~/.kube/config
-              echo "  name: $CLUSTER_NAME" >> ~/.kube/config
-              echo "contexts:" >> ~/.kube/config
-              echo "- context:" >> ~/.kube/config
-              echo "    cluster: $CLUSTER_NAME" >> ~/.kube/config
-              echo "    user: $USER_NAME" >> ~/.kube/config
-              echo "  name: $CONTEXT_NAME" >> ~/.kube/config
-              echo "current-context: $CONTEXT_NAME" >> ~/.kube/config
-              echo "kind: Config" >> ~/.kube/config
-              echo "preferences: {}" >> ~/.kube/config
-              echo "users:" >> ~/.kube/config
-              echo "- name: $USER_NAME" >> ~/.kube/config
-              echo "  user:" >> ~/.kube/config
-              echo "    token: $TOKEN" >> ~/.kube/config
-              
-              chmod 600 ~/.kube/config
-              echo "✅ Kubeconfig modifié pour utiliser le token"
-            fi
-          else
-            echo "✅ Le kubeconfig utilise déjà un token"
-          fi
+          echo "✅ Kubeconfig configuré"
+
+      - name: Verify Kubernetes Connection
+        run: |
+          echo "Vérification de la connexion au cluster Kubernetes..."
           
-          echo ""
-          echo "Vérification de la connexion au cluster..."
-          if ! kubectl cluster-info 2>&1; then
-            echo ""
-            echo "❌ Échec de connexion au cluster Kubernetes"
-            echo ""
-            echo "DEBUG - Contenu du kubeconfig:"
-            cat ~/.kube/config
-            echo ""
-            echo "DEBUG - Test OCI CLI:"
-            oci iam region list --limit 1 || echo "OCI CLI ne fonctionne pas"
-            echo ""
+          kubectl cluster-info || {
+            echo "❌ Impossible de se connecter au cluster OKE"
+            echo "Vérifiez OKE_CLUSTER_ID dans les secrets GitHub"
             exit 1
-          fi
+          }
           
-          echo ""
-          echo "✅ Connexion au cluster réussie"
-          echo ""
           kubectl get nodes
-
-      - name: Créer le namespace si nécessaire
-        run: |
-          kubectl create namespace ${{ inputs.namespace }} --dry-run=client -o yaml | kubectl apply -f -
-          kubectl label namespace ${{ inputs.namespace }} environment=${{ inputs.environment }} --overwrite
-
-      - name: Créer le Secret pour OCIR
-        run: |
-          echo "Configuration du secret OCIR pour Kubernetes..."
           
-          # Construire le username complet si nécessaire
-          OCI_USERNAME="${{ secrets.OCI_USERNAME }}"
-          OCI_TENANCY_NAMESPACE="${{ secrets.OCI_TENANCY_NAMESPACE }}"
+          echo "✅ Connexion au cluster OKE établie"
+
+      - name: Create Namespace if not exists
+        run: |
+          NAMESPACE="smartdish"
           
-          # Si l'username ne contient pas le tenancy namespace, on l'ajoute
-          if [[ "$OCI_USERNAME" != *"/"* ]]; then
-            FULL_USERNAME="${OCI_TENANCY_NAMESPACE}/${OCI_USERNAME}"
-            echo "⚠️  Username modifié pour inclure le tenancy: $FULL_USERNAME"
+          if kubectl get namespace "$NAMESPACE" &> /dev/null; then
+            echo "✅ Namespace '$NAMESPACE' existe déjà"
           else
-            FULL_USERNAME="$OCI_USERNAME"
-            echo "✅ Username déjà au bon format: $FULL_USERNAME"
+            echo "Création du namespace '$NAMESPACE'..."
+            kubectl create namespace "$NAMESPACE"
+            echo "✅ Namespace '$NAMESPACE' créé"
           fi
-          
-          # Créer le secret Docker Registry
-          kubectl create secret docker-registry ocir-secret \
-            --docker-server=${{ env.OCI_REGISTRY }} \
-            --docker-username="$FULL_USERNAME" \
-            --docker-password="${{ secrets.OCI_AUTH_TOKEN }}" \
-            --namespace=${{ inputs.namespace }} \
-            --dry-run=client -o yaml | kubectl apply -f -
-          
-          echo "✅ Secret OCIR créé dans le namespace ${{ inputs.namespace }}"
 
-      - name: Créer les secrets MySQL
+      - name: Apply Kubernetes Manifests
         run: |
-          kubectl create secret generic mysql-secrets \
-            --from-literal=MYSQL_HOST="${{ secrets.MYSQL_HOST }}" \
-            --from-literal=MYSQL_PORT="3306" \
-            --from-literal=MYSQL_DATABASE="smartdish" \
-            --from-literal=MYSQL_USER="${{ secrets.MYSQL_USER }}" \
-            --from-literal=MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}" \
-            --from-literal=MYSQL_ROOT_PASSWORD="${{ secrets.MYSQL_ROOT_PASSWORD }}" \
-            --namespace=${{ inputs.namespace }} \
-            --dry-run=client -o yaml | kubectl apply -f -
+          echo "Déploiement des manifests Kubernetes..."
           
-          echo "✅ Secrets MySQL créés dans le namespace ${{ inputs.namespace }}"
+          # Remplacer les variables d'environnement dans les manifests
+          export IMAGE_TAG="${{ github.sha }}"
+          export MYSQL_ROOT_PASSWORD="${{ secrets.MYSQL_ROOT_PASSWORD }}"
+          export MYSQL_DATABASE="${{ secrets.MYSQL_DATABASE }}"
+          export MONGO_ROOT_USERNAME="${{ secrets.MONGO_ROOT_USERNAME }}"
+          export MONGO_ROOT_PASSWORD="${{ secrets.MONGO_ROOT_PASSWORD }}"
+          
+          # Appliquer les manifests
+          envsubst < k8s/deployment.yaml | kubectl apply -f - -n smartdish
+          kubectl apply -f k8s/service.yaml -n smartdish
+          
+          echo "✅ Manifests Kubernetes appliqués"
 
-      - name: Créer les ConfigMaps
+      - name: Wait for Deployment Rollout
         run: |
-          if [ "${{ inputs.environment }}" == "production" ]; then
-            SPRING_PROFILE="production"
-            LOG_LEVEL="INFO"
-            LOG_LEVEL_JDBC="WARN"
+          echo "Attente du déploiement complet..."
+          
+          kubectl rollout status deployment/smartdish-app -n smartdish --timeout=5m || {
+            echo "❌ Le déploiement a échoué"
+            echo ""
+            echo "📋 Logs des pods :"
+            kubectl logs -l app=smartdish-app -n smartdish --tail=50
+            echo ""
+            echo "📊 État des pods :"
+            kubectl get pods -n smartdish
+            echo ""
+            echo "🔍 Description du déploiement :"
+            kubectl describe deployment smartdish-app -n smartdish
+            exit 1
+          }
+          
+          echo "✅ Déploiement réussi"
+
+      - name: Display Deployment Info
+        run: |
+          echo "=========================================="
+          echo "📦 INFORMATIONS DE DÉPLOIEMENT"
+          echo "=========================================="
+          echo ""
+          echo "🏷️  Image déployée: ghcr.io/${{ github.repository }}:${{ github.sha }}"
+          echo "🌍 Namespace: smartdish"
+          echo "📅 Date: $(date)"
+          echo ""
+          echo "=========================================="
+          echo "📊 ÉTAT DES RESSOURCES"
+          echo "=========================================="
+          kubectl get all -n smartdish
+          echo ""
+          echo "=========================================="
+          echo "🔗 SERVICES EXPOSÉS"
+          echo "=========================================="
+          kubectl get svc -n smartdish
+          echo ""
+          echo "✅ Déploiement CD terminé avec succès"
+
+      - name: Notify Deployment Status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Déploiement réussi sur Kubernetes/OKE"
           else
-            SPRING_PROFILE="integration"
-            LOG_LEVEL="DEBUG"
-            LOG_LEVEL_JDBC="DEBUG"
+            echo "❌ Échec du déploiement sur Kubernetes/OKE"
           fi
-          
-          kubectl create configmap app-config \
-            --from-literal=SPRING_PROFILES_ACTIVE=${SPRING_PROFILE} \
-            --from-literal=LOG_LEVEL=${LOG_LEVEL} \
-            --from-literal=LOG_LEVEL_JDBC=${LOG_LEVEL_JDBC} \
-            --namespace=${{ inputs.namespace }} \
-            --dry-run=client -o yaml | kubectl apply -f -
-          
-          echo "✅ ConfigMap créée dans le namespace ${{ inputs.namespace }}"
-
-      - name: Préparer et déployer l'application
-        run: |
-          TENANCY_NAMESPACE="${{ secrets.OCI_TENANCY_NAMESPACE }}"
-          IMAGE_REPO="${{ env.OCI_REGISTRY }}/${TENANCY_NAMESPACE}/smartdish/${{ inputs.microservice-name }}"
-          IMAGE_TAG="${{ inputs.image-tag }}"
-          
-          if [ "${{ inputs.environment }}" == "production" ]; then
-            REPLICAS=2
-          else
-            REPLICAS=1
-          fi
-          
-          echo "Configuration du déploiement:"
-          echo "  Microservice: ${{ inputs.microservice-name }}"
-          echo "  Namespace: ${{ inputs.namespace }}"
-          echo "  Image: ${IMAGE_REPO}:${IMAGE_TAG}"
-          echo "  Replicas: ${REPLICAS}"
-          
-          # Substituer les variables dans le template
-          sed -e "s|\${MICROSERVICE_NAME}|${{ inputs.microservice-name }}|g" \
-              -e "s|\${NAMESPACE}|${{ inputs.namespace }}|g" \
-              -e "s|\${VERSION}|${IMAGE_TAG}|g" \
-              -e "s|\${REPLICAS}|${REPLICAS}|g" \
-              -e "s|\${IMAGE_URL}|${IMAGE_REPO}|g" \
-              -e "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" \
-              k8s/oci/deployment-template.yaml > /tmp/deployment.yaml
-          
-          echo ""
-          echo "Fichier de déploiement généré:"
-          cat /tmp/deployment.yaml
-          echo ""
-          
-          # Appliquer le déploiement
-          kubectl apply -f /tmp/deployment.yaml
-          
-          echo "✅ Déploiement appliqué"
-
-      - name: Vérifier le déploiement
-        run: |
-          echo "Attente du déploiement..."
-          kubectl rollout status deployment/${{ inputs.microservice-name }} -n ${{ inputs.namespace }} --timeout=5m
-          
-          echo ""
-          echo "Pods en cours d'exécution:"
-          kubectl get pods -n ${{ inputs.namespace }} -l app=${{ inputs.microservice-name }}
-          
-          echo ""
-          echo "Services:"
-          kubectl get svc -n ${{ inputs.namespace }} -l app=${{ inputs.microservice-name }}
-          
-          echo ""
-          echo "✅ Déploiement réussi!"
