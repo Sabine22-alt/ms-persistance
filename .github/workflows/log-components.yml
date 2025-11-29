@@ -19,7 +19,7 @@ jobs:
       - name: Display all component URLs
         run: |
           echo "╔═══════════════════════════════════════════════════════╗"
-          echo "║          🌐 DEPLOYED COMPONENTS INFORMATION           ║"
+          echo "║          🌐 COMMENT ACCÉDER AUX SERVICES              ║"
           echo "╚═══════════════════════════════════════════════════════╝"
           echo ""
           
@@ -27,101 +27,172 @@ jobs:
           if [ -f "service-url.txt" ]; then
             SERVICE_URL=$(cat service-url.txt)
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "🚀 API Service (univ-soa)"
+            echo "ℹ️  DÉPLOIEMENT CI/CD (GitHub Actions)"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "✅ URL: $SERVICE_URL"
-            echo "📍 Health: ${SERVICE_URL}/actuator/health"
-            echo "📍 Info: ${SERVICE_URL}/actuator/info"
-            echo "📍 Database Test: ${SERVICE_URL}/api/database/test"
+            echo "🤖 URL interne (Minikube): $SERVICE_URL"
+            echo "⚠️  Cette URL n'est PAS accessible depuis votre navigateur"
+            echo "📌 Usage: Tests d'intégration automatiques uniquement"
             echo ""
           else
             echo "❌ Service URL not found!"
             echo ""
           fi
           
-          # Extract IP and port if available
-          if [ -f "service-url.txt" ]; then
-            MINIKUBE_IP=$(echo $SERVICE_URL | sed -n 's|http://\([^:]*\):.*|\1|p')
-            API_PORT=$(echo $SERVICE_URL | sed -n 's|http://[^:]*:\([0-9]*\).*|\1|p')
-            
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "💾 phpMyAdmin (MySQL Management)"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "ℹ️  Deployed in namespace: soa-integration"
-            echo "ℹ️  To access, run port-forward:"
-            echo "   kubectl port-forward svc/phpmyadmin 8081:80 -n soa-integration"
-            echo "   Then access: http://localhost:8081"
-            echo "👤 Username: root"
-            echo "🔑 Password: password"
-            echo ""
-            
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "🗄️  MySQL Database (Internal)"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "📍 Host: mysql.soa-integration.svc.cluster.local"
-            echo "📍 Port: 3306"
-            echo "📍 Database: testdb"
-            echo "👤 Username: root / sa"
-            echo "🔑 Password: password"
-            echo ""
-            
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "🖥️  Minikube Cluster"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "📍 IP: $MINIKUBE_IP"
-            echo "📍 Namespace: soa-integration"
-            echo ""
-          fi
-          
           echo "╔═══════════════════════════════════════════════════════╗"
-          echo "║          📊 SUMMARY                                   ║"
+          echo "║       🌐 ACCÈS VIA NAVIGATEUR WEB (2 OPTIONS)        ║"
           echo "╚═══════════════════════════════════════════════════════╝"
           echo ""
-          echo "✅ API Service deployed and accessible"
-          echo "✅ MySQL database running"
-          echo "✅ phpMyAdmin available (use port-forward)"
+          
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ OPTION 1 : Docker Compose Local (RECOMMANDÉ)"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
-          echo "📋 To interact with the cluster from your local machine:"
-          echo "   1. Install kubectl and minikube"
-          echo "   2. Configure context to use the deployed cluster"
-          echo "   3. Run: kubectl get all -n soa-integration"
+          echo "📋 Depuis votre PC Windows :"
+          echo "   1. Ouvrir PowerShell dans le dossier du projet"
+          echo "   2. Exécuter : .\start-local-env.ps1"
+          echo "   3. Attendre 30 secondes"
+          echo ""
+          echo "🌐 URLs accessibles dans votre navigateur :"
+          echo "   🚀 API :           http://localhost:8080"
+          echo "   📍 Health :        http://localhost:8080/health"
+          echo "   📍 Status :        http://localhost:8080/api/status"
+          echo "   📍 DB Test :       http://localhost:8080/api/database/test"
+          echo "   💾 phpMyAdmin :    http://localhost:8081"
+          echo "   🍃 Mongo Express : http://localhost:8082"
+          echo "   📦 MinIO :         http://localhost:9001"
+          echo ""
+          echo "🔑 Identifiants :"
+          echo "   MySQL/phpMyAdmin : root / password"
+          echo "   MongoDB :          admin / password"
+          echo "   MinIO :            minioadmin / minioadmin"
+          echo ""
+          
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ OPTION 2 : Kubernetes Local (Docker Desktop)"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "📋 Prérequis :"
+          echo "   - Docker Desktop avec Kubernetes activé"
+          echo ""
+          echo "📋 Commandes :"
+          echo "   1. Exécuter : .\deploy-kubernetes-local.ps1"
+          echo "   2. Les URLs seront affichées automatiquement"
+          echo "   3. Exemple : http://localhost:<NodePort>"
+          echo ""
+          
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📚 Documentation Disponible"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "📖 Consultez ces guides dans le dépôt :"
+          echo "   • GUIDE-DEMARRAGE-LOCAL.md"
+          echo "   • RESOLUTION-PROBLEMES-NEWMAN.md"
+          echo "   • CORRECTIONS-INTEGRATION-TESTS.md"
+          echo ""
+          
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "⚡ Commandes Rapides"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "🚀 Démarrer environnement local :"
+          echo "   .\start-local-env.ps1"
+          echo ""
+          echo "🛑 Arrêter environnement :"
+          echo "   .\stop-local-env.ps1"
+          echo ""
+          echo "🧪 Tester avec Newman :"
+          echo "   .\test-newman-local.ps1"
+          echo ""
+          echo "📊 État Docker Compose :"
+          echo "   docker-compose ps"
+          echo ""
+          
+          echo "╔═══════════════════════════════════════════════════════╗"
+          echo "║                 📊 RÉSUMÉ                             ║"
+          echo "╚═══════════════════════════════════════════════════════╝"
+          echo ""
+          echo "✅ Tests d'intégration CI/CD : RÉUSSIS"
+          echo "✅ Application déployée dans Minikube (GitHub Actions)"
+          echo "ℹ️  Pour tester localement : .\start-local-env.ps1"
+          echo ""
+          echo "🎯 URLs Minikube (CI/CD uniquement) :"
+          if [ -f "service-url.txt" ]; then
+            SERVICE_URL=$(cat service-url.txt)
+            echo "   Minikube Internal: $SERVICE_URL"
+          fi
+          echo ""
+          echo "🌐 URLs Accessibles (Déploiement Local) :"
+          echo "   API:        http://localhost:8080"
+          echo "   phpMyAdmin: http://localhost:8081"
+          echo "   MinIO:      http://localhost:9001"
           echo ""
 
       - name: Create comprehensive URLs artifact
         run: |
           SERVICE_URL=$(cat service-url.txt 2>/dev/null || echo "N/A")
-          MINIKUBE_IP=$(echo $SERVICE_URL | sed -n 's|http://\([^:]*\):.*|\1|p')
           
-          cat > component-urls.txt << EOF
+          cat > component-urls.txt << 'EOF'
           ╔═══════════════════════════════════════════════════════╗
-          ║          🌐 COMPONENTS ACCESS INFORMATION             ║
+          ║       🌐 COMMENT ACCÉDER AUX SERVICES VIA NAVIGATEUR  ║
           ╚═══════════════════════════════════════════════════════╝
           
-          🚀 API Service: $SERVICE_URL
-          📍 Health Check: ${SERVICE_URL}/actuator/health
-          📍 Database Test: ${SERVICE_URL}/api/database/test
+          ⚠️  IMPORTANT : Les URLs Minikube du CI/CD ne sont PAS accessibles
+          depuis votre navigateur. Voici comment accéder réellement aux services :
           
-          💾 phpMyAdmin:
-          ℹ️  Use port-forward: kubectl port-forward svc/phpmyadmin 8081:80 -n soa-integration
-          ℹ️  Then access: http://localhost:8081
-          👤 Username: root
-          🔑 Password: password
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          ✅ OPTION 1 : Docker Compose Local (RECOMMANDÉ)
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           
-          🗄️  MySQL (Internal):
-          📍 Host: mysql.soa-integration.svc.cluster.local:3306
-          📍 Database: testdb
-          👤 Username: root / sa
-          🔑 Password: password
+          1. Ouvrir PowerShell dans le dossier du projet
+          2. Exécuter : .\start-local-env.ps1
+          3. Attendre 30 secondes
           
-          🖥️  Cluster Info:
-          📍 Namespace: soa-integration
-          📍 Minikube IP: $MINIKUBE_IP
+          🌐 URLs accessibles dans votre navigateur :
+             🚀 API :           http://localhost:8080
+             📍 Health :        http://localhost:8080/health
+             📍 Status :        http://localhost:8080/api/status
+             📍 DB Test :       http://localhost:8080/api/database/test
+             💾 phpMyAdmin :    http://localhost:8081
+             🍃 Mongo Express : http://localhost:8082
+             📦 MinIO :         http://localhost:9001
           
-          📋 Useful commands:
-          - Get all resources: kubectl get all -n soa-integration
-          - View logs: kubectl logs -n soa-integration deployment/univ-soa
-          - Access MySQL: kubectl port-forward svc/mysql 3306:3306 -n soa-integration
+          🔑 Identifiants :
+             MySQL/phpMyAdmin : root / password
+             MongoDB :          admin / password
+             MinIO :            minioadmin / minioadmin
+          
+          🛑 Arrêter : .\stop-local-env.ps1
+          
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          ✅ OPTION 2 : Kubernetes Local (Docker Desktop)
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          
+          Prérequis : Docker Desktop avec Kubernetes activé
+          
+          1. Exécuter : .\deploy-kubernetes-local.ps1
+          2. Les URLs NodePort seront affichées automatiquement
+          3. Ouvrir les URLs dans votre navigateur
+          
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          📚 Documentation
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          
+          Consultez ces guides :
+          • GUIDE-DEMARRAGE-LOCAL.md - Setup complet en 30 secondes
+          • RESOLUTION-PROBLEMES-NEWMAN.md - Debugging
+          • CORRECTIONS-INTEGRATION-TESTS.md - Architecture CI/CD
+          
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          ℹ️  URL CI/CD (Tests Automatiques Uniquement)
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          
+          Minikube Internal (GitHub Actions):
           EOF
+          
+          echo "  $SERVICE_URL" >> component-urls.txt
+          echo "" >> component-urls.txt
+          echo "⚠️  Cette URL n'est pas accessible depuis votre PC." >> component-urls.txt
+          echo "   Elle est utilisée uniquement pour les tests Newman automatiques." >> component-urls.txt
           
           cat component-urls.txt
 

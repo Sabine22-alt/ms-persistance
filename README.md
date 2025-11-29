@@ -1,348 +1,266 @@
-# SmartDish - Application de Recommandation de Recettes
+# 🍳 RecipeYouLove - Parent Template
 
-Application permettant de recommander des recettes à l'utilisateur en fonction des ingrédients saisis et de ses retours. Le système intègre un agent d'apprentissage par renforcement (RL) qui ajuste ses recommandations au fil du temps.
+Template parent pour l'architecture microservices RecipeYouLove avec CI/CD complet.
 
-## Architecture
+## 📋 Vue d'Ensemble
 
-### Microservices
+Ce repository sert de **template parent** pour tous les microservices de l'application RecipeYouLove. Il contient :
+- Pipeline CI/CD complet (GitHub Actions)
+- Configuration Docker et Kubernetes
+- Tests d'intégration automatisés (Newman)
+- Scripts de déploiement local
 
-Ce projet est structuré en architecture microservices avec :
-- **Parent Repository** (ce dépôt) : Template et configuration CI/CD partagée
-- **Microservices forkés** : Chaque microservice est un fork de ce repository
-
-### Infrastructure
-
-- **Cloud Provider** : Oracle Cloud Infrastructure (OCI)
-- **Kubernetes** : Oracle Kubernetes Engine (OKE)
-- **Container Registry** : Oracle Cloud Container Registry (OCIR)
-- **Base de données** : MySQL Database Service (OCI) ou MySQL sur Kubernetes
-- **CI/CD** : GitHub Actions
-- **Gestion des secrets** : Kubernetes Secrets (ou Vault)
-
-### Environnements
-
-1. **Integration** (`smartdish` namespace)
-   - Déclenchement : Push sur `feat/**`, `fix/**`, `develop`
-   - URL : `https://soa-{microservice}-integration.smartdish-integration.cloud`
-   - Replicas : 1 pod par microservice
-
-2. **Production** (`smartdish-prod` namespace)
-   - Déclenchement : Merge sur `main`
-   - URL : `https://soa-{microservice}.smartdish.cloud`
-   - Replicas : 2+ pods avec autoscaling
-
-## Prérequis
-
-### Développement local
-
-- Java 21
-- Maven 3.8+
-- Docker
-- Git
-
-### Déploiement
-
-- Compte Oracle Cloud Infrastructure (OCI)
-- Cluster OKE configuré
-- OCI CLI installé
-- kubectl installé
-- Helm 3 installé
-
-## Installation
-
-### 1. Configuration du cluster OKE
-
-Suivez le guide détaillé : [OCI_CONFIGURATION.md](./OCI_CONFIGURATION.md)
-
-Ou exécutez le script automatique :
-
-```bash
-chmod +x oci-scripts/setup-oke.sh
-./oci-scripts/setup-oke.sh
-```
-
-### 2. Configuration des secrets GitHub
-
-Allez dans `Settings > Secrets and variables > Actions` de votre repository.
-
-#### Secrets requis
-
-```yaml
-# OCI
-OCI_USERNAME: <tenancy-namespace>/<username>
-OCI_AUTH_TOKEN: <auth-token>
-OCI_TENANCY_NAMESPACE: <tenancy-namespace>
-OCI_KUBECONFIG: <kubeconfig-base64>
-
-# MySQL
-MYSQL_HOST: <mysql-host>
-MYSQL_USER: admin
-MYSQL_PASSWORD: <password>
-MYSQL_ROOT_PASSWORD: <root-password>
-
-# SonarQube
-SONAR_TOKEN: <token>
-SONAR_HOST_URL: <url>
-```
-
-#### Variables requises
-
-```yaml
-MICROSERVICE_NAME: smartdish-parent
-COVERAGE_THRESHOLD: 60
-```
-
-### 3. Forker pour un microservice
-
-1. Forkez ce repository
-2. Renommez-le selon votre microservice (ex: `smartdish-user-service`)
-3. Modifiez la variable `MICROSERVICE_NAME` dans les secrets GitHub
-4. Développez votre microservice dans `src/`
-5. Les workflows CI/CD sont automatiquement disponibles
-
-## Développement
-
-### Structure du projet
+## 🏗️ Architecture Microservices
 
 ```
-.
-├── .github/workflows/       # Workflows CI/CD
-├── helm/smartdish/          # Helm Chart pour le déploiement
-├── k8s/oci/                 # Manifests Kubernetes pour OCI
-├── oci-scripts/             # Scripts de configuration OCI
-├── src/                     # Code source Java
-├── Dockerfile               # Image Docker
-├── pom.xml                  # Configuration Maven
-└── OCI_CONFIGURATION.md     # Guide de configuration détaillé
+┌─────────────────────────────────────────────────────────┐
+│                 PARENT REPOSITORY                       │
+│              (Template + CI/CD)                         │
+└─────────────────────────────────────────────────────────┘
+                        │
+        ┌───────────────┼───────────────┐
+        │               │               │
+        ▼               ▼               ▼
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│ Microservice│  │ Microservice│  │ Microservice│
+│    #1       │  │    #2       │  │    #3       │
+│  (Fork)     │  │  (Fork)     │  │  (Fork)     │
+└─────────────┘  └─────────────┘  └─────────────┘
 ```
 
-### Build local
+Chaque microservice :
+1. **Fork** ce repository parent
+2. **Hérite** du pipeline CI/CD
+3. **Personnalise** son code métier
+4. **Partage** la même infrastructure
 
-```bash
-# Compiler le projet
-mvn clean package
+## 🚀 Démarrage Rapide
 
-# Exécuter les tests
-mvn test
+### Pour les Développeurs (Test Local)
 
-# Vérifier la couverture de code
-mvn test jacoco:report
-# Rapport : target/site/jacoco/index.html
+```powershell
+# 1. Cloner le repository
+git clone https://github.com/votre-org/RecipeYouLove.git
+cd RecipeYouLove
 
-# Build Docker
-docker build -t smartdish:local .
+# 2. Démarrer l'environnement complet
+.\start-local-env.ps1
 
-# Exécuter localement
-docker run -p 8090:8090 smartdish:local
+# 3. Accéder à l'application
+# API :        http://localhost:8080
+# phpMyAdmin : http://localhost:8081
+# MinIO :      http://localhost:9001
 ```
 
-### Tests
+### Pour Créer un Nouveau Microservice
 
-```bash
-# Tests unitaires
-mvn test
+Consultez **[CONFIGURATION-MICROSERVICES.md](CONFIGURATION-MICROSERVICES.md)** pour les instructions complètes.
 
-# Tests avec couverture
-mvn clean test jacoco:report
+## 🌐 Accès aux Services
 
-# Le seuil de couverture requis est de 60%
-```
+### En Local (Développement)
 
-## CI/CD Pipeline
+| Service | URL | Identifiants |
+|---------|-----|--------------|
+| **API Spring Boot** | http://localhost:8080 | - |
+| phpMyAdmin | http://localhost:8081 | `root` / `password` |
+| Mongo Express | http://localhost:8082 | `admin` / `password` |
+| MinIO Console | http://localhost:9001 | `minioadmin` / `minioadmin` |
 
-### Workflow automatique
+### En CI/CD (GitHub Actions)
 
-```
-Push feat/** ou fix/**
-    ↓
-┌─────────────────────┐
-│ 1. Build Maven      │
-│    - Compile        │
-│    - Tests          │
-│    - Package JAR    │
-└─────────────────────┘
-    ↓
-┌─────────────────────┐
-│ 2. Check Coverage   │
-│    - JaCoCo Report  │
-│    - Threshold: 60% │
-└─────────────────────┘
-    ↓
-┌─────────────────────┐
-│ 3. Build Docker     │
-│    - Build Image    │
-│    - Push to OCIR   │
-└─────────────────────┘
-    ↓
-┌─────────────────────┐
-│ 4. Security Scan    │
-│    - Trivy          │
-│    - SARIF Report   │
-└─────────────────────┘
-    ↓
-┌─────────────────────┐
-│ 5. Deploy K8s       │
-│    - Helm upgrade   │
-│    - Integration    │
-└─────────────────────┘
-```
+Les services déployés dans Minikube (GitHub Actions) sont **uniquement pour les tests automatiques**. Les URLs ne sont pas accessibles depuis l'extérieur.
 
-### Pull Request vers main
+## 📊 Pipeline CI/CD
 
 ```
-Pull Request → main
-    ↓
-┌─────────────────────┐
-│ 1. Build & Tests    │
-└─────────────────────┘
-    ↓
-┌─────────────────────┐
-│ 2. SonarQube        │
-│    - Quality Gate   │
-│    - Code Smells    │
-│    - Security       │
-└─────────────────────┘
+1️⃣ Configuration & Variables
+2️⃣ Build Maven
+3️⃣ Check Code Coverage (80% minimum)
+4️⃣ Build Docker Image
+5️⃣ Check Image Security (Trivy)
+6️⃣ Deploy to Kubernetes & Integration Tests (Newman)
+7️⃣ Log Components URLs
 ```
 
-### Merge vers main
+### Déclenchement
 
-```
-Merge → main
-    ↓
-[Build → Tests → Coverage → Docker → Security → Deploy Production]
-```
+- **Push** sur `main`, `develop`, `feat/**`, `fix/**`
+- **Pull Request** vers `main`, `develop`
 
-## Déploiement manuel
+### Résultats
 
-### Avec Helm
+- ✅ Tests unitaires
+- ✅ Couverture de code
+- ✅ Sécurité de l'image
+- ✅ Tests d'intégration
+- 📦 Artifacts (JAR, Docker image, rapports)
 
-```bash
-# Integration
-helm upgrade --install smartdish-parent ./helm/smartdish \
-  --namespace smartdish \
-  --values ./helm/smartdish/values-integration.yaml \
-  --set image.repository=fra.ocir.io/<tenancy>/smartdish/smartdish-parent \
-  --set image.tag=v1.0.0 \
-  --set microserviceName=smartdish-parent
+## 🛠️ Scripts Disponibles
 
-# Production
-helm upgrade --install smartdish-parent ./helm/smartdish \
-  --namespace smartdish-prod \
-  --values ./helm/smartdish/values-production.yaml \
-  --set image.repository=fra.ocir.io/<tenancy>/smartdish/smartdish-parent \
-  --set image.tag=v1.0.0 \
-  --set microserviceName=smartdish-parent
-```
+### Développement Local
 
-### Avec kubectl
+| Script | Description |
+|--------|-------------|
+| `start-local-env.ps1` | Démarrer l'environnement Docker Compose complet |
+| `stop-local-env.ps1` | Arrêter l'environnement |
+| `test-newman-local.ps1` | Exécuter les tests Newman localement |
+| `quick-start.ps1` | Build rapide et démarrage de l'app seule |
 
-```bash
-# Appliquer les configurations
-kubectl apply -f k8s/oci/namespace.yaml
-kubectl apply -f k8s/oci/configmap.yaml
+### ArgoCD (GitOps)
 
-# Configurer les secrets
-export MYSQL_HOST="mysql.example.com"
-export MYSQL_USER="admin"
-export MYSQL_PASSWORD="password"
-export MYSQL_ROOT_PASSWORD="rootpassword"
+| Script | Description |
+|--------|-------------|
+| `setup-argocd.ps1` | Installer ArgoCD sur Kubernetes local |
+| `setup-argocd-app.ps1` | Configurer une application ArgoCD |
 
-envsubst < k8s/oci/mysql-secrets.yaml | kubectl apply -f -
+## 🎯 Déploiement avec ArgoCD (GitOps)
 
-# Déployer avec le template
-export MICROSERVICE_NAME="smartdish-parent"
-export NAMESPACE="smartdish"
-export IMAGE_URL="fra.ocir.io/tenancy/smartdish/smartdish-parent"
-export IMAGE_TAG="v1.0.0"
-export REPLICAS="1"
-export VERSION="1.0.0"
+### Setup Rapide
 
-envsubst < k8s/oci/deployment-template.yaml | kubectl apply -f -
+```powershell
+# 1. Builder l'image (IMPORTANT - sinon ErrImageNeverPull)
+.\build-and-load-image.ps1
+
+# 2. Installer ArgoCD (une fois, prend 3-5 min)
+.\setup-argocd.ps1
+# Mot de passe affiche dans le terminal
+
+# 3. Configurer votre app
+.\setup-argocd-app.ps1
+# Entrer l'URL de votre repo Git
+
+# 4. Interface Web
+https://localhost:8080
+# Login: admin / Password: (affiche a l'etape 2)
 ```
 
-## Monitoring
+### Workflow Quotidien
 
-### Vérifier l'état des pods
-
-```bash
-kubectl get pods -n smartdish
-kubectl logs -f deployment/smartdish-parent -n smartdish
-kubectl describe pod <pod-name> -n smartdish
+```
+1. Modifier code
+2. .\build-and-load-image.ps1
+3. git commit && git push
+4. ArgoCD synchronise automatiquement (< 3 min)
+5. Verifier: kubectl get pods -n soa-local
 ```
 
-### Vérifier les services et ingress
+### Notes Importantes
 
-```bash
-kubectl get svc -n smartdish
-kubectl get ingress -n smartdish
+- ⏱️ **ArgoCD prend 3-5 minutes** à démarrer au premier lancement
+- 🔑 **Mot de passe admin** : sauvegardé dans le terminal lors du setup
+- 🐳 **Image Docker** : doit être buildée localement AVANT le déploiement
+- 🔄 **Sync automatique** : max 3 minutes après un push Git
+
+## 📚 Documentation
+
+### Pour Démarrer
+
+- **[README.md](README.md)** (ce fichier) - Vue d'ensemble et démarrage rapide
+
+### Pour Développer
+
+- **[GUIDE-DEVELOPPEUR.md](GUIDE-DEVELOPPEUR.md)** - Guide complet développeur
+  - Setup environnement
+  - Tests (unitaires + Newman)
+  - **ArgoCD : Setup, mot de passe, troubleshooting**
+  - Pipeline CI/CD expliqué
+  - Debugging
+
+### Pour Créer un Microservice
+
+- **[CONFIGURATION-MICROSERVICES.md](CONFIGURATION-MICROSERVICES.md)** - Configuration microservices fils
+  - Fork et personnalisation
+  - Configuration GitHub Actions
+  - Configuration Docker/Kubernetes
+  - **ArgoCD pour microservices fils**
+  - **Récupération mot de passe ArgoCD**
+  - Tests d'intégration
+
+## 🔧 Configuration Requise
+
+### Développement Local
+
+- **Java** 17+
+- **Maven** 3.8+
+- **Docker Desktop** (avec Kubernetes optionnel)
+- **PowerShell** 5.1+
+- **Git**
+
+### CI/CD (GitHub Actions)
+
+Rien à installer, tout est automatique !
+
+## 🎯 Cas d'Usage
+
+### Je veux tester l'application localement
+
+```powershell
+.\start-local-env.ps1
+# Ouvrir http://localhost:8080
 ```
 
-### Métriques
+### Je veux créer un nouveau microservice
 
-```bash
-kubectl top pods -n smartdish
-kubectl top nodes
+Voir **[CONFIGURATION-MICROSERVICES.md](CONFIGURATION-MICROSERVICES.md)**
+
+### Je veux comprendre le pipeline CI/CD
+
+Voir **[GUIDE-DEVELOPPEUR.md](GUIDE-DEVELOPPEUR.md)** section "Pipeline CI/CD"
+
+### Je veux modifier la collection Newman
+
+Modifier `tests/newman/collection.json` puis :
+```powershell
+.\test-newman-local.ps1
 ```
 
-## Troubleshooting
+## 🤝 Contribution
 
-### Les pods ne démarrent pas
+1. Fork le repository
+2. Créer une branche : `git checkout -b feat/ma-fonctionnalite`
+3. Commit : `git commit -m "feat: ma fonctionnalité"`
+4. Push : `git push origin feat/ma-fonctionnalite`
+5. Créer une Pull Request
 
-```bash
-kubectl describe pod <pod-name> -n smartdish
-kubectl logs <pod-name> -n smartdish
+## 📝 Conventions de Commit
+
+```
+feat: nouvelle fonctionnalité
+fix: correction de bug
+docs: documentation
+refactor: refactoring
+test: ajout de tests
+chore: tâches diverses
 ```
 
-### Problème de connexion MySQL
+## 🐛 Support
 
-```bash
-# Vérifier les secrets
-kubectl get secret mysql-secrets -n smartdish -o yaml
+- **Issues** : https://github.com/votre-org/RecipeYouLove/issues
+- **Discussions** : https://github.com/votre-org/RecipeYouLove/discussions
 
-# Tester la connexion depuis un pod
-kubectl run -it --rm debug --image=mysql:8 --restart=Never -n smartdish -- \
-  mysql -h <mysql-host> -u <user> -p
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir [LICENSE](LICENSE) pour plus de détails.
+
+---
+
+## ⚡ TL;DR (Trop Long, Pas Lu)
+
+```powershell
+# Démarrer tout en local
+.\start-local-env.ps1
+
+# Accéder
+# http://localhost:8080       → API
+# http://localhost:8081       → phpMyAdmin
+# http://localhost:9001       → MinIO
+
+# Arrêter
+.\stop-local-env.ps1
+
+# Créer un microservice → Lire CONFIGURATION-MICROSERVICES.md
 ```
 
-### Image Docker non trouvée
+🎉 **C'est tout !**
 
-```bash
-# Vérifier le secret OCIR
-kubectl get secret ocir-secret -n smartdish -o yaml
-
-# Recréer le secret
-kubectl delete secret ocir-secret -n smartdish
-kubectl create secret docker-registry ocir-secret \
-  --docker-server=fra.ocir.io \
-  --docker-username=<tenancy-namespace>/<username> \
-  --docker-password=<auth-token> \
-  --namespace=smartdish
-```
-
-### Ingress ne fonctionne pas
-
-```bash
-# Vérifier NGINX Ingress
-kubectl get pods -n ingress-nginx
-kubectl logs -n ingress-nginx deployment/ingress-nginx-controller
-
-# Vérifier l'ingress
-kubectl describe ingress smartdish-ingress -n smartdish
-```
-
-## Documentation
-
-- [Configuration OCI complète](./OCI_CONFIGURATION.md)
-- [Helm Charts](./helm/smartdish/README.md)
-- [Dockerfile](./Dockerfile)
-
-## Support
-
-Pour toute question ou problème :
-1. Consultez la documentation OCI
-2. Vérifiez les logs des pods
-3. Consultez les issues GitHub
-
-## License
-
-Ce projet est sous licence MIT.
