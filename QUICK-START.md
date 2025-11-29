@@ -79,6 +79,22 @@ git push
 
 ✅ **Déjà corrigé dans le workflow actuel**
 
+### Erreur "Request failed with status code 404" (Minikube)
+
+**Symptôme** : 
+```
+AxiosError: Request failed with status code 404
+https://api.github.com/repos/kubernetes/minikube/releases/tags/1.32.0
+```
+
+**Cause** : Version de Minikube incorrecte (manque le `v` devant)
+
+**Solution** : Versions corrigées avec le préfixe `v` :
+- `minikube version: 'v1.32.0'` (au lieu de `'1.32.0'`)
+- `kubernetes version: 'v1.28.0'` (au lieu de `'1.28.0'`)
+
+✅ **Déjà corrigé dans le workflow actuel**
+
 ### Si vous ne voyez pas tous les jobs :
 
 1. **Vérifiez que les anciens fichiers sont supprimés** :
