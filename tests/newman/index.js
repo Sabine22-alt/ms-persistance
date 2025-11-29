@@ -43,7 +43,7 @@ const opts = {
   collection: require(path.resolve(collectionPath)),
   reporters: reporters.split(','),
   reporter: {
-    html: {
+    htmlextra: {
       export: path.join(outputDir, 'newman-report.html')
     },
     json: {
