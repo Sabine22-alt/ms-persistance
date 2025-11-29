@@ -52,7 +52,7 @@ class DatabaseControllerTest {
         Map<String, Object> result = databaseController.testDatabaseConnections();
 
         assertNotNull(result);
-        assertTrue(result.size() >= 3, "La map doit contenir au moins 3 clés: mysql, database, status");
+        assertEquals(3, result.size(), "La map doit contenir exactement 3 clés: mysql, database, status");
         assertTrue(result.containsKey("mysql"));
         assertTrue(result.containsKey("database"));
         assertTrue(result.containsKey("status"));
@@ -72,7 +72,7 @@ class DatabaseControllerTest {
 
         // Assert
         assertNotNull(result);
-        assertTrue(result.size() >= 2, "En cas d'échec, la map doit contenir au moins 2 clés: mysql, status");
+        assertEquals(2, result.size(), "En cas d'échec, la map doit contenir exactement 2 clés: mysql, status");
         assertTrue(result.containsKey("mysql"));
         assertTrue(result.containsKey("status"));
         assertTrue(result.get("mysql").toString().contains("failed"));

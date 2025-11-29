@@ -15,12 +15,6 @@ jobs:
           name: service-url
           path: ./
 
-      - name: Download service URL artifact (with health)
-        uses: actions/download-artifact@v4
-        with:
-          name: service-url-artifact
-          path: ./
-        continue-on-error: true
 
       - name: Display all component URLs
         run: |
