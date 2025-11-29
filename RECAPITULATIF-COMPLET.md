@@ -44,7 +44,7 @@ tests/newman/
 
 ---
 
-## 🔧 Corrections Appliquées (6 itérations)
+## 🔧 Corrections Appliquées (9 itérations)
 
 ### 1️⃣ OS Ubuntu Corrigé
 
@@ -429,6 +429,8 @@ kubectl get configmap univ-soa-config -n soa-integration -o yaml
 6. `fix: installation manuelle Minikube pour éviter rate limit + config kubectl`
 7. `fix: remplacement H2 par MySQL deployment dans Kubernetes`
 8. `fix: minikube image load + suppression kubectl set image (CRITIQUE)`
+9. `fix: MongoTemplate optionnel + InitContainer wait-for-mysql (FINAL)`
+
 ---
 
 ## 🔗 Liens Utiles

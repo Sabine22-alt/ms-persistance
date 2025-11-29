@@ -34,11 +34,15 @@ public class DatabaseController {
             result.put("mysql", "❌ MySQL connection failed: " + e.getMessage());
         }
 
-        try {
-            mongoTemplate.getCollection("test");
-            result.put("mongodb", "✅ MongoDB connection successful");
-        } catch (Exception e) {
-            result.put("mongodb", "❌ MongoDB connection failed: " + e.getMessage());
+        if (mongoTemplate != null) {
+            try {
+                mongoTemplate.getCollection("test");
+                result.put("mongodb", "✅ MongoDB connection successful");
+            } catch (Exception e) {
+                result.put("mongodb", "❌ MongoDB connection failed: " + e.getMessage());
+            }
+        } else {
+            result.put("mongodb", "⚠️ MongoDB is disabled (not configured)");
         }
 
         return result;
