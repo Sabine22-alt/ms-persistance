@@ -4,7 +4,7 @@ Write-Host "🧪 Test Local de la Collection Newman" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 # Vérifier que l'application tourne
-$baseUrl = "http://localhost:8080"
+$baseUrl = "http://localhost:8090"
 Write-Host "📍 URL de base: $baseUrl`n"
 
 # Tester la connectivité
