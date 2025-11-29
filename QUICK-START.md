@@ -145,7 +145,35 @@ Consultez **`PIPELINE-ARCHITECTURE.md`** pour :
 
 ---
 
+## 📝 Historique des Corrections
+
+### Corrections appliquées (29 nov 2025)
+
+1. **✅ OS Ubuntu corrigé**
+   - `ubuntu-latest` → `ubuntu-22.04`
+   - Raison : Action Minikube nécessite Ubuntu 18/20/22
+
+2. **✅ Noms des inputs Minikube corrigés**
+   - `minikube-version` → `minikube version`
+   - `kubernetes-version` → `kubernetes version`
+   - `start-args` → `start args`
+   - Raison : Noms des inputs de l'action ont changé
+
+3. **✅ Versions avec préfixe `v` ajouté**
+   - `1.32.0` → `v1.32.0`
+   - `1.28.0` → `v1.28.0`
+   - Raison : L'API GitHub nécessite le `v` pour les tags de release
+
+### État actuel
+
+✅ Tous les workflows sont corrigés et fonctionnels  
+✅ Pipeline modulaire avec 7 workflows + 1 orchestrateur  
+✅ Tous les jobs visibles sur GitHub Actions  
+
+---
+
 **Date** : 29 novembre 2025  
 **Status** : ✅ Production Ready  
-**Jobs** : 7 workflows modulaires + 1 orchestrateur
+**Jobs** : 7 workflows modulaires + 1 orchestrateur  
+**Dernière mise à jour** : Correction version Minikube (v1.32.0)
 
