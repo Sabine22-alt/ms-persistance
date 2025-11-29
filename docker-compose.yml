@@ -155,13 +155,43 @@ services:
       "
 
   # ========================================
+  # Spring Boot API (univ-soa)
+  # ========================================
+  univ-soa:
+    image: univ-soa:latest
+    container_name: univ-soa-local
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+    ports:
+      - "8080:8080"
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  # ========================================
   # Newman - Tests d'intégration API
   # ========================================
   newman:
     image: postman/newman:alpine
     container_name: newman-local
+    depends_on:
+      univ-soa:
+        condition: service_healthy
     volumes:
-      - ./newman-collections:/etc/newman
+      - ./tests/newman:/etc/newman
     networks:
       - microservices-network
     entrypoint: ["tail", "-f", "/dev/null"]
@@ -178,6 +208,8 @@ services:
       mongodb:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      univ-soa:
         condition: service_healthy
     environment:
       MYSQL_PORT: ${MYSQL_PORT}
@@ -209,6 +241,18 @@ services:
       echo '╚════════════════════════════════════════════════════════════════╝';
       echo '';
       echo '📦 SERVICES DISPONIBLES :';
+      echo '';
+      echo '┌────────────────────────────────────────────────────────────────┐';
+      echo '│ 🚀 Spring Boot API (RecipeYouLove)                            │';
+      echo '│    🔗 Home            : http://localhost:8080/                 │';
+      echo '│    🔗 Health          : http://localhost:8080/health           │';
+      echo '│    🔗 Status          : http://localhost:8080/api/status       │';
+      echo '│    🔗 Database Test   : http://localhost:8080/api/database/test│';
+      echo '│    🔗 Actuator Health : http://localhost:8080/actuator/health  │';
+      echo '│                                                                │';
+      echo '│    📖 Documentation Swagger (si activé) :                      │';
+      echo '│    http://localhost:8080/swagger-ui.html                       │';
+      echo '└────────────────────────────────────────────────────────────────┘';
       echo '';
       echo '┌────────────────────────────────────────────────────────────────┐';
       echo '│ 🗄️  MySQL Database                                            │';

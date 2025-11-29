@@ -1,0 +1,17 @@
+{
+  "name": "univ-soa-integration-tests",
+  "version": "2.0.0",
+  "description": "Integration tests for RecipeYouLove API (POST/GET/PUT/DELETE)",
+  "private": true,
+  "scripts": {
+    "test": "node index.js --collection ./collection.json --environment ./env.json --data ./dataset.json",
+    "test:ci": "node index.js --collection ./collection.json --environment ./env.json --data ./dataset.json --reporters cli,json",
+    "test:html": "node index.js --collection ./collection.json --environment ./env.json --data ./dataset.json --reporters cli,htmlextra"
+  },
+  "dependencies": {
+    "newman": "^6.2.1",
+    "newman-reporter-htmlextra": "^1.23.1",
+    "minimist": "^1.2.8"
+  }
+}
+

@@ -1,0 +1,53 @@
+name: Build Maven
+
+on:
+  workflow_call:
+    outputs:
+      build-status:
+        description: "Build status"
+        value: ${{ jobs.build-maven.outputs.status }}
+
+jobs:
+  build-maven:
+    name: Build with Maven
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.build.outcome }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build with Maven
+        id: build
+        run: |
+          echo "🔨 Building application with Maven..."
+          mvn -B clean package -DskipTests=false
+          echo "✅ Build completed successfully"
+
+      - name: Run unit tests
+        run: |
+          echo "🧪 Running unit tests..."
+          mvn test
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: application-jar
+          path: target/*.jar
+          retention-days: 7
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: target/surefire-reports/
+          retention-days: 7
+

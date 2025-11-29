@@ -1,0 +1,63 @@
+name: CI/CD Pipeline Orchestrator
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feat/**'
+      - 'fix/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # Job 1: Configuration Variables
+  config-vars:
+    name: "1️⃣ Configuration & Variables"
+    uses: ./.github/workflows/config-vars.yml
+
+  # Job 2: Build Maven
+  build-maven:
+    name: "2️⃣ Build Maven"
+    needs: config-vars
+    uses: ./.github/workflows/build-maven.yml
+
+  # Job 3: Check Coverage
+  check-coverage:
+    name: "3️⃣ Check Code Coverage"
+    needs: build-maven
+    uses: ./.github/workflows/check-coverage.yml
+
+  # Job 4: Build Docker Image
+  build-docker-image:
+    name: "4️⃣ Build Docker Image"
+    needs: [config-vars, check-coverage]
+    uses: ./.github/workflows/build-docker-image.yml
+    with:
+      image-tag: ${{ needs.config-vars.outputs.image-tag }}
+
+  # Job 5: Check Image Conformity
+  check-conformity-image:
+    name: "5️⃣ Check Image Conformity & Security"
+    needs: [config-vars, build-docker-image]
+    uses: ./.github/workflows/check-conformity-image.yml
+    with:
+      image-tag: ${{ needs.config-vars.outputs.image-tag }}
+
+  # Job 6: Deploy to Kubernetes & Run Integration Tests
+  deploy-kubernetes:
+    name: "6️⃣ Deploy to Kubernetes & Integration Tests"
+    needs: [config-vars, check-conformity-image]
+    uses: ./.github/workflows/deploy-kubernetes.yml
+    with:
+      image-tag: ${{ needs.config-vars.outputs.image-tag }}
+
+  # Job 7: Log All Components URLs
+  log-components:
+    name: "7️⃣ Log Components URLs"
+    needs: deploy-kubernetes
+    if: always()
+    uses: ./.github/workflows/log-components.yml
+

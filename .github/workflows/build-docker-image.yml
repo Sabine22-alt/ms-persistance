@@ -1,0 +1,72 @@
+name: Build Docker Image
+
+on:
+  workflow_call:
+    inputs:
+      image-tag:
+        required: true
+        type: string
+    outputs:
+      image-tag:
+        description: "Docker image tag"
+        value: ${{ jobs.build-docker.outputs.image-tag }}
+      image-full-name:
+        description: "Full Docker image name"
+        value: ${{ jobs.build-docker.outputs.image-full-name }}
+
+env:
+  IMAGE_NAME: univ-soa
+
+jobs:
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tag }}
+      image-full-name: ${{ steps.meta.outputs.image-full-name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: application-jar
+          path: target/
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          TAG=${{ inputs.image-tag }}
+          IMAGE_FULL="${{ env.IMAGE_NAME }}:${TAG}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "image-full-name=$IMAGE_FULL" >> $GITHUB_OUTPUT
+          echo "🏷️ Image tag: $TAG"
+          echo "📦 Full image name: $IMAGE_FULL"
+
+      - name: Build Docker image
+        run: |
+          echo "🐳 Building Docker image..."
+          docker build -t ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag }} \
+                       -t ${{ env.IMAGE_NAME }}:latest \
+                       -f Dockerfile .
+          echo "✅ Docker image built successfully"
+
+      - name: List Docker images
+        run: |
+          echo "📋 Available Docker images:"
+          docker images | grep ${{ env.IMAGE_NAME }} || echo "No images found"
+
+      - name: Save Docker image
+        run: |
+          echo "💾 Saving Docker image to tar..."
+          docker save -o app-image.tar ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag }}
+          ls -lh app-image.tar
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: app-image.tar
+          retention-days: 1
+

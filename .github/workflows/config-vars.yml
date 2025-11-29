@@ -1,0 +1,49 @@
+name: Config Variables
+
+on:
+  workflow_call:
+    outputs:
+      image-tag:
+        description: "Image tag for Docker"
+        value: ${{ jobs.config-vars.outputs.image-tag }}
+      short-sha:
+        description: "Short commit SHA"
+        value: ${{ jobs.config-vars.outputs.short-sha }}
+      branch-name:
+        description: "Branch name"
+        value: ${{ jobs.config-vars.outputs.branch-name }}
+
+jobs:
+  config-vars:
+    name: Configuration & Variables
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.vars.outputs.image-tag }}
+      short-sha: ${{ steps.vars.outputs.short-sha }}
+      branch-name: ${{ steps.vars.outputs.branch-name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set configuration variables
+        id: vars
+        run: |
+          SHORT_SHA=${GITHUB_SHA::8}
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          IMAGE_TAG="${SHORT_SHA}-${BRANCH_NAME//\//-}"
+          
+          echo "short-sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          
+          echo "::notice::Image Tag: $IMAGE_TAG"
+          echo "::notice::Branch: $BRANCH_NAME"
+          echo "::notice::SHA: $SHORT_SHA"
+
+      - name: Display environment info
+        run: |
+          echo "🔧 Configuration Variables:"
+          echo "  - Image Tag: ${{ steps.vars.outputs.image-tag }}"
+          echo "  - Branch: ${{ steps.vars.outputs.branch-name }}"
+          echo "  - SHA: ${{ steps.vars.outputs.short-sha }}"
+

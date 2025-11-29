@@ -1,0 +1,87 @@
+name: Check Image Conformity
+
+on:
+  workflow_call:
+    inputs:
+      image-tag:
+        required: true
+        type: string
+
+env:
+  IMAGE_NAME: univ-soa
+
+jobs:
+  check-conformity:
+    name: Check Docker Image Conformity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: ./
+
+      - name: Load Docker image
+        run: |
+          echo "📥 Loading Docker image..."
+          docker load -i app-image.tar
+
+      - name: Inspect Docker image
+        run: |
+          echo "🔍 Inspecting Docker image..."
+          docker inspect ${{ env.IMAGE_NAME }}:${{ inputs.image-tag }}
+
+      - name: Check image size
+        run: |
+          echo "📏 Checking image size..."
+          IMAGE_SIZE=$(docker image inspect ${{ env.IMAGE_NAME }}:${{ inputs.image-tag }} --format='{{.Size}}')
+          IMAGE_SIZE_MB=$((IMAGE_SIZE / 1024 / 1024))
+          echo "Image size: ${IMAGE_SIZE_MB} MB"
+          
+          if [ $IMAGE_SIZE_MB -gt 1000 ]; then
+            echo "⚠️ Warning: Image size is larger than 1GB"
+          else
+            echo "✅ Image size is acceptable"
+          fi
+
+      - name: Check image layers
+        run: |
+          echo "📦 Checking image layers..."
+          docker history ${{ env.IMAGE_NAME }}:${{ inputs.image-tag }}
+
+      - name: Scan for vulnerabilities (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ inputs.image-tag }}
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+      - name: Test container startup
+        run: |
+          echo "🚀 Testing container startup..."
+          CONTAINER_ID=$(docker run -d -p 8080:8080 ${{ env.IMAGE_NAME }}:${{ inputs.image-tag }})
+          echo "Container ID: $CONTAINER_ID"
+          
+          echo "⏳ Waiting for container to be healthy..."
+          sleep 30
+          
+          echo "📊 Container status:"
+          docker ps -a | grep $CONTAINER_ID || true
+          
+          echo "📋 Container logs:"
+          docker logs $CONTAINER_ID || true
+          
+          echo "🧹 Cleaning up..."
+          docker stop $CONTAINER_ID || true
+          docker rm $CONTAINER_ID || true
+
+      - name: Conformity check summary
+        run: |
+          echo "✅ Docker image conformity checks completed"
+          echo "🏷️ Image: ${{ env.IMAGE_NAME }}:${{ inputs.image-tag }}"
+

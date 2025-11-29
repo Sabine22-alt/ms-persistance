@@ -1,392 +1,266 @@
-# 🍳 SmartDish - Template Microservices
+# 🍳 RecipeYouLove - Parent Template
 
-## 📖 Vue d'ensemble
+Template parent pour l'architecture microservices RecipeYouLove avec CI/CD complet.
 
-Ce projet constitue le **template parent** pour tous les microservices de l'application **SmartDish**. Il s'agit d'un générateur de recettes intelligent qui recommande des plats à l'utilisateur en fonction des ingrédients saisis et de ses retours. Le système intègre un agent d'apprentissage par renforcement (RL) qui ajuste ses recommandations au fil du temps.
+## 📋 Vue d'Ensemble
+
+Ce repository sert de **template parent** pour tous les microservices de l'application RecipeYouLove. Il contient :
+- Pipeline CI/CD complet (GitHub Actions)
+- Configuration Docker et Kubernetes
+- Tests d'intégration automatisés (Newman)
+- Scripts de déploiement local
 
 ## 🏗️ Architecture Microservices
 
-Cette application sera composée de plusieurs microservices, chacun ayant sa propre responsabilité :
-
-- **🔐 ms-authentification** - Gestion de l'authentification et des utilisateurs
-- **🥗 ms-recette** - Gestion des recettes et des ingrédients
-- **🤖 ms-feedback** - Gestion des retours utilisateurs et moteur de recommandation avec IA/RL
-
-## 🎯 Objectif du Template
-
-Ce template fournit :
-- ✅ Configuration complète de l'environnement de développement avec **Docker Compose**
-- ✅ Connexions aux bases de données (MySQL + MongoDB)
-- ✅ Stockage MinIO pour les fichiers
-- ✅ Interfaces d'administration web
-- ✅ Configuration sécurisée avec variables d'environnement
-- ✅ Structure de projet Spring Boot standardisée
-
-## 🐳 Docker Compose - Standardisation
-
-**Docker Compose est utilisé pour :**
-- ✅ **Exécution locale standardisée** - Tous les développeurs auront le même environnement
-- ✅ **Configuration unifiée** - Même version des bases de données, même ports, mêmes services
-- ✅ **Isolation des services** - Chaque microservice a ses propres ressources
-- ✅ **Déploiement simplifié** - Un seul `docker-compose up -d` pour tout démarrer
-
-Cela garantit que l'environnement de développement soit **identique chez tous les contributeurs**.
-
-## 🔐 Gestion du fichier .env
-
-**⚠️ IMPORTANT - Configuration sécurisée :**
-
-Le fichier `.env` contenant les configurations sensibles (mots de passe, clés) **ne sera PAS inclus dans le repository** pour des raisons de sécurité.
-
-**Processus de récupération du .env :**
-1. Le fichier `.env` sera **fourni individuellement par l'administrateur projet**
-2. Distribution via **message privé** ou **canal sécurisé du groupe projet**
-3. **Placer le fichier `.env` reçu à la racine du projet**
-4. Ne jamais commiter ce fichier (déjà protégé par .gitignore)
-
-```bash
-# Structure attendue :
-votre-projet/
-├── .env                 # ← Fichier reçu de l'administrateur
-├── docker-compose.yml
-└── ...
+```
+┌─────────────────────────────────────────────────────────┐
+│                 PARENT REPOSITORY                       │
+│              (Template + CI/CD)                         │
+└─────────────────────────────────────────────────────────┘
+                        │
+        ┌───────────────┼───────────────┐
+        │               │               │
+        ▼               ▼               ▼
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│ Microservice│  │ Microservice│  │ Microservice│
+│    #1       │  │    #2       │  │    #3       │
+│  (Fork)     │  │  (Fork)     │  │  (Fork)     │
+└─────────────┘  └─────────────┘  └─────────────┘
 ```
 
-## 🔄 Maintenir votre microservice à jour
+Chaque microservice :
+1. **Fork** ce repository parent
+2. **Hérite** du pipeline CI/CD
+3. **Personnalise** son code métier
+4. **Partage** la même infrastructure
 
-### Importance du rebase du template
+## 🚀 Démarrage Rapide
 
-Le template parent est régulièrement mis à jour avec :
-- ✅ **Nouvelles fonctionnalités** - Améliorations de l'infrastructure
-- ✅ **Corrections de sécurité** - Mise à jour des dépendances et configurations
-- ✅ **Optimisations** - Performance et bonnes pratiques
-- ✅ **Nouvelles versions** - Spring Boot, bases de données, Docker
+### Pour les Développeurs (Test Local)
 
-**⚠️ Il est ESSENTIEL de maintenir votre microservice synchronisé avec le template.**
+```powershell
+# 1. Cloner le repository
+git clone https://github.com/votre-org/RecipeYouLove.git
+cd RecipeYouLove
 
-### Comment faire le rebase du template
+# 2. Démarrer l'environnement complet
+.\start-local-env.ps1
 
-#### 1. Configuration initiale (à faire une seule fois)
-
-```bash
-# Ajouter le template comme remote "upstream"
-git remote add upstream https://github.com/votre-org/SmartDish.git
-
-# Vérifier les remotes configurés
-git remote -v
-# origin    https://github.com/votre-username/ms-authentification.git (fetch)
-# origin    https://github.com/votre-username/ms-authentification.git (push)
-# upstream  https://github.com/votre-org/SmartDish.git (fetch)
-# upstream  https://github.com/votre-org/SmartDish.git (push)
+# 3. Accéder à l'application
+# API :        http://localhost:8080
+# phpMyAdmin : http://localhost:8081
+# MinIO :      http://localhost:9001
 ```
 
-#### 2. Processus de mise à jour (à répéter régulièrement)
+### Pour Créer un Nouveau Microservice
 
-```bash
-# 1. S'assurer d'être sur la branche principale
-git checkout main
+Consultez **[CONFIGURATION-MICROSERVICES.md](CONFIGURATION-MICROSERVICES.md)** pour les instructions complètes.
 
-# 2. Sauvegarder vos modifications locales
-git stash
+## 🌐 Accès aux Services
 
-# 3. Récupérer les dernières modifications du template
-git fetch upstream
+### En Local (Développement)
 
-# 4. Rebaser votre microservice sur le template mis à jour
-git rebase upstream/main
+| Service | URL | Identifiants |
+|---------|-----|--------------|
+| **API Spring Boot** | http://localhost:8080 | - |
+| phpMyAdmin | http://localhost:8081 | `root` / `password` |
+| Mongo Express | http://localhost:8082 | `admin` / `password` |
+| MinIO Console | http://localhost:9001 | `minioadmin` / `minioadmin` |
 
-# 5. Résoudre les conflits s'il y en a (voir section ci-dessous)
+### En CI/CD (GitHub Actions)
 
-# 6. Restaurer vos modifications locales
-git stash pop
+Les services déployés dans Minikube (GitHub Actions) sont **uniquement pour les tests automatiques**. Les URLs ne sont pas accessibles depuis l'extérieur.
 
-# 7. Pousser les modifications
-git push origin main --force-with-lease
-```
-
-#### 3. Résolution des conflits de rebase
-
-En cas de conflits, Git vous indiquera les fichiers concernés :
-
-```bash
-# Voir les fichiers en conflit
-git status
-
-# Éditer manuellement chaque fichier en conflit
-# Garder vos adaptations spécifiques (noms, ports, etc.)
-# Intégrer les nouvelles fonctionnalités du template
-
-# Marquer les conflits comme résolus
-git add fichier-resolu.java
-git add autre-fichier-resolu.properties
-
-# Continuer le rebase
-git rebase --continue
-```
-
-#### 4. Vérification après rebase
-
-```bash
-# Vérifier que tout compile
-mvn clean compile
-
-# Tester l'infrastructure
-docker-compose down
-docker-compose up -d
-
-# Tester l'application
-mvn spring-boot:run
-```
-
-### Conflits courants et résolutions
-
-| Type de conflit | Action recommandée |
-|-----------------|-------------------|
-| **pom.xml** | Garder votre `artifactId` et `name`, intégrer nouvelles dépendances |
-| **application.properties** | Garder votre `spring.application.name`, intégrer nouvelles configs |
-| **Package Java** | Garder votre package, adapter les nouveaux imports si nécessaire |
-| **docker-compose.yml** | Garder vos ports personnalisés, intégrer nouveaux services |
-
-### Planning de mise à jour recommandé
-
-- 🔄 **Hebdomadaire** - Vérifier s'il y a des mises à jour du template
-- 📅 **Avant chaque release** - Obligatoire avant de déployer en production
-- 🚨 **Immédiatement** - En cas d'alerte de sécurité du template
-
-### Commandes utiles pour le suivi
-
-```bash
-# Voir les commits du template non intégrés
-git log --oneline HEAD..upstream/main
-
-# Voir les différences avec le template
-git diff upstream/main
-
-# Voir l'historique des rebases
-git reflog
-```
-
-### En cas de problème lors du rebase
-
-```bash
-# Annuler le rebase en cours
-git rebase --abort
-
-# Revenir à l'état avant le rebase
-git reset --hard HEAD@{1}
-
-# Demander de l'aide avec les logs
-git log --oneline --graph -10
-```
-
-## 🚀 Démarrage rapide
-
-### Prérequis
-- Java 21+
-- Maven 3.6+
-- Docker & Docker Compose
-- Git
-
-### Installation
-
-1. **Cloner le template** (ou forker pour créer un nouveau microservice)
-```bash
-git clone https://github.com/votre-org/SmartDish.git
-cd SmartDish
-```
-
-2. **Récupérer le fichier .env**
-```bash
-# Attendre de recevoir le fichier .env de l'administrateur
-# Le placer à la racine du projet
-```
-
-3. **Démarrer l'infrastructure avec Docker Compose**
-```bash
-docker-compose up -d
-```
-
-4. **Vérifier que tous les services sont en ligne**
-```bash
-docker-compose ps
-# Attendre que tous les services soient "Healthy"
-```
-
-5. **Compiler et démarrer l'application**
-```bash
-mvn clean install
-mvn spring-boot:run
-```
-
-## 🔗 Accès aux services
-
-Une fois tous les services démarrés :
-
-| Service | URL | Accès |
-|---------|-----|-------|
-| **Application Spring Boot** | http://localhost:8090 | Direct |
-| **PhpMyAdmin (MySQL)** | http://localhost:8080 | Interface d'administration |
-| **Mongo Express (MongoDB)** | http://localhost:8081 | Interface d'administration |
-| **MinIO Console** | http://localhost:9001 | Interface d'administration |
-
-*Les identifiants d'accès sont configurés dans le fichier .env fourni par l'administrateur.*
-
-## 🔧 Adapter le template pour un nouveau microservice
-
-### 1. Configuration du projet
-
-**a) Modifier le `pom.xml`**
-```xml
-<groupId>com.smartdish</groupId>
-<artifactId>ms-nom-de-votre-microservice</artifactId>
-<name>ms-nom-de-votre-microservice</name>
-<description>Description de votre microservice</description>
-```
-
-**b) Renommer le package principal**
-```bash
-# Déplacer de :
-src/main/java/com/springbootTemplate/univ/soa/
-# Vers :
-src/main/java/com/smartdish/[nom-microservice]/
-```
-
-**c) Mettre à jour le fichier principal `Application.java`**
-```java
-package com.smartdish.[nom-microservice];
-
-@SpringBootApplication
-public class [NomMicroservice]Application {
-    public static void main(String[] args) {
-        SpringApplication.run([NomMicroservice]Application.class, args);
-    }
-}
-```
-
-### 2. Configuration des bases de données
-
-**a) Modifier le fichier `.env` (reçu de l'administrateur)**
-```env
-# Adapter selon votre microservice
-MYSQL_DATABASE=nom_microservice_db
-MONGO_DATABASE=nom_microservice_mongodb
-
-# Changer les ports si nécessaire pour éviter les conflits
-SERVER_PORT=8091  # ou autre port libre
-MYSQL_PORT=3308   # si vous avez plusieurs microservices
-MONGO_PORT=27018  # si vous avez plusieurs microservices
-```
-
-**b) Mettre à jour `application.properties`**
-```properties
-spring.application.name=nom-de-votre-microservice
-```
-
-### 3. Structure recommandée pour chaque microservice
+## 📊 Pipeline CI/CD
 
 ```
-src/main/java/com/smartdish/[microservice]/
-├── Application.java
-├── config/
-│   ├── DatabaseConfig.java
-│   └── SecurityConfig.java
-├── controller/
-│   ├── [Entity]Controller.java
-│   └── HealthController.java
-├── service/
-│   ├── [Entity]Service.java
-│   └── [Entity]ServiceImpl.java
-├── repository/
-│   ├── [Entity]Repository.java
-│   └── [Entity]MongoRepository.java
-├── model/
-│   ├── entity/
-│   │   └── [Entity].java
-│   └── dto/
-│       ├── [Entity]RequestDto.java
-│       └── [Entity]ResponseDto.java
-└── exception/
-    ├── GlobalExceptionHandler.java
-    └── [Custom]Exception.java
+1️⃣ Configuration & Variables
+2️⃣ Build Maven
+3️⃣ Check Code Coverage (80% minimum)
+4️⃣ Build Docker Image
+5️⃣ Check Image Security (Trivy)
+6️⃣ Deploy to Kubernetes & Integration Tests (Newman)
+7️⃣ Log Components URLs
 ```
 
-## 🗃️ Configuration des bases de données par microservice
+### Déclenchement
 
-### Recommandations par microservice :
+- **Push** sur `main`, `develop`, `feat/**`, `fix/**`
+- **Pull Request** vers `main`, `develop`
 
-| Microservice | Base principale | Base secondaire | Justification |
-|--------------|----------------|-----------------|---------------|
-| **ms-authentification** | MySQL | - | Données relationnelles critiques |
-| **ms-recette** | MySQL | MongoDB | Recettes structurées + métadonnées flexibles |
-| **ms-feedback** | MongoDB | - | Données non-structurées, ML/IA |
+### Résultats
 
-## 🐳 Configuration Docker pour développement
+- ✅ Tests unitaires
+- ✅ Couverture de code
+- ✅ Sécurité de l'image
+- ✅ Tests d'intégration
+- 📦 Artifacts (JAR, Docker image, rapports)
 
-### Ports par défaut recommandés :
+## 🛠️ Scripts Disponibles
 
-| Microservice | Port App | Port MySQL | Port MongoDB |
-|--------------|----------|------------|--------------|
-| **ms-authentification** | 8091 | 3308 | 27018 |
-| **ms-recette** | 8092 | 3309 | 27019 |
-| **ms-feedback** | 8093 | 3310 | 27020 |
+### Développement Local
 
-### Commandes Docker pour chaque microservice
+| Script | Description |
+|--------|-------------|
+| `start-local-env.ps1` | Démarrer l'environnement Docker Compose complet |
+| `stop-local-env.ps1` | Arrêter l'environnement |
+| `test-newman-local.ps1` | Exécuter les tests Newman localement |
+| `quick-start.ps1` | Build rapide et démarrage de l'app seule |
 
-```bash
-# Arrêter le template
-docker-compose down
+### ArgoCD (GitOps)
 
-# Modifier le .env avec les nouveaux ports
-# Redémarrer avec la nouvelle configuration
-docker-compose up -d
+| Script | Description |
+|--------|-------------|
+| `setup-argocd.ps1` | Installer ArgoCD sur Kubernetes local |
+| `setup-argocd-app.ps1` | Configurer une application ArgoCD |
+
+## 🎯 Déploiement avec ArgoCD (GitOps)
+
+### Setup Rapide
+
+```powershell
+# 1. Builder l'image (IMPORTANT - sinon ErrImageNeverPull)
+.\build-and-load-image.ps1
+
+# 2. Installer ArgoCD (une fois, prend 3-5 min)
+.\setup-argocd.ps1
+# Mot de passe affiche dans le terminal
+
+# 3. Configurer votre app
+.\setup-argocd-app.ps1
+# Entrer l'URL de votre repo Git
+
+# 4. Interface Web
+https://localhost:8080
+# Login: admin / Password: (affiche a l'etape 2)
 ```
 
-## 🚀 Pipeline CI/CD (En développement)
+### Workflow Quotidien
 
-**🔄 Prochainement disponible :**
-- Pipeline CI/CD complète
-- Intégration Kubernetes pour le déploiement
-- Gestion des secrets avec Vault
-- Déploiement automatisé en environnements de test/production
+```
+1. Modifier code
+2. .\build-and-load-image.ps1
+3. git commit && git push
+4. ArgoCD synchronise automatiquement (< 3 min)
+5. Verifier: kubectl get pods -n soa-local
+```
 
-*Cette fonctionnalité est actuellement en cours de développement par l'équipe infrastructure.*
+### Notes Importantes
 
-## 🔒 Sécurité et bonnes pratiques
+- ⏱️ **ArgoCD prend 3-5 minutes** à démarrer au premier lancement
+- 🔑 **Mot de passe admin** : sauvegardé dans le terminal lors du setup
+- 🐳 **Image Docker** : doit être buildée localement AVANT le déploiement
+- 🔄 **Sync automatique** : max 3 minutes après un push Git
 
-### Variables d'environnement
-- ✅ Toujours utiliser le fichier `.env` fourni par l'administrateur
-- ✅ Ne jamais commiter le fichier `.env` (déjà dans .gitignore)
-- ✅ Signaler tout problème de configuration à l'administrateur
+## 📚 Documentation
 
-### Base de données
-- ✅ Créer des utilisateurs spécifiques pour chaque microservice
-- ✅ Utiliser des bases de données séparées
-- ✅ Implémenter des migrations avec Flyway/Liquibase
-- ✅ Configurer les backup automatiques
+### Pour Démarrer
 
-## 📚 Documentation détaillée
+- **[README.md](README.md)** (ce fichier) - Vue d'ensemble et démarrage rapide
 
-- [Guide d'accès aux services](SERVICES_ACCESS.md)
-- [Guide de rebase avec le template](GUIDE_REBASE_TEMPLATE.md)
-- [Configuration Docker](docker-compose.yml)
+### Pour Développer
+
+- **[GUIDE-DEVELOPPEUR.md](GUIDE-DEVELOPPEUR.md)** - Guide complet développeur
+  - Setup environnement
+  - Tests (unitaires + Newman)
+  - **ArgoCD : Setup, mot de passe, troubleshooting**
+  - Pipeline CI/CD expliqué
+  - Debugging
+
+### Pour Créer un Microservice
+
+- **[CONFIGURATION-MICROSERVICES.md](CONFIGURATION-MICROSERVICES.md)** - Configuration microservices fils
+  - Fork et personnalisation
+  - Configuration GitHub Actions
+  - Configuration Docker/Kubernetes
+  - **ArgoCD pour microservices fils**
+  - **Récupération mot de passe ArgoCD**
+  - Tests d'intégration
+
+## 🔧 Configuration Requise
+
+### Développement Local
+
+- **Java** 17+
+- **Maven** 3.8+
+- **Docker Desktop** (avec Kubernetes optionnel)
+- **PowerShell** 5.1+
+- **Git**
+
+### CI/CD (GitHub Actions)
+
+Rien à installer, tout est automatique !
+
+## 🎯 Cas d'Usage
+
+### Je veux tester l'application localement
+
+```powershell
+.\start-local-env.ps1
+# Ouvrir http://localhost:8080
+```
+
+### Je veux créer un nouveau microservice
+
+Voir **[CONFIGURATION-MICROSERVICES.md](CONFIGURATION-MICROSERVICES.md)**
+
+### Je veux comprendre le pipeline CI/CD
+
+Voir **[GUIDE-DEVELOPPEUR.md](GUIDE-DEVELOPPEUR.md)** section "Pipeline CI/CD"
+
+### Je veux modifier la collection Newman
+
+Modifier `tests/newman/collection.json` puis :
+```powershell
+.\test-newman-local.ps1
+```
 
 ## 🤝 Contribution
 
-1. Forker ce template pour créer un nouveau microservice
-2. Recevoir le fichier `.env` de l'administrateur
-3. Suivre les conventions de nommage
-4. Mettre à jour la documentation
-5. Tester localement avec Docker Compose
-6. Créer une Pull Request avec une description détaillée
+1. Fork le repository
+2. Créer une branche : `git checkout -b feat/ma-fonctionnalite`
+3. Commit : `git commit -m "feat: ma fonctionnalité"`
+4. Push : `git push origin feat/ma-fonctionnalite`
+5. Créer une Pull Request
 
-## 📞 Support
+## 📝 Conventions de Commit
 
-Pour toute question sur ce template ou l'architecture microservices :
-- Créer une issue sur ce repository
-- Consulter la documentation dans `/docs`
-- Contacter l'administrateur pour les questions de configuration
-- Signaler les problèmes d'environnement Docker
+```
+feat: nouvelle fonctionnalité
+fix: correction de bug
+docs: documentation
+refactor: refactoring
+test: ajout de tests
+chore: tâches diverses
+```
+
+## 🐛 Support
+
+- **Issues** : https://github.com/votre-org/RecipeYouLove/issues
+- **Discussions** : https://github.com/votre-org/RecipeYouLove/discussions
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir [LICENSE](LICENSE) pour plus de détails.
 
 ---
 
-🎯 **Ce template est conçu pour accélérer le développement des microservices SmartDish tout en garantissant une cohérence architecturale et une sécurité optimale.**
+## ⚡ TL;DR (Trop Long, Pas Lu)
+
+```powershell
+# Démarrer tout en local
+.\start-local-env.ps1
+
+# Accéder
+# http://localhost:8080       → API
+# http://localhost:8081       → phpMyAdmin
+# http://localhost:9001       → MinIO
+
+# Arrêter
+.\stop-local-env.ps1
+
+# Créer un microservice → Lire CONFIGURATION-MICROSERVICES.md
+```
+
+🎉 **C'est tout !**
+

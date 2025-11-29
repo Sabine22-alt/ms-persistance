@@ -1,7 +1,6 @@
 package com.springbootTemplate.univ.soa.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,9 +17,6 @@ public class DatabaseController {
     @Autowired
     private DataSource dataSource;
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
     @GetMapping("/test")
     public Map<String, Object> testDatabaseConnections() {
         Map<String, Object> result = new HashMap<>();
@@ -28,18 +24,14 @@ public class DatabaseController {
         // Test MySQL connection
         try {
             Connection connection = dataSource.getConnection();
+            String dbName = connection.getCatalog();
             connection.close();
             result.put("mysql", "✅ MySQL connection successful");
+            result.put("database", dbName);
+            result.put("status", "ready");
         } catch (Exception e) {
             result.put("mysql", "❌ MySQL connection failed: " + e.getMessage());
-        }
-
-        // Test MongoDB connection
-        try {
-            mongoTemplate.getCollection("test");
-            result.put("mongodb", "✅ MongoDB connection successful");
-        } catch (Exception e) {
-            result.put("mongodb", "❌ MongoDB connection failed: " + e.getMessage());
+            result.put("status", "error");
         }
 
         return result;
