@@ -21,9 +21,20 @@ spec:
         ports:
         - containerPort: 8080
           name: http
+        envFrom:
+        - configMapRef:
+            name: univ-soa-config
         env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "dev"
+        # Override datasource URL for embedded H2 (no external MySQL needed)
+        - name: spring.datasource.url
+          value: "jdbc:h2:mem:testdb"
+        - name: spring.datasource.driver-class-name
+          value: "org.h2.Driver"
+        - name: spring.jpa.properties.hibernate.dialect
+          value: "org.hibernate.dialect.H2Dialect"
+        # Disable MongoDB for integration tests
+        - name: spring.autoconfigure.exclude
+          value: "org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration,org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration"
         livenessProbe:
           httpGet:
             path: /actuator/health

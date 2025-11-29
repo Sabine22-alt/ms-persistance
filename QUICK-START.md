@@ -219,6 +219,12 @@ Consultez **`PIPELINE-ARCHITECTURE.md`** pour :
    - Étapes de debug améliorées (logs, events, describe)
    - Raison : Le deployment cherche `univ-soa:latest` mais l'image chargée avait un tag différent
 
+5. **✅ Variables d'environnement manquantes**
+   - Création de `k8s/minikube/configmap.yaml`
+   - Ajout de `envFrom: configMapRef` dans le deployment
+   - Configuration H2 en mémoire (pas de MySQL/MongoDB externe requis)
+   - Raison : L'application crashait au démarrage avec "Failed to bind properties"
+
 ### État actuel
 
 ✅ Tous les workflows sont corrigés et fonctionnels  

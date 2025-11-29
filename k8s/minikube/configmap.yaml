@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: univ-soa-config
+  labels:
+    app: univ-soa
+data:
+  # Server Configuration
+  SERVER_PORT: "8080"
+
+  # MySQL Configuration (embedded H2 pour les tests)
+  MYSQL_PORT: "3306"
+  MYSQL_DATABASE: "testdb"
+  MYSQL_USERNAME: "sa"
+  MYSQL_ROOT_PASSWORD: "password"
+
+  # MongoDB Configuration (désactivé pour les tests)
+  MONGO_PORT: "27017"
+  MONGO_DATABASE: "testdb"
+  MONGO_ROOT_USERNAME: "admin"
+  MONGO_ROOT_PASSWORD: "password"
+
+  # JPA/Hibernate Configuration
+  JPA_DDL_AUTO: "create-drop"
+  JPA_SHOW_SQL: "false"
+  JPA_FORMAT_SQL: "false"
+  JPA_USE_SQL_COMMENTS: "false"
+
+  # Logging Configuration
+  LOG_LEVEL_JDBC: "INFO"
+  LOG_LEVEL_HIBERNATE_SQL: "INFO"
+  LOG_LEVEL_HIBERNATE_BINDER: "INFO"
+
+  # Actuator Configuration
+  ACTUATOR_ENDPOINTS: "health,info,metrics"
+  ACTUATOR_HEALTH_DETAILS: "always"
+
+  # Spring Profile
+  SPRING_PROFILES_ACTIVE: "dev"
+
