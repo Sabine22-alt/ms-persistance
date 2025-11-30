@@ -92,7 +92,7 @@ jobs:
           echo "📊 Current deployments:"
           kubectl get deployments -n ${{ env.NAMESPACE }}
           
-          echo "✅ Manifests applied (using image: univ-soa:latest)"
+          echo "✅ Manifests applied (using image: ms-persistance:latest)"
 
       - name: Wait for pods to be created
         run: |
@@ -133,8 +133,8 @@ jobs:
           kubectl get pods -n ${{ env.NAMESPACE }} -o wide
           
           echo ""
-          echo "🔍 univ-soa pods details:"
-          kubectl describe pods -l app=univ-soa -n ${{ env.NAMESPACE }} || echo "No univ-soa pods yet"
+          echo "🔍 ms-persistance pods details:"
+          kubectl describe pods -l app=ms-persistance -n ${{ env.NAMESPACE }} || echo "No ms-persistance pods yet"
           
           echo ""
           echo "🔍 Recent events:"
@@ -143,11 +143,11 @@ jobs:
       - name: Wait for deployment
         run: |
           echo "⏳ Waiting for deployment rollout..."
-          kubectl rollout status deployment/univ-soa -n ${{ env.NAMESPACE }} --timeout=300s || {
+          kubectl rollout status deployment/ms-persistance -n ${{ env.NAMESPACE }} --timeout=300s || {
             echo "❌ Rollout timeout! Gathering debug info..."
             kubectl get pods -n ${{ env.NAMESPACE }} -o wide
             kubectl describe pods -n ${{ env.NAMESPACE }}
-            kubectl logs -l app=univ-soa -n ${{ env.NAMESPACE }} --tail=50 || true
+            kubectl logs -l app=ms-persistance -n ${{ env.NAMESPACE }} --tail=50 || true
             exit 1
           }
           
@@ -157,11 +157,11 @@ jobs:
       - name: Get service endpoint
         id: endpoint
         run: |
-          kubectl wait --for=condition=ready pod -l app=univ-soa -n ${{ env.NAMESPACE }} --timeout=300s
-          SERVICE_URL=$(minikube service univ-soa --url -n ${{ env.NAMESPACE }} 2>/dev/null || echo "")
+          kubectl wait --for=condition=ready pod -l app=ms-persistance -n ${{ env.NAMESPACE }} --timeout=300s
+          SERVICE_URL=$(minikube service ms-persistance --url -n ${{ env.NAMESPACE }} 2>/dev/null || echo "")
           if [ -z "$SERVICE_URL" ]; then
             MINIKUBE_IP=$(minikube ip)
-            NODEPORT=$(kubectl get svc univ-soa -n ${{ env.NAMESPACE }} -o jsonpath='{.spec.ports[0].nodePort}')
+            NODEPORT=$(kubectl get svc ms-persistance -n ${{ env.NAMESPACE }} -o jsonpath='{.spec.ports[0].nodePort}')
             SERVICE_URL="http://$MINIKUBE_IP:$NODEPORT"
           fi
           echo "service_url=$SERVICE_URL" >> $GITHUB_OUTPUT
@@ -187,7 +187,7 @@ jobs:
           curl -f "$SERVICE_URL/health" || \
           curl -f "$SERVICE_URL/" || {
             echo "❌ Health check failed"
-            kubectl logs -l app=univ-soa -n ${{ env.NAMESPACE }} --tail=50
+            kubectl logs -l app=ms-persistance -n ${{ env.NAMESPACE }} --tail=50
             exit 1
           }
           
@@ -235,7 +235,7 @@ jobs:
               curl -v "${{ steps.endpoint.outputs.service_url }}/actuator/health" || true
               echo ""
               echo "📋 Pod logs:"
-              kubectl logs -l app=univ-soa -n ${{ env.NAMESPACE }} --tail=100
+              kubectl logs -l app=ms-persistance -n ${{ env.NAMESPACE }} --tail=100
               exit 1
             }
           
