@@ -1,12 +1,13 @@
 package com.springbootTemplate.univ.soa.controller;
 
-import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthComponent;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -20,17 +21,18 @@ public class HealthController {
 
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
-        Health health = (Health) healthEndpoint.health();
-        Status status = health.getStatus();
-        Map<String, Object> body = Map.of(
-                "status", status.getCode(),
-                "details", health.getDetails()
-        );
+        HealthComponent healthComponent = healthEndpoint.health();
+        Status status = healthComponent.getStatus();
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", status.getCode());
+
         if (Status.UP.equals(status)) {
+            body.put("message", "healthy");
             return ResponseEntity.ok(body);
         } else {
+            body.put("message", "unhealthy");
             return ResponseEntity.status(503).body(body);
         }
     }
 }
-

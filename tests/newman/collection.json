@@ -35,6 +35,65 @@
       }
     },
     {
+      "name": "Actuator Health",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Health status is UP\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.equal('UP');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/actuator/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["actuator", "health"]
+        }
+      }
+    },
+    {
+      "name": "Home Page",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response contains API running message\", function () {",
+              "    pm.expect(pm.response.text()).to.include('API is running');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": ["{{baseUrl}}"],
+          "path": [""]
+        }
+      }
+    },
+    {
       "name": "API Status",
       "event": [
         {
@@ -103,65 +162,6 @@
       }
     },
     {
-      "name": "Home Page",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test(\"Response contains API running message\", function () {",
-              "    pm.expect(pm.response.text()).to.include('API is running');",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/",
-          "host": ["{{baseUrl}}"],
-          "path": [""]
-        }
-      }
-    },
-    {
-      "name": "Actuator Health",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test(\"Health status is UP\", function () {",
-              "    var jsonData = pm.response.json();",
-              "    pm.expect(jsonData.status).to.equal('UP');",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/actuator/health",
-          "host": ["{{baseUrl}}"],
-          "path": ["actuator", "health"]
-        }
-      }
-    },
-    {
       "name": "1. Create Aliment",
       "event": [
         {
@@ -195,385 +195,7 @@
       }
     },
     {
-      "name": "2. Get All Aliments",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-              "pm.test(\"Response is array\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.be.an('array'); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/aliments",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "aliments"]
-        }
-      }
-    },
-    {
-      "name": "3. Get Aliment by ID",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-              "pm.test(\"Response has correct id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.id).to.equal(pm.environment.get('alimentId')); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "aliments", "{{alimentId}}"]
-        }
-      }
-    },
-    {
-      "name": "4. Update Aliment",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-              "pm.test(\"Response has updated name\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.nom).to.equal('Carotte'); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"nom\": \"Carotte\", \"categorie\": \"LEGUME\"}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "aliments", "{{alimentId}}"]
-        }
-      }
-    },
-    {
-      "name": "5. Delete Aliment",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "aliments", "{{alimentId}}"]
-        }
-      }
-    },
-    {
-      "name": "6. Create Feedback",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
-              "pm.test(\"Response has id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('id'); pm.environment.set('feedbackId', jsonData.id); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"utilisateurId\": {{utilisateurId}}, \"recetteId\": {{recetteId}}, \"evaluation\": {{feedbackEvaluation}}, \"commentaire\": \"{{feedbackCommentaire}}\"}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/feedbacks",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "feedbacks"]
-        }
-      }
-    },
-    {
-      "name": "7. Get All Feedbacks",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-              "pm.test(\"Response is array\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.be.an('array'); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/feedbacks",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "feedbacks"]
-        }
-      }
-    },
-    {
-      "name": "8. Get Feedback by ID",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-              "pm.test(\"Response has correct id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.id).to.equal(pm.environment.get('feedbackId')); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]
-        }
-      }
-    },
-    {
-      "name": "9. Update Feedback",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-              "pm.test(\"Response has updated evaluation\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.evaluation).to.equal(4); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"evaluation\": 4, \"commentaire\": \"Très bon\"}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]
-        }
-      }
-    },
-    {
-      "name": "10. Delete Feedback",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]
-        }
-      }
-    },
-    {
-      "name": "11. Create Recette",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
-              "pm.test(\"Response has id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('id'); pm.environment.set('recetteId', jsonData.id); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"titre\": \"Salade\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Mélanger les ingrédients\", \"temps\": 5}]}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/recettes",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "recettes"]
-        }
-      }
-    },
-    {
-      "name": "12. Get All Recettes",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-              "pm.test(\"Response is array\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.be.an('array'); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/recettes",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "recettes"]
-        }
-      }
-    },
-    {
-      "name": "13. Get Recette by ID",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-              "pm.test(\"Response has correct id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.id).to.equal(pm.environment.get('recetteId')); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "recettes", "{{recetteId}}"]
-        }
-      }
-    },
-    {
-      "name": "14. Update Recette",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-              "pm.test(\"Response has updated title\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.titre).to.equal('Salade César'); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"titre\": \"Salade César\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 150, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Préparer la sauce\", \"temps\": 10}]}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "recettes", "{{recetteId}}"]
-        }
-      }
-    },
-    {
-      "name": "15. Delete Recette",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "recettes", "{{recetteId}}"]
-        }
-      }
-    },
-    {
-      "name": "16. Create Utilisateur",
+      "name": "2. Create Utilisateur",
       "event": [
         {
           "listen": "test",
@@ -606,7 +228,339 @@
       }
     },
     {
-      "name": "17. Get All Utilisateurs",
+      "name": "3. Create Recette",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+              "pm.test(\"Response has id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('id'); pm.environment.set('recetteId', jsonData.id); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"titre\": \"Salade\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Mélanger les ingrédients\", \"temps\": 5}]}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/recettes",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "recettes"]
+        }
+      }
+    },
+    {
+      "name": "4. Create Feedback",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+              "pm.test(\"Response has id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('id'); pm.environment.set('feedbackId', jsonData.id); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"utilisateurId\": {{utilisateurId}}, \"recetteId\": {{recetteId}}, \"evaluation\": {{feedbackEvaluation}}, \"commentaire\": \"{{feedbackCommentaire}}\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/feedbacks",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "feedbacks"]
+        }
+      }
+    },
+    {
+      "name": "5. Get All Aliments",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response is array\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.be.an('array'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/aliments",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "aliments"]
+        }
+      }
+    },
+    {
+      "name": "6. Get Aliment by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response has correct id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.id).to.equal(pm.environment.get('alimentId')); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "aliments", "{{alimentId}}"]
+        }
+      }
+    },
+    {
+      "name": "7. Update Aliment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response has updated name\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.nom).to.equal('Carotte'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nom\": \"Carotte\", \"categorie\": \"LEGUME\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "aliments", "{{alimentId}}"]
+        }
+      }
+    },
+    {
+      "name": "8. Get All Recettes",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response is array\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.be.an('array'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/recettes",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "recettes"]
+        }
+      }
+    },
+    {
+      "name": "9. Get Recette by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response has correct id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.id).to.equal(pm.environment.get('recetteId')); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "recettes", "{{recetteId}}"]
+        }
+      }
+    },
+    {
+      "name": "10. Update Recette",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response has updated title\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.titre).to.equal('Salade César'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"titre\": \"Salade César\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 150, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Préparer la sauce\", \"temps\": 10}]}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "recettes", "{{recetteId}}"]
+        }
+      }
+    },
+    {
+      "name": "11. Get All Feedbacks",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response is array\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.be.an('array'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/feedbacks",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "feedbacks"]
+        }
+      }
+    },
+    {
+      "name": "12. Get Feedback by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response has correct id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.id).to.equal(pm.environment.get('feedbackId')); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]
+        }
+      }
+    },
+    {
+      "name": "13. Update Feedback",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response has updated evaluation\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.evaluation).to.equal(4); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"evaluation\": 4, \"commentaire\": \"Très bon\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]
+        }
+      }
+    },
+    {
+      "name": "14. Delete Feedback",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]
+        }
+      }
+    },
+    {
+      "name": "15. Get All Utilisateurs",
       "event": [
         {
           "listen": "test",
@@ -630,7 +584,7 @@
       }
     },
     {
-      "name": "18. Get Utilisateur by ID",
+      "name": "16. Get Utilisateur by ID",
       "event": [
         {
           "listen": "test",
@@ -654,7 +608,7 @@
       }
     },
     {
-      "name": "19. Update Utilisateur",
+      "name": "17. Update Utilisateur",
       "event": [
         {
           "listen": "test",
@@ -687,7 +641,7 @@
       }
     },
     {
-      "name": "20. Delete Utilisateur",
+      "name": "18. Delete Utilisateur",
       "event": [
         {
           "listen": "test",
@@ -706,6 +660,52 @@
           "raw": "{{baseUrl}}/api/persistance/utilisateurs/{{utilisateurId}}",
           "host": ["{{baseUrl}}"],
           "path": ["api", "persistance", "utilisateurs", "{{utilisateurId}}"]
+        }
+      }
+    },
+    {
+      "name": "19. Delete Recette",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "recettes", "{{recetteId}}"]
+        }
+      }
+    },
+    {
+      "name": "20. Delete Aliment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "persistance", "aliments", "{{alimentId}}"]
         }
       }
     }
