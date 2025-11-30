@@ -78,7 +78,7 @@ Write-Host "✅ Build réussi`n" -ForegroundColor Green
 
 # Build de l'image Docker
 Write-Host "🐳 Construction de l'image Docker..." -ForegroundColor Yellow
-docker build -t univ-soa:latest . | Out-Null
+docker build -t ms-persistance:latest . | Out-Null
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Échec du build Docker!" -ForegroundColor Red
     exit 1
@@ -118,14 +118,14 @@ Write-Host "║         🌐 URLS ACCESSIBLES DEPUIS VOTRE PC          ║" -For
 Write-Host "╚═══════════════════════════════════════════════════════╝" -ForegroundColor Green
 Write-Host ""
 
-Write-Host "🚀 API Spring Boot (univ-soa)" -ForegroundColor Cyan
+Write-Host "🚀 API Spring Boot (ms-persistance)" -ForegroundColor Cyan
 Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor DarkGray
-Write-Host "   📍 Home:            http://localhost:8080/" -ForegroundColor White
-Write-Host "   📍 Health:          http://localhost:8080/health" -ForegroundColor White
-Write-Host "   📍 Status:          http://localhost:8080/api/status" -ForegroundColor White
-Write-Host "   📍 Database Test:   http://localhost:8080/api/database/test" -ForegroundColor White
-Write-Host "   📍 Actuator Health: http://localhost:8080/actuator/health" -ForegroundColor White
-Write-Host "   📍 Depuis réseau:   http://${localIP}:8080/" -ForegroundColor Gray
+Write-Host "   📍 Home:            http://localhost:8090/" -ForegroundColor White
+Write-Host "   📍 Health:          http://localhost:8090/health" -ForegroundColor White
+Write-Host "   📍 Status:          http://localhost:8090/api/status" -ForegroundColor White
+Write-Host "   📍 Database Test:   http://localhost:8090/api/database/test" -ForegroundColor White
+Write-Host "   📍 Actuator Health: http://localhost:8090/actuator/health" -ForegroundColor White
+Write-Host "   📍 Depuis réseau:   http://${localIP}:8090/" -ForegroundColor Gray
 Write-Host ""
 
 Write-Host "💾 phpMyAdmin (Interface MySQL)" -ForegroundColor Cyan
@@ -162,7 +162,7 @@ Write-Host "║              📋 COMMANDES UTILES                      ║" -Fo
 Write-Host "╚═══════════════════════════════════════════════════════╝" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "   🔍 Voir les logs:        docker-compose logs -f" -ForegroundColor White
-Write-Host "   🔍 Logs d'un service:    docker-compose logs -f univ-soa" -ForegroundColor White
+Write-Host "   🔍 Logs d'un service:    docker-compose logs -f ms-persistance" -ForegroundColor White
 Write-Host "   🛑 Arrêter:              docker-compose stop" -ForegroundColor White
 Write-Host "   🗑️  Tout supprimer:       docker-compose down -v" -ForegroundColor White
 Write-Host "   🔄 Redémarrer:           docker-compose restart" -ForegroundColor White

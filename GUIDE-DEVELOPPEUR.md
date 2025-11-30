@@ -577,7 +577,7 @@ pm.expect(pm.response.text()).to.include('success');
 docker-compose logs -f
 
 # Redémarrer un service
-docker-compose restart univ-soa
+docker-compose restart ms-persistance
 
 # Arrêter
 .\stop-local-env.ps1
@@ -616,20 +616,20 @@ mvn spring-boot:run
 docker-compose logs -f
 
 # Un service spécifique
-docker-compose logs -f univ-soa
+docker-compose logs -f ms-persistance
 
 # Dernières 100 lignes
-docker-compose logs --tail=100 univ-soa
+docker-compose logs --tail=100 ms-persistance
 ```
 
 #### En Kubernetes
 
 ```bash
 # Logs en temps réel
-kubectl logs -f -l app=univ-soa -n soa-local
+kubectl logs -f -l app=ms-persistance -n soa-local
 
 # Logs des 5 dernières minutes
-kubectl logs --since=5m -l app=univ-soa -n soa-local
+kubectl logs --since=5m -l app=ms-persistance -n soa-local
 
 # Logs d'un pod spécifique
 kubectl logs <pod-name> -n soa-local
@@ -654,10 +654,10 @@ taskkill /PID <PID> /F
 curl http://localhost:8080/health
 
 # Vérifier les logs de l'API
-docker-compose logs univ-soa
+docker-compose logs ms-persistance
 
 # Redémarrer l'environnement
-docker-compose restart univ-soa
+docker-compose restart ms-persistance
 ```
 
 #### 3. Base de données ne se connecte pas
@@ -691,7 +691,7 @@ mvn clean package -DskipTests
 
 ```bash
 # Build manuel avec logs
-docker build -t univ-soa:latest . --progress=plain
+docker build -t ms-persistance:latest . --progress=plain
 
 # Nettoyer les images non utilisées
 docker system prune -a

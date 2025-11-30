@@ -30,7 +30,7 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "OK - Image Docker creee`n" -ForegroundColor Green
 # Verifier l'image
 Write-Host "3. Verification de l'image..." -ForegroundColor Yellow
-$imageExists = docker images univ-soa:latest --format "{{.Repository}}:{{.Tag}}"
+$imageExists = docker images ms-persistance:latest --format "{{.Repository}}:{{.Tag}}"
 if ($imageExists) {
     Write-Host "OK - Image trouvee: $imageExists`n" -ForegroundColor Green
 } else {
@@ -55,7 +55,7 @@ Write-Host "================================================================" -F
 Write-Host "            IMAGE PRETE POUR ARGOCD" -ForegroundColor Green
 Write-Host "================================================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "L'image univ-soa:latest est maintenant disponible." -ForegroundColor Cyan
+Write-Host "L'image ms-persistance:latest est maintenant disponible." -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Prochaines etapes:" -ForegroundColor Yellow
 Write-Host "1. Si ArgoCD n'est pas encore configure:" -ForegroundColor White

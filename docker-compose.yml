@@ -155,11 +155,11 @@ services:
       "
 
   # ========================================
-  # Spring Boot API (univ-soa)
+  # Spring Boot API (ms-persistance)
   # ========================================
-  univ-soa:
-    image: univ-soa:latest
-    container_name: univ-soa-local
+  ms-persistance:
+    image: ms-persistance:latest
+    container_name: ms-persistance-local
     restart: unless-stopped
     depends_on:
       mysql:
@@ -188,7 +188,7 @@ services:
     image: postman/newman:alpine
     container_name: newman-local
     depends_on:
-      univ-soa:
+      ms-persistance:
         condition: service_healthy
     volumes:
       - ./tests/newman:/etc/newman
@@ -209,7 +209,7 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-      univ-soa:
+      ms-persistance:
         condition: service_healthy
     environment:
       MYSQL_PORT: ${MYSQL_PORT}

@@ -101,12 +101,12 @@ switch ($choice) {
         Write-Host "  minikube start" -ForegroundColor White
         Write-Host "  minikube stop" -ForegroundColor White
         Write-Host "  minikube dashboard" -ForegroundColor White
-        Write-Host "  minikube service univ-soa --url -n soa-integration" -ForegroundColor White
+        Write-Host "  minikube service ms-persistance --url -n soa-integration" -ForegroundColor White
 
         Write-Host "`nKubernetes:" -ForegroundColor Yellow
         Write-Host "  kubectl get pods -n soa-integration" -ForegroundColor White
         Write-Host "  kubectl get svc -n soa-integration" -ForegroundColor White
-        Write-Host "  kubectl logs -f deployment/univ-soa -n soa-integration" -ForegroundColor White
+        Write-Host "  kubectl logs -f deployment/ms-persistance -n soa-integration" -ForegroundColor White
         Write-Host "  kubectl describe pod <pod-name> -n soa-integration" -ForegroundColor White
 
         Write-Host "`nArgoCD:" -ForegroundColor Yellow
@@ -118,8 +118,8 @@ switch ($choice) {
         Write-Host "  npm test" -ForegroundColor White
 
         Write-Host "`nDocker:" -ForegroundColor Yellow
-        Write-Host "  docker build -t univ-soa:dev ." -ForegroundColor White
-        Write-Host "  docker run -p 8080:8080 univ-soa:dev" -ForegroundColor White
+        Write-Host "  docker build -t ms-persistance:dev ." -ForegroundColor White
+        Write-Host "  docker run -p 8080:8080 ms-persistance:dev" -ForegroundColor White
 
         Write-Host "`nMaven:" -ForegroundColor Yellow
         Write-Host "  mvn clean package" -ForegroundColor White

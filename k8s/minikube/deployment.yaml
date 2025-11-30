@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: univ-soa
+  name: ms-persistance
   labels:
-    app: univ-soa
+    app: ms-persistance
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: univ-soa
+      app: ms-persistance
   template:
     metadata:
       labels:
-        app: univ-soa
+        app: ms-persistance
     spec:
       initContainers:
       - name: wait-for-mysql

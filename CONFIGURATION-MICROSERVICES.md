@@ -680,7 +680,7 @@ kubectl get application -n argocd
 kubectl get pods -n soa-local
 
 # Voir les logs d'un pod
-kubectl logs -n soa-local -l app=univ-soa
+kubectl logs -n soa-local -l app=ms-persistance
 
 # Forcer une synchronisation
 kubectl -n argocd patch application recipeyoulove --type merge -p '{"operation":{"sync":{}}}'
