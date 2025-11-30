@@ -25,51 +25,51 @@ jobs:
 
       - name: Extract and display JaCoCo instruction coverage percentage
         run: |
-          set -e
+          set -euo pipefail
           THRESHOLD=60.0
           XML_FILE=target/site/jacoco/jacoco.xml
-          PERCENT=""
+          MISSED=""
+          COVERED=""
+
           if [ -f "$XML_FILE" ]; then
             echo "✅ Found $XML_FILE, extracting INSTRUCTION counter..."
-            # Extract the counter element for INSTRUCTION and read missed/covered
-            INST_LINE=$(grep -o '<counter[^>]*type="INSTRUCTION"[^>]*>' "$XML_FILE" || true)
-            if [ -n "$INST_LINE" ]; then
-              MISSED=$(echo "$INST_LINE" | sed -n 's/.*missed="\([0-9]\+\)".*/\1/p' )
-              COVERED=$(echo "$INST_LINE" | sed -n 's/.*covered="\([0-9]\+\)".*/\1/p' )
-              TOTAL=$((MISSED + COVERED))
-              if [ "$TOTAL" -gt 0 ]; then
-                PERCENT=$(awk -v c="$COVERED" -v t="$TOTAL" 'BEGIN{printf "%.2f", (c/t)*100}')
-              else
-                PERCENT="0.00"
-              fi
-              echo "📈 JaCoCo instruction coverage: ${PERCENT}% (covered ${COVERED} / total ${TOTAL})"
+            # Preferred: use xmllint if available
+            if command -v xmllint >/dev/null 2>&1; then
+              MISSED=$(xmllint --xpath 'string(//counter[@type="INSTRUCTION"]/@missed)' "$XML_FILE" 2>/dev/null || true)
+              COVERED=$(xmllint --xpath 'string(//counter[@type="INSTRUCTION"]/@covered)' "$XML_FILE" 2>/dev/null || true)
             else
-              echo "⚠️ INSTRUCTION counter not found in $XML_FILE"
+              # Fallback: take first matching counter tag and parse attributes safely
+              LINE=$(grep -o '<counter[^>]*type="INSTRUCTION"[^>]*/>' "$XML_FILE" | head -n1 || true)
+              if [ -n "$LINE" ]; then
+                MISSED=$(echo "$LINE" | sed -n 's/.*missed="\([0-9]\+\)".*/\1/p' || true)
+                COVERED=$(echo "$LINE" | sed -n 's/.*covered="\([0-9]\+\)".*/\1/p' || true)
+              fi
             fi
           else
-            echo "⚠️ $XML_FILE not found. Trying HTML fallback (target/site/jacoco/index.html)..."
-            if [ -f target/site/jacoco/index.html ]; then
-              # Try to extract a percentage from the HTML as fallback (best-effort)
-              PERCENT=$(grep -oP 'Instruction.*?</td>\s*<td[^>]*>\K[0-9]+\.[0-9]+' target/site/jacoco/index.html || true)
-              if [ -n "$PERCENT" ]; then
-                echo "📈 Parsed instruction coverage from HTML: ${PERCENT}%"
-              else
-                echo "❌ Could not parse coverage percentage from HTML fallback."
-                PERCENT=""
-              fi
-            fi
+            echo "⚠️ $XML_FILE not found."
           fi
 
-          if [ -z "$PERCENT" ]; then
-            echo "❌ Coverage percentage could not be determined."
+          # Validate numeric values
+          MISSED=${MISSED:-0}
+          COVERED=${COVERED:-0}
+          if ! [[ "$MISSED" =~ ^[0-9]+$ ]] || ! [[ "$COVERED" =~ ^[0-9]+$ ]]; then
+            echo "❌ Could not determine numeric missed/covered values (missed='${MISSED}' covered='${COVERED}')"
             exit 1
           fi
+
+          TOTAL=$((MISSED + COVERED))
+          if [ "$TOTAL" -eq 0 ]; then
+            PERCENT="0.00"
+          else
+            PERCENT=$(awk -v c="$COVERED" -v t="$TOTAL" 'BEGIN{printf "%.2f", (c/t)*100}')
+          fi
+
+          echo "📈 JaCoCo instruction coverage: ${PERCENT}% (covered ${COVERED} / total ${TOTAL})"
 
           # Compare with threshold (float compare using awk)
           BELOW=$(awk -v p="$PERCENT" -v t="$THRESHOLD" 'BEGIN{print (p+0 < t) ? 1 : 0}')
           if [ "$BELOW" -eq 1 ]; then
             echo "❌ Coverage ${PERCENT}% is below threshold ${THRESHOLD}%"
-            # Fail the step so CI job fails
             exit 1
           else
             echo "✅ Coverage ${PERCENT}% meets threshold ${THRESHOLD}%"
