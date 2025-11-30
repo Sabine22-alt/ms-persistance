@@ -53,10 +53,15 @@ jobs:
           echo "   3. Attendre 30 secondes"
           echo ""
           echo "🌐 URLs accessibles dans votre navigateur :"
-          echo "   🚀 API :           http://localhost:8080"
-          echo "   📍 Health :        http://localhost:8080/health"
-          echo "   📍 Status :        http://localhost:8080/api/status"
-          echo "   📍 DB Test :       http://localhost:8080/api/database/test"
+          echo "   🚀 API :           http://localhost:8090"
+          echo "   📍 Health :        http://localhost:8090/health"
+          echo "   📍 Actuator:       http://localhost:8090/actuator/health"
+          echo "   📍 Status :        http://localhost:8090/api/status"
+          echo "   📍 DB Test :       http://localhost:8090/api/database/test"
+          echo "   📍 Aliments:       http://localhost:8090/api/persistance/aliments"
+          echo "   📍 Recettes:      http://localhost:8090/api/persistance/recettes"
+          echo "   📍 Feedbacks:     http://localhost:8090/api/persistance/feedbacks"
+          echo "   📍 Utilisateurs:  http://localhost:8090/api/persistance/utilisateurs"
           echo "   💾 phpMyAdmin :    http://localhost:8081"
           echo "   🍃 Mongo Express : http://localhost:8082"
           echo "   📦 MinIO :         http://localhost:9001"
@@ -122,7 +127,7 @@ jobs:
           fi
           echo ""
           echo "🌐 URLs Accessibles (Déploiement Local) :"
-          echo "   API:        http://localhost:8080"
+          echo "   API:        http://localhost:8090"
           echo "   phpMyAdmin: http://localhost:8081"
           echo "   MinIO:      http://localhost:9001"
           echo ""
@@ -148,10 +153,15 @@ jobs:
           3. Attendre 30 secondes
           
           🌐 URLs accessibles dans votre navigateur :
-             🚀 API :           http://localhost:8080
-             📍 Health :        http://localhost:8080/health
-             📍 Status :        http://localhost:8080/api/status
-             📍 DB Test :       http://localhost:8080/api/database/test
+             🚀 API :           http://localhost:8090
+             📍 Health :        http://localhost:8090/health
+             📍 Actuator:       http://localhost:8090/actuator/health
+             📍 Status :        http://localhost:8090/api/status
+             📍 DB Test :       http://localhost:8090/api/database/test
+             📍 Aliments:       http://localhost:8090/api/persistance/aliments
+             📍 Recettes:      http://localhost:8090/api/persistance/recettes
+             📍 Feedbacks:     http://localhost:8090/api/persistance/feedbacks
+             📍 Utilisateurs:  http://localhost:8090/api/persistance/utilisateurs
              💾 phpMyAdmin :    http://localhost:8081
              🍃 Mongo Express : http://localhost:8082
              📦 MinIO :         http://localhost:9001
@@ -202,4 +212,3 @@ jobs:
           name: component-urls
           path: component-urls.txt
           retention-days: 7
-
