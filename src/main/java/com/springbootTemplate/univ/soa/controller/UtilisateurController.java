@@ -48,6 +48,17 @@ public class UtilisateurController {
     }
 
     /**
+     * GET /api/persistance/utilisateurs/email/{email} - Récupérer un utilisateur par email
+     */
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UtilisateurDTO> getUtilisateurByEmail(@PathVariable String email) {
+        return utilisateurService.findByEmail(email)
+                .map(utilisateurMapper::toDTO)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
      * POST /api/persistance/utilisateurs - Créer un nouvel utilisateur
      */
     @PostMapping
