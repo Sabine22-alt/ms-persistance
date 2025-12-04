@@ -18,7 +18,6 @@ public class UtilisateurMapper {
         UtilisateurDTO dto = new UtilisateurDTO();
         dto.setId(utilisateur.getId());
         dto.setEmail(utilisateur.getEmail());
-        // Ne jamais renvoyer le mot de passe dans les GET
         dto.setNom(utilisateur.getNom());
         dto.setPrenom(utilisateur.getPrenom());
         dto.setActif(utilisateur.getActif());
