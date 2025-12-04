@@ -14,7 +14,7 @@ import java.util.Set;
 public class UtilisateurDTO {
     private Long id;
     private String email;
-    private String motDePasse; // Ne sera pas renvoyé dans les réponses GET
+    private String motDePasse;
     private String nom;
     private String prenom;
     private Boolean actif;
