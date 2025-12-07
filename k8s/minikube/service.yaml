@@ -5,7 +5,11 @@ metadata:
   labels:
     app: ms-persistance
 spec:
-  type: NodePort
+  # Use ClusterIP to avoid NodePort collisions when deploying the same app
+  # in multiple namespaces/with ArgoCD. If you need external access, expose
+  # the service via an Ingress (recommended) or assign a unique nodePort per
+  # environment.
+  type: ClusterIP
   selector:
     app: ms-persistance
   ports:
@@ -13,4 +17,3 @@ spec:
     targetPort: 8090
     protocol: TCP
     name: http
-

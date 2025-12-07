@@ -171,11 +171,11 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "true"
     ports:
-      - "8080:8080"
+      - "8090:8090"
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -244,14 +244,14 @@ services:
       echo '';
       echo '┌────────────────────────────────────────────────────────────────┐';
       echo '│ 🚀 Spring Boot API (RecipeYouLove)                            │';
-      echo '│    🔗 Home            : http://localhost:8080/                 │';
-      echo '│    🔗 Health          : http://localhost:8080/health           │';
-      echo '│    🔗 Status          : http://localhost:8080/api/status       │';
-      echo '│    🔗 Database Test   : http://localhost:8080/api/database/test│';
-      echo '│    🔗 Actuator Health : http://localhost:8080/actuator/health  │';
+      echo '│    🔗 Home            : http://localhost:8090/                 │';
+      echo '│    🔗 Health          : http://localhost:8090/health           │';
+      echo '│    🔗 Status          : http://localhost:8090/api/status       │';
+      echo '│    🔗 Database Test   : http://localhost:8090/api/database/test│';
+      echo '│    🔗 Actuator Health : http://localhost:8090/actuator/health  │';
       echo '│                                                                │';
       echo '│    📖 Documentation Swagger (si activé) :                      │';
-      echo '│    http://localhost:8080/swagger-ui.html                       │';
+      echo '│    http://localhost:8090/swagger-ui.html                       │';
       echo '└────────────────────────────────────────────────────────────────┘';
       echo '';
       echo '┌────────────────────────────────────────────────────────────────┐';

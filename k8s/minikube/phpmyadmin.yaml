@@ -5,11 +5,13 @@ metadata:
   labels:
     app: phpmyadmin
 spec:
-  type: NodePort
+  # Use ClusterIP to avoid fixed NodePort collisions in multi-namespace deployments.
+  # If you need external access in your local cluster, create an Ingress or
+  # expose with a unique NodePort per environment.
+  type: ClusterIP
   ports:
   - port: 80
     targetPort: 80
-    nodePort: 30081
   selector:
     app: phpmyadmin
 ---
@@ -65,4 +67,3 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 3
-
