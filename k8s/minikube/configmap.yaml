@@ -41,6 +41,15 @@ data:
   ACTUATOR_ENDPOINTS: "health,info,metrics"
   ACTUATOR_HEALTH_DETAILS: "always"
 
+  # MinIO Configuration
+  MINIO_ENDPOINT: "http://minio:9000"
+  MINIO_ACCESS_KEY: "minioadmin"
+  MINIO_SECRET_KEY: "minioadmin123"
+  MINIO_ROOT_USER: "minioadmin"
+  MINIO_ROOT_PASSWORD: "minioadmin123"
+  MINIO_API_PORT: "9000"
+  MINIO_CONSOLE_PORT: "9001"
+
   # Spring Profile
   SPRING_PROFILES_ACTIVE: "dev"
 
