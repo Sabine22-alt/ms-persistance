@@ -156,6 +156,7 @@
 								<!-- Exclure les repositories (interfaces) et DTOs du scope de coverage unitaires -->
 								<exclude>**/repository/**</exclude>
 								<exclude>**/*Repository*.class</exclude>
+                                <exclude>**/exception/**</exclude>
 								<exclude>**/dto/**</exclude>
 							</excludes>
 						</configuration>
