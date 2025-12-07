@@ -29,7 +29,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.test.context.ActiveProfiles;
+
 @WebMvcTest(FeedbackController.class)
+@ActiveProfiles("test")
 @DisplayName("Tests unitaires pour FeedbackController")
 class FeedbackControllerTest {
 

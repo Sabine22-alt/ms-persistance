@@ -25,7 +25,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.test.context.ActiveProfiles;
+
 @WebMvcTest(UtilisateurController.class)
+@ActiveProfiles("test")
 @DisplayName("Tests unitaires pour UtilisateurController")
 class UtilisateurControllerTest {
 
