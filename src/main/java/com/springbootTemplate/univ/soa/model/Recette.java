@@ -52,6 +52,9 @@ public class Recette {
     @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Feedback> feedbacks = new ArrayList<>();
 
+    @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<FichierRecette> fichiers = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         dateCreation = LocalDateTime.now();

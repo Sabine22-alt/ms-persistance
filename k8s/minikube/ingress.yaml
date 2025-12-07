@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ms-persistance-ingress
+  annotations:
+    # depends on your ingress controller; for minikube with ingress addon this works
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: ms-persistance.local
+    http:
+      paths:
+      - path: /(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: ms-persistance
+            port:
+              number: 8090
+
+# To use this Ingress locally, either enable an ingress controller (minikube addons enable ingress)
+# and add an /etc/hosts entry:
+#   127.0.0.1  ms-persistance.local
+# Then you can access the app on http://ms-persistance.local/
+

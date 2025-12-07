@@ -24,7 +24,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.test.context.ActiveProfiles;
+
 @WebMvcTest(AlimentController.class)
+@ActiveProfiles("test")
 @DisplayName("Tests unitaires pour AlimentController")
 class AlimentControllerTest {
 

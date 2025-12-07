@@ -6,7 +6,6 @@ networks:
 
 volumes:
   mysql-data:
-  mongodb-data:
   minio-data:
 
 services:
@@ -55,48 +54,6 @@ services:
     networks:
       - microservices-network
 
-  # ========================================
-  # MongoDB - Base de données NoSQL
-  # ========================================
-  mongodb:
-    image: mongo:7.0
-    container_name: mongodb-local
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-    ports:
-      - "${MONGO_PORT}:27017"
-    volumes:
-      - mongodb-data:/data/db
-    networks:
-      - microservices-network
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ========================================
-  # Mongo Express - Interface MongoDB
-  # ========================================
-  mongo-express:
-    image: mongo-express:latest
-    container_name: mongo-express-local
-    restart: unless-stopped
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
-    ports:
-      - "${MONGO_EXPRESS_PORT}:8081"
-    networks:
-      - microservices-network
 
   # ========================================
   # MinIO - Stockage S3-compatible
@@ -148,8 +105,11 @@ services:
       mc mb myminio/datasets-bucket || true;
       mc mb myminio/reports-bucket || true;
       mc mb myminio/backups-bucket || true;
+      mc mb myminio/recettes-bucket || true;
+      mc mb myminio/documents-bucket || true;
       
       mc anonymous set download myminio/reports-bucket;
+      mc anonymous set download myminio/recettes-bucket;
       
       echo '✅ Buckets MinIO créés';
       "
@@ -158,24 +118,39 @@ services:
   # Spring Boot API (ms-persistance)
   # ========================================
   ms-persistance:
-    image: ms-persistance:latest
+    image: ${DOCKER_USERNAME}/ms-persistance:latest
     container_name: ms-persistance-local
     restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     environment:
+      # Database
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${JPA_DDL_AUTO}
+      SPRING_JPA_SHOW_SQL: ${JPA_SHOW_SQL}
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: ${JPA_FORMAT_SQL}
+      SPRING_JPA_PROPERTIES_HIBERNATE_USE_SQL_COMMENTS: ${JPA_USE_SQL_COMMENTS}
+      # MinIO
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      # Logging
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_JDBC: ${LOG_LEVEL_JDBC}
+      LOGGING_LEVEL_ORG_HIBERNATE_SQL: ${LOG_LEVEL_HIBERNATE_SQL}
+      LOGGING_LEVEL_ORG_HIBERNATE_TYPE_DESCRIPTOR_SQL_BASICBINDER: ${LOG_LEVEL_HIBERNATE_BINDER}
+      # Server
+      SERVER_PORT: 8090
     ports:
-      - "8080:8080"
+      - "${SERVER_PORT}:8090"
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -205,8 +180,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      mongodb:
-        condition: service_healthy
       minio:
         condition: service_healthy
       ms-persistance:
@@ -216,12 +189,6 @@ services:
       MYSQL_USERNAME: ${MYSQL_USERNAME}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
-      MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-      MONGO_EXPRESS_PORT: ${MONGO_EXPRESS_PORT}
-      MONGO_EXPRESS_USERNAME: ${MONGO_EXPRESS_USERNAME}
-      MONGO_EXPRESS_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
       MINIO_API_PORT: ${MINIO_API_PORT}
       MINIO_CONSOLE_PORT: ${MINIO_CONSOLE_PORT}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -244,14 +211,14 @@ services:
       echo '';
       echo '┌────────────────────────────────────────────────────────────────┐';
       echo '│ 🚀 Spring Boot API (RecipeYouLove)                            │';
-      echo '│    🔗 Home            : http://localhost:8080/                 │';
-      echo '│    🔗 Health          : http://localhost:8080/health           │';
-      echo '│    🔗 Status          : http://localhost:8080/api/status       │';
-      echo '│    🔗 Database Test   : http://localhost:8080/api/database/test│';
-      echo '│    🔗 Actuator Health : http://localhost:8080/actuator/health  │';
+      echo '│    🔗 Home            : http://localhost:8090/                 │';
+      echo '│    🔗 Health          : http://localhost:8090/health           │';
+      echo '│    🔗 Status          : http://localhost:8090/api/status       │';
+      echo '│    🔗 Database Test   : http://localhost:8090/api/database/test│';
+      echo '│    🔗 Actuator Health : http://localhost:8090/actuator/health  │';
       echo '│                                                                │';
       echo '│    📖 Documentation Swagger (si activé) :                      │';
-      echo '│    http://localhost:8080/swagger-ui.html                       │';
+      echo '│    http://localhost:8090/swagger-ui.html                       │';
       echo '└────────────────────────────────────────────────────────────────┘';
       echo '';
       echo '┌────────────────────────────────────────────────────────────────┐';
@@ -273,23 +240,6 @@ services:
       echo '└────────────────────────────────────────────────────────────────┘';
       echo '';
       echo '┌────────────────────────────────────────────────────────────────┐';
-      echo '│ 🍃 MongoDB Database                                            │';
-      echo '│    📍 Host     : localhost:$${MONGO_PORT}                      │';
-      echo '│    👤 User     : $${MONGO_ROOT_USERNAME}                       │';
-      echo '│    🔑 Password : $${MONGO_ROOT_PASSWORD}                       │';
-      echo '│                                                                │';
-      echo '│    📝 Connection String :                                      │';
-      echo '│    mongodb://$${MONGO_ROOT_USERNAME}:$${MONGO_ROOT_PASSWORD}@localhost:$${MONGO_PORT} │';
-      echo '└────────────────────────────────────────────────────────────────┘';
-      echo '';
-      echo '┌────────────────────────────────────────────────────────────────┐';
-      echo '│ 🌿 Mongo Express (Interface MongoDB)                          │';
-      echo '│    🔗 URL      : http://localhost:$${MONGO_EXPRESS_PORT}       │';
-      echo '│    👤 User     : $${MONGO_EXPRESS_USERNAME}                    │';
-      echo '│    🔑 Password : $${MONGO_EXPRESS_PASSWORD}                    │';
-      echo '└────────────────────────────────────────────────────────────────┘';
-      echo '';
-      echo '┌────────────────────────────────────────────────────────────────┐';
       echo '│ 🪣 MinIO (S3-Compatible Storage)                              │';
       echo '│    🔗 API      : http://localhost:$${MINIO_API_PORT}           │';
       echo '│    🌐 Console  : http://localhost:$${MINIO_CONSOLE_PORT}       │';
@@ -301,6 +251,8 @@ services:
       echo '│       • datasets-bucket                                        │';
       echo '│       • reports-bucket                                         │';
       echo '│       • backups-bucket                                         │';
+      echo '│       • recettes-bucket  (Images de recettes)                  │';
+      echo '│       • documents-bucket (Documents PDF/Word)                  │';
       echo '└────────────────────────────────────────────────────────────────┘';
       echo '';
       echo '🔧 COMMANDES UTILES :';

@@ -272,11 +272,61 @@ mvn clean package -DskipTests
 java -jar target/ms-persistance-1.0.0.jar
 ```
 
+## 🐳 Déploiement Docker
+
+### Option 1 : Déploiement local (Kubernetes/Minikube)
+
+```powershell
+# Build et charge l'image dans Kubernetes local
+.\build-and-load-image.ps1
+```
+
+### Option 2 : Déploiement Docker Hub (pour utilisation inter-microservices)
+
+```powershell
+# Build et push vers Docker Hub
+.\build-and-push-dockerhub.ps1
+```
+
+**📖 Documentation complète** : Consultez [DOCKER-HUB-DEPLOYMENT.md](./DOCKER-HUB-DEPLOYMENT.md) pour :
+- Instructions détaillées de déploiement sur Docker Hub
+- Intégration avec ms-recette via HTTP client
+- Configuration Docker Compose et Kubernetes
+- Exemples de code Java pour appeler le service
+- Troubleshooting et bonnes pratiques
+
+## 🔧 Dépannage
+
+### Image Docker unhealthy ou en erreur
+
+Si l'image ms-persistance est marquée comme **unhealthy** ou en erreur lorsque vous l'utilisez dans ms-recette :
+
+```powershell
+# Lancer le script de diagnostic
+.\diagnose-health.ps1
+```
+
+**Cause commune** : Le health check utilise un mauvais endpoint.
+
+**Solution rapide** :
+1. Reconstruire l'image avec le Dockerfile corrigé (l'endpoint est maintenant `/actuator/health`)
+2. Push la nouvelle image vers Docker Hub
+3. Pull la nouvelle image dans ms-recette
+
+**📖 Guide complet** : Consultez [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) pour :
+- Diagnostic détaillé des problèmes de health check
+- Solutions pour les conteneurs unhealthy
+- Vérification de la configuration MySQL
+- Commandes de diagnostic Docker
+- Points de contrôle de la configuration
+
 ## 📚 Ressources
 
 - [Documentation Spring Boot](https://docs.spring.io/spring-boot/docs/current/reference/html/)
 - [Spring Data JPA](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
 - [Swagger/OpenAPI](https://swagger.io/docs/)
 - [Exemple ms-feedback](https://github.com/nassimug/ms-feedback)
+- [Guide Déploiement Docker Hub](./DOCKER-HUB-DEPLOYMENT.md)
+- [Guide Dépannage](./TROUBLESHOOTING.md)
 
 ---
