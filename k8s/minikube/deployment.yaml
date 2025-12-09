@@ -20,8 +20,13 @@ spec:
         command: ['sh', '-c']
         args:
         - |
-          echo "Waiting for MySQL to be ready..."
-          until nc -z mysql 3306; do
+          echo "Waiting for DNS to be ready..."
+          until nslookup mysql.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do
+            echo "DNS not ready, waiting 2s..."
+            sleep 2
+          done
+          echo "DNS ready, waiting for MySQL port..."
+          until nc -w 2 mysql 3306; do
             echo "MySQL not ready yet, waiting 3s..."
             sleep 3
           done
@@ -31,8 +36,8 @@ spec:
         command: ['sh', '-c']
         args:
         - |
-          echo "Waiting for MinIO to be ready..."
-          until nc -z minio 9000; do
+          echo "Waiting for MinIO..."
+          until nc -w 2 minio 9000; do
             echo "MinIO not ready yet, waiting 3s..."
             sleep 3
           done
