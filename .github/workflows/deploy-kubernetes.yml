@@ -38,15 +38,29 @@ jobs:
           curl -sLO https://storage.googleapis.com/minikube/releases/v1.32.0/minikube-linux-amd64
           sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
           
-          # Démarrage avec DNS activé (sans skip-phases pour garder kube-proxy et DNS)
+          # Démarrage de Minikube
           minikube start --driver=docker --memory=3072 --cpus=2 --kubernetes-version=v1.28.0
           
           # Configuration kubectl
           kubectl config use-context minikube
           
-          # Vérifier que CoreDNS est prêt
-          echo "⏳ Waiting for CoreDNS to be ready..."
-          kubectl wait --for=condition=ready pod -l k8s-app=kube-dns -n kube-system --timeout=90s
+          # Attendre que le cluster soit prêt
+          echo "⏳ Waiting for cluster to be ready..."
+          sleep 10
+          
+          # Vérifier que CoreDNS est déployé et prêt
+          echo "⏳ Waiting for CoreDNS pods to be created..."
+          for i in {1..30}; do
+            if kubectl get pods -n kube-system -l k8s-app=kube-dns 2>/dev/null | grep -q "coredns"; then
+              echo "CoreDNS pods found, waiting for ready state..."
+              kubectl wait --for=condition=ready pod -l k8s-app=kube-dns -n kube-system --timeout=120s && break
+            fi
+            echo "Waiting for CoreDNS pods... ($i/30)"
+            sleep 3
+          done
+          
+          echo "📋 Cluster status:"
+          kubectl get pods -n kube-system
           
           # Charger l'image
           echo "📥 Loading Docker image..."
