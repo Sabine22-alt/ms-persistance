@@ -198,6 +198,19 @@ jobs:
           path: tests/newman/newman-results/
           retention-days: 5
 
+      - name: Upload service URL artifact
+        if: always()
+        run: |
+          echo "${{ steps.endpoint.outputs.service_url }}" > service-url.txt
+
+      - name: Upload service URL
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: service-url
+          path: service-url.txt
+          retention-days: 5
+
       - name: Debug info on failure
         if: failure()
         run: |
