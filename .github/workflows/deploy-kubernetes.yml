@@ -106,19 +106,18 @@ jobs:
           echo "📋 Services:"
           kubectl get svc -n ${{ env.NAMESPACE }}
           
-          # Attendre le rollout avec timeout de 240s
-          kubectl rollout status deployment/ms-persistance -n ${{ env.NAMESPACE }} --timeout=240s || {
+          # Attendre le rollout avec timeout de 180s
+          kubectl rollout status deployment/ms-persistance -n ${{ env.NAMESPACE }} --timeout=180s || {
             echo "❌ Rollout failed"
             echo ""
             echo "📋 Pods status:"
             kubectl get pods -n ${{ env.NAMESPACE }} -o wide
             echo ""
-            echo "📋 Init container logs:"
-            POD=$(kubectl get pods -l app=ms-persistance -n ${{ env.NAMESPACE }} -o jsonpath='{.items[0].metadata.name}')
-            kubectl logs $POD -c wait-for-deps -n ${{ env.NAMESPACE }} || true
+            echo "📋 Pod logs:"
+            kubectl logs -l app=ms-persistance -n ${{ env.NAMESPACE }} --tail=100 || true
             echo ""
             echo "📋 Pod describe:"
-            kubectl describe pod $POD -n ${{ env.NAMESPACE }}
+            kubectl describe pods -l app=ms-persistance -n ${{ env.NAMESPACE }}
             exit 1
           }
           echo "✅ Application deployed"
