@@ -18,7 +18,7 @@ public class Etape {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recette_id", nullable = false)
+    @JoinColumn(name = "recette_id", nullable = false, foreignKey = @ForeignKey(name = "fk_etape_recette"))
     @JsonBackReference
     private Recette recette;
 

@@ -42,8 +42,8 @@ public class Utilisateur {
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "aliments_exclus",
-            joinColumns = @JoinColumn(name = "utilisateur_id"),
-            inverseJoinColumns = @JoinColumn(name = "aliment_id")
+            joinColumns = @JoinColumn(name = "utilisateur_id", foreignKey = @ForeignKey(name = "fk_aliments_exclus_utilisateur")),
+            inverseJoinColumns = @JoinColumn(name = "aliment_id", foreignKey = @ForeignKey(name = "fk_aliments_exclus_aliment"))
     )
     private Set<Aliment> alimentsExclus = new HashSet<>();
 

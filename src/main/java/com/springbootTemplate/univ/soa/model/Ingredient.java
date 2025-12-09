@@ -18,12 +18,12 @@ public class Ingredient {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recette_id", nullable = false)
+    @JoinColumn(name = "recette_id", nullable = false, foreignKey = @ForeignKey(name = "fk_ingredient_recette"))
     @JsonBackReference
     private Recette recette;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "aliment_id", nullable = false)
+    @JoinColumn(name = "aliment_id", nullable = false, foreignKey = @ForeignKey(name = "fk_ingredient_aliment"))
     private Aliment aliment;
 
     @Column

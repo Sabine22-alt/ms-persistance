@@ -38,7 +38,7 @@ public class FichierRecette {
     private String cheminMinio;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recette_id", nullable = false)
+    @JoinColumn(name = "recette_id", nullable = false, foreignKey = @ForeignKey(name = "fk_fichier_recette"))
     private Recette recette;
 
     @Column(name = "date_upload", updatable = false)

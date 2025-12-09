@@ -20,12 +20,12 @@ public class Feedback {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "utilisateur_id", nullable = false)
+    @JoinColumn(name = "utilisateur_id", nullable = false, foreignKey = @ForeignKey(name = "fk_feedback_utilisateur"))
     @JsonBackReference
     private Utilisateur utilisateur;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recette_id", nullable = false)
+    @JoinColumn(name = "recette_id", nullable = false, foreignKey = @ForeignKey(name = "fk_feedback_recette"))
     @JsonBackReference
     private Recette recette;
 

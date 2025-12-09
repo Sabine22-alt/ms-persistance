@@ -172,26 +172,35 @@ jobs:
           echo "🏥 Testing service health..."
           SERVICE_URL="${{ steps.endpoint.outputs.service_url }}"
           
+          echo "📍 Service URL: $SERVICE_URL"
+          
+          # Vérifier que l'URL est valide
+          if [ -z "$SERVICE_URL" ]; then
+            echo "❌ SERVICE_URL is empty!"
+            kubectl get svc -n ${{ env.NAMESPACE }}
+            exit 1
+          fi
+          
           # Attendre que le service soit vraiment prêt
           for i in {1..12}; do
-            if curl -f --connect-timeout 5 "$SERVICE_URL/actuator/health" 2>/dev/null; then
-              echo "✅ Service is healthy!"
-              break
-            fi
             echo "⏳ Waiting for service to be fully ready ($i/12)..."
-            sleep 5
+            if curl -sf --connect-timeout 10 "${SERVICE_URL}/actuator/health" 2>/dev/null; then
+              echo "✅ Service is healthy!"
+              exit 0
+            fi
+            sleep 10
           done
           
-          # Test final
-          curl -f "$SERVICE_URL/actuator/health" || \
-          curl -f "$SERVICE_URL/health" || \
-          curl -f "$SERVICE_URL/" || {
-            echo "❌ Health check failed"
-            kubectl logs -l app=ms-persistance -n ${{ env.NAMESPACE }} --tail=50
-            exit 1
-          }
+          # Test final avec plus de détails
+          echo "🔍 Final health check attempt..."
+          curl -v "${SERVICE_URL}/actuator/health" || true
           
-          echo "✅ Service is healthy and ready for tests"
+          echo "❌ Health check failed"
+          echo "📋 Pod logs:"
+          kubectl logs -l app=ms-persistance -n ${{ env.NAMESPACE }} --tail=100
+          echo "📋 Pod status:"
+          kubectl describe pods -l app=ms-persistance -n ${{ env.NAMESPACE }}
+          exit 1
 
       - name: Install Newman for integration tests
         working-directory: ./tests/newman
