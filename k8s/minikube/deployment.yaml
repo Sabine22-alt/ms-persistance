@@ -26,16 +26,31 @@ spec:
         args:
         - |
           apk add --no-cache netcat-openbsd > /dev/null 2>&1
-          echo "Waiting for MySQL..."
+          TIMEOUT=120
+          ELAPSED=0
+          
+          echo "Waiting for MySQL (timeout: ${TIMEOUT}s)..."
           while ! nc -z mysql 3306 2>/dev/null; do
+            if [ $ELAPSED -ge $TIMEOUT ]; then
+              echo "ERROR: MySQL connection timeout after ${TIMEOUT}s"
+              exit 1
+            fi
             sleep 2
+            ELAPSED=$((ELAPSED + 2))
           done
-          echo "MySQL is ready!"
-          echo "Waiting for MinIO..."
+          echo "MySQL is ready! (${ELAPSED}s)"
+          
+          ELAPSED=0
+          echo "Waiting for MinIO (timeout: ${TIMEOUT}s)..."
           while ! nc -z minio 9000 2>/dev/null; do
+            if [ $ELAPSED -ge $TIMEOUT ]; then
+              echo "ERROR: MinIO connection timeout after ${TIMEOUT}s"
+              exit 1
+            fi
             sleep 2
+            ELAPSED=$((ELAPSED + 2))
           done
-          echo "MinIO is ready!"
+          echo "MinIO is ready! (${ELAPSED}s)"
           echo "All dependencies ready!"
       containers:
       - name: ms-persistance

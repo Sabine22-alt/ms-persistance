@@ -113,10 +113,9 @@ jobs:
             echo "📋 Pods status:"
             kubectl get pods -n ${{ env.NAMESPACE }} -o wide
             echo ""
-            echo "📋 Init containers logs:"
+            echo "📋 Init container logs:"
             POD=$(kubectl get pods -l app=ms-persistance -n ${{ env.NAMESPACE }} -o jsonpath='{.items[0].metadata.name}')
-            kubectl logs $POD -c wait-for-mysql -n ${{ env.NAMESPACE }} || true
-            kubectl logs $POD -c wait-for-minio -n ${{ env.NAMESPACE }} || true
+            kubectl logs $POD -c wait-for-deps -n ${{ env.NAMESPACE }} || true
             echo ""
             echo "📋 Pod describe:"
             kubectl describe pod $POD -n ${{ env.NAMESPACE }}
