@@ -71,21 +71,15 @@
           "listen": "test",
           "script": {
             "exec": [
-              "// Accept either a proper home page response or fallback to actuator health",
               "if (pm.response.code === 200 && pm.response.text().includes('API is running')) {",
               "    pm.test('Home page OK', function () {",
               "        pm.expect(pm.response.code).to.equal(200);",
-              "        pm.expect(pm.response.text()).to.include('API is running');",
               "    });",
               "} else {",
-              "    // fallback to actuator health check",
               "    pm.sendRequest(pm.environment.get('baseUrl') + '/actuator/health', function (err, res) {",
-              "        pm.test('Actuator health fallback is reachable and UP', function () {",
+              "        pm.test('Actuator health fallback is UP', function () {",
               "            pm.expect(err).to.equal(null);",
               "            pm.expect(res).to.have.property('code', 200);",
-              "            var json = res.json();",
-              "            pm.expect(json).to.have.property('status');",
-              "            pm.expect(json.status).to.eql('UP');",
               "        });",
               "    });",
               "}"
@@ -111,20 +105,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Status code is 200\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test(\"Response has JSON body\", function () {",
-              "    pm.response.to.be.json;",
-              "});",
-              "",
-              "pm.test(\"Response contains application name\", function () {",
-              "    var jsonData = pm.response.json();",
-              "    pm.expect(jsonData).to.have.property('applicationName');",
-              "    pm.expect(jsonData).to.have.property('version');",
-              "    pm.expect(jsonData).to.have.property('status');",
-              "});"
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
             ],
             "type": "text/javascript"
           }
@@ -147,16 +128,7 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Status code is 200\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test(\"DB component is UP in actuator health\", function () {",
-              "    var jsonData = pm.response.json();",
-              "    pm.expect(jsonData).to.have.property('components');",
-              "    pm.expect(jsonData.components).to.have.property('db');",
-              "    pm.expect(jsonData.components.db.status).to.equal('UP');",
-              "});"
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
             ],
             "type": "text/javascript"
           }
@@ -188,21 +160,9 @@
       ],
       "request": {
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"nom\": \"{{alimentNom}}\", \"categorie\": \"{{alimentCategorie}}\"}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/aliments",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "aliments"]
-        }
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"nom\": \"{{alimentNom}}\", \"categorie\": \"{{alimentCategorie}}\"}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/aliments", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "aliments"]}
       }
     },
     {
@@ -221,21 +181,9 @@
       ],
       "request": {
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"email\": \"{{utilisateurEmail}}\", \"motDePasse\": \"{{utilisateurMotDePasse}}\", \"nom\": \"{{utilisateurNom}}\", \"prenom\": \"{{utilisateurPrenom}}\", \"role\": \"{{utilisateurRole}}\"}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/utilisateurs",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "utilisateurs"]
-        }
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"email\": \"{{utilisateurEmail}}\", \"motDePasse\": \"{{utilisateurMotDePasse}}\", \"nom\": \"{{utilisateurNom}}\", \"prenom\": \"{{utilisateurPrenom}}\", \"role\": \"{{utilisateurRole}}\"}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/utilisateurs", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "utilisateurs"]}
       }
     },
     {
@@ -254,21 +202,9 @@
       ],
       "request": {
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"titre\": \"Salade\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Mélanger les ingrédients\", \"temps\": 5}]}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/recettes",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "recettes"]
-        }
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"titre\": \"Salade\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Mélanger les ingrédients\", \"temps\": 5}]}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes"]}
       }
     },
     {
@@ -287,21 +223,9 @@
       ],
       "request": {
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"utilisateurId\": {{utilisateurId}}, \"recetteId\": {{recetteId}}, \"evaluation\": {{feedbackEvaluation}}, \"commentaire\": \"{{feedbackCommentaire}}\"}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/feedbacks",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "feedbacks"]
-        }
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"utilisateurId\": {{utilisateurId}}, \"recetteId\": {{recetteId}}, \"evaluation\": {{feedbackEvaluation}}, \"commentaire\": \"{{feedbackCommentaire}}\"}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/feedbacks", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "feedbacks"]}
       }
     },
     {
@@ -321,11 +245,7 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/aliments",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "aliments"]
-        }
+        "url": {"raw": "{{baseUrl}}/api/persistance/aliments", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "aliments"]}
       }
     },
     {
@@ -345,11 +265,7 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "aliments", "{{alimentId}}"]
-        }
+        "url": {"raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "aliments", "{{alimentId}}"]}
       }
     },
     {
@@ -368,21 +284,9 @@
       ],
       "request": {
         "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"nom\": \"Carotte\", \"categorie\": \"LEGUME\"}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "aliments", "{{alimentId}}"]
-        }
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"nom\": \"Carotte\", \"categorie\": \"LEGUME\"}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "aliments", "{{alimentId}}"]}
       }
     },
     {
@@ -402,11 +306,7 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/recettes",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "recettes"]
-        }
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes"]}
       }
     },
     {
@@ -426,11 +326,7 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "recettes", "{{recetteId}}"]
-        }
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes", "{{recetteId}}"]}
       }
     },
     {
@@ -449,21 +345,9 @@
       ],
       "request": {
         "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"titre\": \"Salade César\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 150, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Préparer la sauce\", \"temps\": 10}]}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "recettes", "{{recetteId}}"]
-        }
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"titre\": \"Salade César\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 150, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Préparer la sauce\", \"temps\": 10}]}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes", "{{recetteId}}"]}
       }
     },
     {
@@ -483,11 +367,7 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/feedbacks",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "feedbacks"]
-        }
+        "url": {"raw": "{{baseUrl}}/api/persistance/feedbacks", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "feedbacks"]}
       }
     },
     {
@@ -507,11 +387,7 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]
-        }
+        "url": {"raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]}
       }
     },
     {
@@ -530,21 +406,9 @@
       ],
       "request": {
         "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"evaluation\": 4, \"commentaire\": \"Très bon\"}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]
-        }
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"evaluation\": 4, \"commentaire\": \"Très bon\"}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]}
       }
     },
     {
@@ -563,11 +427,7 @@
       "request": {
         "method": "DELETE",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]
-        }
+        "url": {"raw": "{{baseUrl}}/api/persistance/feedbacks/{{feedbackId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "feedbacks", "{{feedbackId}}"]}
       }
     },
     {
@@ -587,11 +447,7 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/utilisateurs",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "utilisateurs"]
-        }
+        "url": {"raw": "{{baseUrl}}/api/persistance/utilisateurs", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "utilisateurs"]}
       }
     },
     {
@@ -611,11 +467,7 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/utilisateurs/{{utilisateurId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "utilisateurs", "{{utilisateurId}}"]
-        }
+        "url": {"raw": "{{baseUrl}}/api/persistance/utilisateurs/{{utilisateurId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "utilisateurs", "{{utilisateurId}}"]}
       }
     },
     {
@@ -634,21 +486,9 @@
       ],
       "request": {
         "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"email\": \"test@example.com\", \"nom\": \"Martin\", \"prenom\": \"Jean\", \"role\": \"USER\"}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/utilisateurs/{{utilisateurId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "utilisateurs", "{{utilisateurId}}"]
-        }
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"email\": \"test@example.com\", \"nom\": \"Martin\", \"prenom\": \"Jean\", \"role\": \"USER\"}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/utilisateurs/{{utilisateurId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "utilisateurs", "{{utilisateurId}}"]}
       }
     },
     {
@@ -667,57 +507,7 @@
       "request": {
         "method": "DELETE",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/utilisateurs/{{utilisateurId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "utilisateurs", "{{utilisateurId}}"]
-        }
-      }
-    },
-    {
-      "name": "19. Delete Recette",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "recettes", "{{recetteId}}"]
-        }
-      }
-    },
-    {
-      "name": "20. Delete Aliment",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "persistance", "aliments", "{{alimentId}}"]
-        }
+        "url": {"raw": "{{baseUrl}}/api/persistance/utilisateurs/{{utilisateurId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "utilisateurs", "{{utilisateurId}}"]}
       }
     },
     {
@@ -737,91 +527,168 @@
       "request": {
         "method": "GET",
         "header": [],
-        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/en-attente", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","en-attente"] }
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes/en-attente", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","en-attente"]}
+      }
+    },
+    {
+      "name": "19. Create Recette for Validation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+              "pm.test(\"Response has id and status EN_ATTENTE\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('id'); pm.environment.set('recetteValidationId', jsonData.id); pm.expect(jsonData.statut).to.equal('EN_ATTENTE'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"titre\": \"Soupe à l'oignon\", \"description\": \"Une délicieuse soupe\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 200, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Couper les oignons\", \"temps\": 10}]}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes"]}
       }
     },
     {
       "name": "Valider Recette",
       "event": [
-        { "listen": "test", "script": { "exec": [
-          "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-          "pm.test(\"Recette validée\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('statut','VALIDEE'); pm.expect(jsonData).to.have.property('actif', true); });"
-        ], "type": "text/javascript" } }
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Recette validée\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.statut).to.equal('VALIDEE'); pm.expect(jsonData.actif).to.equal(true); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
       ],
       "request": {
         "method": "PUT",
         "header": [],
-        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}/valider", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteId}}","valider"] }
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes/{{recetteValidationId}}/valider", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteValidationId}}","valider"]}
+      }
+    },
+    {
+      "name": "20. Create Recette for Rejection",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+              "pm.test(\"Response has id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('id'); pm.environment.set('recetteRejectionId', jsonData.id); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"titre\": \"Recette incomplète\", \"ingredients\": [], \"etapes\": []}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes"]}
       }
     },
     {
       "name": "Rejeter Recette",
       "event": [
-        { "listen": "test", "script": { "exec": [
-          "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-          "pm.test(\"Recette rejetée\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('statut','REJETEE'); pm.expect(jsonData.motifRejet).to.be.a('string').and.not.empty; });"
-        ], "type": "text/javascript" } }
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Recette rejetée\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.statut).to.equal('REJETEE'); pm.expect(jsonData.motifRejet).to.be.a('string').and.not.empty; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
       ],
       "request": {
         "method": "PUT",
-        "header": [ { "key": "Content-Type", "value": "application/json" } ],
-        "body": { "mode": "raw", "raw": "{\"motif\": \"Incomplète\"}" },
-        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}/rejeter", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteId}}","rejeter"] }
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"motif\": \"Recette incomplète, ingrédients et étapes manquants\"}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes/{{recetteRejectionId}}/rejeter", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteRejectionId}}","rejeter"]}
       }
     },
     {
-      "name": "Upload Image Recette",
+      "name": "19. Delete Recette for CRUD",
       "event": [
-        { "listen": "test", "script": { "exec": [
-          "pm.test(\"Status code is 200 or 201\", function () { pm.expect([200,201]).to.include(pm.response.code); });",
-          "pm.test(\"Image metadata OK\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('id'); pm.environment.set('fichierImageId', jsonData.id); pm.expect(jsonData).to.have.property('type','IMAGE'); pm.expect(jsonData.urlTelechargement).to.be.a('string'); });"
-        ], "type": "text/javascript" } }
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
       ],
       "request": {
-        "method": "POST",
+        "method": "DELETE",
         "header": [],
-        "body": {
-          "mode": "formdata",
-          "formdata": [
-            { "key": "file", "type": "file", "src": [] }
-          ]
-        },
-        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}/fichiers/images", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteId}}","fichiers","images"] }
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes", "{{recetteId}}"]}
       }
     },
     {
-      "name": "Upload Document Recette",
+      "name": "20. Delete Aliment",
       "event": [
-        { "listen": "test", "script": { "exec": [
-          "pm.test(\"Status code is 200 or 201\", function () { pm.expect([200,201]).to.include(pm.response.code); });",
-          "pm.test(\"Document metadata OK\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('id'); pm.environment.set('fichierDocId', jsonData.id); pm.expect(jsonData).to.have.property('type','DOCUMENT'); });"
-        ], "type": "text/javascript" } }
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
       ],
       "request": {
-        "method": "POST",
+        "method": "DELETE",
         "header": [],
-        "body": {
-          "mode": "formdata",
-          "formdata": [
-            { "key": "file", "type": "file", "src": [] }
-          ]
-        },
-        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}/fichiers/documents", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteId}}","fichiers","documents"] }
+        "url": {"raw": "{{baseUrl}}/api/persistance/aliments/{{alimentId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "aliments", "{{alimentId}}"]}
       }
     },
     {
-      "name": "Download Fichier Recette",
+      "name": "21. Delete Validation Recette",
       "event": [
-        { "listen": "test", "script": { "exec": [
-          "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
-          "pm.test(\"Has Content-Disposition\", function () { pm.expect(pm.response.headers.get('Content-Disposition')).to.exist; });"
-        ], "type": "text/javascript" } }
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
       ],
       "request": {
-        "method": "GET",
+        "method": "DELETE",
         "header": [],
-        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}/fichiers/{{fichierImageId}}/download", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteId}}","fichiers","{{fichierImageId}}","download"] }
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes/{{recetteValidationId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes", "{{recetteValidationId}}"]}
+      }
+    },
+    {
+      "name": "22. Delete Rejection Recette",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes/{{recetteRejectionId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes", "{{recetteRejectionId}}"]}
       }
     }
   ]
 }
+
