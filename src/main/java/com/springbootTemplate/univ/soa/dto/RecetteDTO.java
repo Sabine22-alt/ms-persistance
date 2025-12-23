@@ -14,12 +14,16 @@ import java.util.List;
 public class RecetteDTO {
     private Long id;
     private String titre;
+    private String description;
     private Integer tempsTotal;
     private Integer kcal;
     private String imageUrl;
     private Recette.Difficulte difficulte;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
+    private Boolean actif;
+    private Recette.StatutRecette statut;
+    private String motifRejet;
     private List<IngredientDTO> ingredients;
     private List<EtapeDTO> etapes;
 

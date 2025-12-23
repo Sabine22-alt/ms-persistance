@@ -9,9 +9,8 @@
     "test:html": "node index.js --collection ./collection.json --environment ./env.json --data ./dataset.json --reporters cli,htmlextra"
   },
   "dependencies": {
-    "newman": "^6.2.1",
-    "newman-reporter-htmlextra": "^1.23.1",
-    "minimist": "^1.2.8"
+    "minimist": "^1.2.8",
+    "newman": "^6.2.0",
+    "newman-reporter-htmlextra": "^1.23.1"
   }
 }
-

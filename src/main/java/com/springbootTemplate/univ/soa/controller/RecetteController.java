@@ -1,8 +1,10 @@
 package com.springbootTemplate.univ.soa.controller;
 
 import com.springbootTemplate.univ.soa.dto.RecetteDTO;
+import com.springbootTemplate.univ.soa.exception.ResourceNotFoundException;
 import com.springbootTemplate.univ.soa.mapper.RecetteMapper;
 import com.springbootTemplate.univ.soa.model.Recette;
+import com.springbootTemplate.univ.soa.model.Recette.StatutRecette;
 import com.springbootTemplate.univ.soa.service.RecetteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,17 @@ public class RecetteController {
     @GetMapping
     public ResponseEntity<List<RecetteDTO>> getAllRecettes() {
         List<RecetteDTO> dtos = recetteService.findAll().stream()
+                .map(recetteMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * GET /api/persistance/recettes/en-attente - Récupérer recettes en attente de validation
+     */
+    @GetMapping("/en-attente")
+    public ResponseEntity<List<RecetteDTO>> getRecettesEnAttente() {
+        List<RecetteDTO> dtos = recetteService.findByStatut(StatutRecette.EN_ATTENTE).stream()
                 .map(recetteMapper::toDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
@@ -243,6 +256,40 @@ public class RecetteController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Erreur lors de la mise à jour: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * PUT /api/persistance/recettes/{id}/valider - Valider une recette (actif=true, statut=VALIDEE)
+     */
+    @PutMapping("/{id}/valider")
+    public ResponseEntity<RecetteDTO> validerRecette(@PathVariable Long id) {
+        try {
+            Recette recette = recetteService.validerRecette(id);
+            return ResponseEntity.ok(recetteMapper.toDTO(recette));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * PUT /api/persistance/recettes/{id}/rejeter - Rejeter une recette (statut=REJETEE) avec motif
+     */
+    @PutMapping("/{id}/rejeter")
+    public ResponseEntity<RecetteDTO> rejeterRecette(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String motif = body != null ? body.get("motif") : null;
+        if (motif == null || motif.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        try {
+            Recette recette = recetteService.rejeterRecette(id, motif.trim());
+            return ResponseEntity.ok(recetteMapper.toDTO(recette));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

@@ -13,35 +13,5 @@
     "utilisateurNom": "Dupont",
     "utilisateurPrenom": "Jean",
     "utilisateurRole": "USER"
-  },
-  {
-    "testRun": "run-2",
-    "alimentNom": "Poulet",
-    "alimentCategorie": "VIANDE",
-    "feedbackEvaluation": 3,
-    "feedbackCommentaire": "Moyen",
-    "recetteTitre": "Soupe",
-    "recetteIngredients": [{"alimentId": 2, "quantite": 200, "unite": "MILLILITRE"}],
-    "recetteEtapes": [{"ordre": 1, "texte": "Cuire", "temps": 15}],
-    "utilisateurEmail": "user2@example.com",
-    "utilisateurMotDePasse": "pass456",
-    "utilisateurNom": "Martin",
-    "utilisateurPrenom": "Marie",
-    "utilisateurRole": "ADMIN"
-  },
-  {
-    "testRun": "run-3",
-    "alimentNom": "Riz",
-    "alimentCategorie": "CEREALE",
-    "feedbackEvaluation": 1,
-    "feedbackCommentaire": "Mauvais",
-    "recetteTitre": "Dessert",
-    "recetteIngredients": [{"alimentId": 3, "quantite": 50, "unite": "UNITE"}],
-    "recetteEtapes": [{"ordre": 1, "texte": "Servir", "temps": 1}],
-    "utilisateurEmail": "user3@example.com",
-    "utilisateurMotDePasse": "pass789",
-    "utilisateurNom": "Durand",
-    "utilisateurPrenom": "Paul",
-    "utilisateurRole": "USER"
   }
 ]

@@ -23,6 +23,10 @@ public class Recette {
     @Column(nullable = false, length = 200)
     private String titre;
 
+    // Ajout description
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "temps_total")
     private Integer tempsTotal; // en minutes
 
@@ -41,6 +45,16 @@ public class Recette {
 
     @Column(name = "date_modification")
     private LocalDateTime dateModification;
+
+    @Column(nullable = false)
+    private Boolean actif = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "statut", length = 20, nullable = false)
+    private StatutRecette statut = StatutRecette.EN_ATTENTE;
+
+    @Column(name = "motif_rejet", length = 500)
+    private String motifRejet;
 
     @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Ingredient> ingredients = new ArrayList<>();
@@ -70,5 +84,11 @@ public class Recette {
         FACILE,
         MOYEN,
         DIFFICILE
+    }
+
+    public enum StatutRecette {
+        EN_ATTENTE,
+        VALIDEE,
+        REJETEE
     }
 }

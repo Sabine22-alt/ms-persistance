@@ -19,12 +19,16 @@ public class RecetteMapper {
         RecetteDTO dto = new RecetteDTO();
         dto.setId(recette.getId());
         dto.setTitre(recette.getTitre());
+        dto.setDescription(recette.getDescription());
         dto.setTempsTotal(recette.getTempsTotal());
         dto.setKcal(recette.getKcal());
         dto.setImageUrl(recette.getImageUrl());
         dto.setDifficulte(recette.getDifficulte());
         dto.setDateCreation(recette.getDateCreation());
         dto.setDateModification(recette.getDateModification());
+        dto.setActif(recette.getActif());
+        dto.setStatut(recette.getStatut());
+        dto.setMotifRejet(recette.getMotifRejet());
 
         if (recette.getIngredients() != null) {
             dto.setIngredients(
@@ -73,11 +77,14 @@ public class RecetteMapper {
         Recette recette = new Recette();
         recette.setId(dto.getId());
         recette.setTitre(dto.getTitre());
+        recette.setDescription(dto.getDescription());
         recette.setTempsTotal(dto.getTempsTotal());
         recette.setKcal(dto.getKcal());
         recette.setImageUrl(dto.getImageUrl());
         recette.setDifficulte(dto.getDifficulte());
-
+        recette.setActif(dto.getActif());
+        recette.setStatut(dto.getStatut());
+        recette.setMotifRejet(dto.getMotifRejet());
         return recette;
     }
 }

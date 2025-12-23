@@ -945,4 +945,3 @@ En cas de problème :
 ---
 
 **Développé avec ❤️ pour Chef Bot Recettes**
-
