@@ -29,6 +29,10 @@ public class RecetteService {
         return recetteRepository.findById(id);
     }
 
+    public List<Recette> findByStatut(Recette.StatutRecette statut) {
+        return recetteRepository.findByStatut(statut);
+    }
+
     @Transactional
     public Recette save(Recette recette) {
         recette.setId(null);
@@ -67,10 +71,14 @@ public class RecetteService {
 
         // Mise à jour des champs de base
         existing.setTitre(recette.getTitre());
+        existing.setDescription(recette.getDescription());
         existing.setTempsTotal(recette.getTempsTotal());
         existing.setKcal(recette.getKcal());
         existing.setImageUrl(recette.getImageUrl());
         existing.setDifficulte(recette.getDifficulte());
+        existing.setActif(recette.getActif());
+        existing.setStatut(recette.getStatut());
+        existing.setMotifRejet(recette.getMotifRejet());
 
         // Mise à jour des ingrédients
         if (recette.getIngredients() != null) {
@@ -112,10 +120,15 @@ public class RecetteService {
     public Recette saveFromDTO(RecetteDTO dto) {
         Recette recette = new Recette();
         recette.setTitre(dto.getTitre());
+        recette.setDescription(dto.getDescription());
         recette.setTempsTotal(dto.getTempsTotal());
         recette.setKcal(dto.getKcal());
         recette.setImageUrl(dto.getImageUrl());
         recette.setDifficulte(dto.getDifficulte());
+        // par défaut: actif=false, statut=EN_ATTENTE
+        recette.setActif(Boolean.FALSE);
+        recette.setStatut(Recette.StatutRecette.EN_ATTENTE);
+        recette.setMotifRejet(null);
 
         // Traiter les ingrédients depuis le DTO
         if (dto.getIngredients() != null && !dto.getIngredients().isEmpty()) {
@@ -165,10 +178,12 @@ public class RecetteService {
 
         // Mise à jour des champs de base
         existing.setTitre(dto.getTitre());
+        existing.setDescription(dto.getDescription());
         existing.setTempsTotal(dto.getTempsTotal());
         existing.setKcal(dto.getKcal());
         existing.setImageUrl(dto.getImageUrl());
         existing.setDifficulte(dto.getDifficulte());
+        // ne pas changer actif/statut/motif ici via DTO utilisateur standard
 
         // Mise à jour des ingrédients
         existing.getIngredients().clear();

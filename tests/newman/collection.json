@@ -719,6 +719,109 @@
           "path": ["api", "persistance", "aliments", "{{alimentId}}"]
         }
       }
+    },
+    {
+      "name": "Recettes En Attente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response is array\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.be.an('array'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/en-attente", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","en-attente"] }
+      }
+    },
+    {
+      "name": "Valider Recette",
+      "event": [
+        { "listen": "test", "script": { "exec": [
+          "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+          "pm.test(\"Recette validée\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('statut','VALIDEE'); pm.expect(jsonData).to.have.property('actif', true); });"
+        ], "type": "text/javascript" } }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}/valider", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteId}}","valider"] }
+      }
+    },
+    {
+      "name": "Rejeter Recette",
+      "event": [
+        { "listen": "test", "script": { "exec": [
+          "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+          "pm.test(\"Recette rejetée\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('statut','REJETEE'); pm.expect(jsonData.motifRejet).to.be.a('string').and.not.empty; });"
+        ], "type": "text/javascript" } }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\"motif\": \"Incomplète\"}" },
+        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}/rejeter", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteId}}","rejeter"] }
+      }
+    },
+    {
+      "name": "Upload Image Recette",
+      "event": [
+        { "listen": "test", "script": { "exec": [
+          "pm.test(\"Status code is 200 or 201\", function () { pm.expect([200,201]).to.include(pm.response.code); });",
+          "pm.test(\"Image metadata OK\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('id'); pm.environment.set('fichierImageId', jsonData.id); pm.expect(jsonData).to.have.property('type','IMAGE'); pm.expect(jsonData.urlTelechargement).to.be.a('string'); });"
+        ], "type": "text/javascript" } }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "file", "type": "file", "src": [] }
+          ]
+        },
+        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}/fichiers/images", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteId}}","fichiers","images"] }
+      }
+    },
+    {
+      "name": "Upload Document Recette",
+      "event": [
+        { "listen": "test", "script": { "exec": [
+          "pm.test(\"Status code is 200 or 201\", function () { pm.expect([200,201]).to.include(pm.response.code); });",
+          "pm.test(\"Document metadata OK\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('id'); pm.environment.set('fichierDocId', jsonData.id); pm.expect(jsonData).to.have.property('type','DOCUMENT'); });"
+        ], "type": "text/javascript" } }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "file", "type": "file", "src": [] }
+          ]
+        },
+        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}/fichiers/documents", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteId}}","fichiers","documents"] }
+      }
+    },
+    {
+      "name": "Download Fichier Recette",
+      "event": [
+        { "listen": "test", "script": { "exec": [
+          "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+          "pm.test(\"Has Content-Disposition\", function () { pm.expect(pm.response.headers.get('Content-Disposition')).to.exist; });"
+        ], "type": "text/javascript" } }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}/fichiers/{{fichierImageId}}/download", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteId}}","fichiers","{{fichierImageId}}","download"] }
+      }
     }
   ]
 }

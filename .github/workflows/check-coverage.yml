@@ -18,74 +18,75 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Run tests and generate JaCoCo report (XML + HTML)
-        run: |
-          echo "📊 Running tests and generating JaCoCo report..."
-          mvn -B -V -DskipTests=false -Djacoco.skip=false clean test jacoco:report
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: application-jar
+          path: target/
 
-      - name: Extract and display JaCoCo instruction coverage percentage
+      - name: Run tests and generate coverage
         run: |
-          set -euo pipefail
-          THRESHOLD=60.0
-          XML_FILE=target/site/jacoco/jacoco.xml
-          MISSED=""
-          COVERED=""
+          echo "📊 Running tests and generating coverage report..."
+          mvn clean test jacoco:report
 
-          if [ -f "$XML_FILE" ]; then
-            echo "✅ Found $XML_FILE, extracting INSTRUCTION counter..."
-            # Preferred: use xmllint if available
-            if command -v xmllint >/dev/null 2>&1; then
-              MISSED=$(xmllint --xpath 'string(//counter[@type="INSTRUCTION"]/@missed)' "$XML_FILE" 2>/dev/null || true)
-              COVERED=$(xmllint --xpath 'string(//counter[@type="INSTRUCTION"]/@covered)' "$XML_FILE" 2>/dev/null || true)
-            else
-              # Fallback: take first matching counter tag and parse attributes safely
-              LINE=$(grep -o '<counter[^>]*type="INSTRUCTION"[^>]*/>' "$XML_FILE" | head -n1 || true)
-              if [ -n "$LINE" ]; then
-                MISSED=$(echo "$LINE" | sed -n 's/.*missed="\([0-9]\+\)".*/\1/p' || true)
-                COVERED=$(echo "$LINE" | sed -n 's/.*covered="\([0-9]\+\)".*/\1/p' || true)
+      - name: Extract and display coverage percentage
+        id: coverage
+        run: |
+          echo "📈 Extracting coverage percentage..."
+          
+          # Extraire le pourcentage de couverture depuis jacoco.csv
+          if [ -f target/site/jacoco/jacoco.csv ]; then
+            # Calculer le pourcentage d'instructions couvertes
+            COVERED=$(awk -F',' 'NR>1 {sum+=$4} END {print sum}' target/site/jacoco/jacoco.csv)
+            MISSED=$(awk -F',' 'NR>1 {sum+=$3} END {print sum}' target/site/jacoco/jacoco.csv)
+            TOTAL=$((COVERED + MISSED))
+          
+            if [ $TOTAL -gt 0 ]; then
+              COVERAGE=$(awk "BEGIN {printf \"%.2f\", ($COVERED / $TOTAL) * 100}")
+              echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          
+              echo "=========================================="
+              echo "📊 CODE COVERAGE REPORT"
+              echo "=========================================="
+              echo "✅ Instructions Covered: $COVERED"
+              echo "❌ Instructions Missed: $MISSED"
+              echo "📊 Total Instructions: $TOTAL"
+              echo "🎯 Coverage: $COVERAGE%"
+              echo "=========================================="
+          
+              # Vérifier le seuil minimum de 60%
+              THRESHOLD=60
+              COVERAGE_INT=${COVERAGE%.*}
+          
+              if [ "$COVERAGE_INT" -ge "$THRESHOLD" ]; then
+                echo "✅ Coverage ($COVERAGE%) meets the minimum threshold ($THRESHOLD%)"
+                echo "status=success" >> $GITHUB_OUTPUT
+              else
+                echo "❌ Coverage ($COVERAGE%) is below the minimum threshold ($THRESHOLD%)"
+                echo "status=failed" >> $GITHUB_OUTPUT
+                exit 1
               fi
+            else
+              echo "⚠️  No coverage data found"
+              exit 1
             fi
           else
-            echo "⚠️ $XML_FILE not found."
-          fi
-
-          # Validate numeric values
-          MISSED=${MISSED:-0}
-          COVERED=${COVERED:-0}
-          if ! [[ "$MISSED" =~ ^[0-9]+$ ]] || ! [[ "$COVERED" =~ ^[0-9]+$ ]]; then
-            echo "❌ Could not determine numeric missed/covered values (missed='${MISSED}' covered='${COVERED}')"
+            echo "❌ Coverage report file not found"
             exit 1
-          fi
-
-          TOTAL=$((MISSED + COVERED))
-          if [ "$TOTAL" -eq 0 ]; then
-            PERCENT="0.00"
-          else
-            PERCENT=$(awk -v c="$COVERED" -v t="$TOTAL" 'BEGIN{printf "%.2f", (c/t)*100}')
-          fi
-
-          echo "📈 JaCoCo instruction coverage: ${PERCENT}% (covered ${COVERED} / total ${TOTAL})"
-
-          # Compare with threshold (float compare using awk)
-          BELOW=$(awk -v p="$PERCENT" -v t="$THRESHOLD" 'BEGIN{print (p+0 < t) ? 1 : 0}')
-          if [ "$BELOW" -eq 1 ]; then
-            echo "❌ Coverage ${PERCENT}% is below threshold ${THRESHOLD}%"
-            exit 1
-          else
-            echo "✅ Coverage ${PERCENT}% meets threshold ${THRESHOLD}%"
           fi
 
       - name: Upload coverage reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-reports
           path: target/site/jacoco/
           retention-days: 7
 
-      - name: Display coverage report location
+      - name: Coverage Summary
+        if: always()
         run: |
-          if [ -f target/site/jacoco/index.html ]; then
-            echo "✅ Coverage report generated: target/site/jacoco/index.html"
-          else
-            echo "⚠️ No coverage HTML generated"
-          fi
+          echo "📋 Coverage Summary:"
+          echo "Coverage: ${{ steps.coverage.outputs.coverage }}%"
+          echo "Status: ${{ steps.coverage.outputs.status }}"
+
