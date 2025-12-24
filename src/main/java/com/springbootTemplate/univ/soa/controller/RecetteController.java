@@ -117,10 +117,11 @@ public class RecetteController {
         // Validation : ingrédients
         if (dto.getIngredients() != null && !dto.getIngredients().isEmpty()) {
             for (RecetteDTO.IngredientDTO ingredient : dto.getIngredients()) {
-                // Validation : alimentId requis
-                if (ingredient.getAlimentId() == null) {
+                // Validation : alimentId OU alimentNom requis
+                if (ingredient.getAlimentId() == null &&
+                    (ingredient.getAlimentNom() == null || ingredient.getAlimentNom().trim().isEmpty())) {
                     return ResponseEntity.badRequest()
-                            .body(createErrorResponse("L'ID de l'aliment est requis pour chaque ingrédient"));
+                            .body(createErrorResponse("L'ID ou le nom de l'aliment est requis pour chaque ingrédient"));
                 }
 
                 // Validation : quantité
@@ -224,9 +225,11 @@ public class RecetteController {
         // Validation des ingrédients
         if (dto.getIngredients() != null) {
             for (RecetteDTO.IngredientDTO ingredient : dto.getIngredients()) {
-                if (ingredient.getAlimentId() == null) {
+                // Validation : alimentId OU alimentNom requis
+                if (ingredient.getAlimentId() == null &&
+                    (ingredient.getAlimentNom() == null || ingredient.getAlimentNom().trim().isEmpty())) {
                     return ResponseEntity.badRequest()
-                            .body(createErrorResponse("L'ID de l'aliment est requis pour chaque ingrédient"));
+                            .body(createErrorResponse("L'ID ou le nom de l'aliment est requis pour chaque ingrédient"));
                 }
                 if (ingredient.getQuantite() != null && ingredient.getQuantite() <= 0) {
                     return ResponseEntity.badRequest()

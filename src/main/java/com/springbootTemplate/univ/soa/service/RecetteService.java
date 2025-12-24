@@ -135,13 +135,23 @@ public class RecetteService {
             for (RecetteDTO.IngredientDTO ingredientDTO : dto.getIngredients()) {
                 Ingredient ingredient = new Ingredient();
 
-                // Récupérer l'aliment
-                Aliment aliment = alimentRepository.findById(ingredientDTO.getAlimentId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Aliment non trouvé avec l'ID: " + ingredientDTO.getAlimentId()
-                        ));
+                // Si alimentId est fourni, récupérer l'aliment existant
+                if (ingredientDTO.getAlimentId() != null) {
+                    Aliment aliment = alimentRepository.findById(ingredientDTO.getAlimentId())
+                            .orElseThrow(() -> new ResourceNotFoundException(
+                                    "Aliment non trouvé avec l'ID: " + ingredientDTO.getAlimentId()
+                            ));
+                    ingredient.setAliment(aliment);
+                } else if (ingredientDTO.getAlimentNom() != null && !ingredientDTO.getAlimentNom().trim().isEmpty()) {
+                    // Sinon, si un nom est fourni, l'utiliser directement
+                    ingredient.setNomAliment(ingredientDTO.getAlimentNom().trim());
+                } else {
+                    // Si ni ID ni nom fourni, erreur
+                    throw new IllegalArgumentException(
+                            "L'ID ou le nom de l'aliment est requis pour chaque ingrédient"
+                    );
+                }
 
-                ingredient.setAliment(aliment);
                 ingredient.setQuantite(ingredientDTO.getQuantite());
                 ingredient.setUnite(ingredientDTO.getUnite() != null ?
                         Ingredient.Unite.valueOf(ingredientDTO.getUnite()) : null);
@@ -192,13 +202,23 @@ public class RecetteService {
             for (RecetteDTO.IngredientDTO ingredientDTO : dto.getIngredients()) {
                 Ingredient ingredient = new Ingredient();
 
-                // Récupérer l'aliment
-                Aliment aliment = alimentRepository.findById(ingredientDTO.getAlimentId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Aliment non trouvé avec l'ID: " + ingredientDTO.getAlimentId()
-                        ));
+                // Si alimentId est fourni, récupérer l'aliment existant
+                if (ingredientDTO.getAlimentId() != null) {
+                    Aliment aliment = alimentRepository.findById(ingredientDTO.getAlimentId())
+                            .orElseThrow(() -> new ResourceNotFoundException(
+                                    "Aliment non trouvé avec l'ID: " + ingredientDTO.getAlimentId()
+                            ));
+                    ingredient.setAliment(aliment);
+                } else if (ingredientDTO.getAlimentNom() != null && !ingredientDTO.getAlimentNom().trim().isEmpty()) {
+                    // Sinon, si un nom est fourni, l'utiliser directement
+                    ingredient.setNomAliment(ingredientDTO.getAlimentNom().trim());
+                } else {
+                    // Si ni ID ni nom fourni, erreur
+                    throw new IllegalArgumentException(
+                            "L'ID ou le nom de l'aliment est requis pour chaque ingrédient"
+                    );
+                }
 
-                ingredient.setAliment(aliment);
                 ingredient.setQuantite(ingredientDTO.getQuantite());
                 ingredient.setUnite(ingredientDTO.getUnite() != null ?
                         Ingredient.Unite.valueOf(ingredientDTO.getUnite()) : null);

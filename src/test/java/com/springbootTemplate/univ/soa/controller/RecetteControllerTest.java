@@ -262,8 +262,8 @@ class RecetteControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/persistance/recettes - avec ingrédient sans alimentId, devrait retourner 400")
-    void createRecette_avecIngredientSansAlimentId_devraitRetourner400() throws Exception {
+    @DisplayName("POST /api/persistance/recettes - avec ingrédient sans alimentId ni alimentNom, devrait retourner 400")
+    void createRecette_avecIngredientSansAlimentIdNiNom_devraitRetourner400() throws Exception {
         // Given
         RecetteDTO dto = new RecetteDTO();
         dto.setTitre("Test");
@@ -272,6 +272,7 @@ class RecetteControllerTest {
 
         RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO();
         ingredientDTO.setQuantite(100.0f);
+        // Ni alimentId ni alimentNom
         dto.getIngredients().add(ingredientDTO);
 
         // When & Then
@@ -279,9 +280,57 @@ class RecetteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("L'ID de l'aliment est requis pour chaque ingrédient"));
+                .andExpect(jsonPath("$.error").value("L'ID ou le nom de l'aliment est requis pour chaque ingrédient"));
 
         verify(recetteService, never()).saveFromDTO(any());
+    }
+
+    @Test
+    @DisplayName("POST /api/persistance/recettes - avec ingrédient alimentNom uniquement, devrait réussir")
+    void createRecette_avecIngredientAlimentNom_devraitReussir() throws Exception {
+        // Given
+        RecetteDTO newDTO = new RecetteDTO();
+        newDTO.setTitre("Nouvelle Recette");
+        newDTO.setTempsTotal(30);
+        newDTO.setIngredients(new ArrayList<>());
+
+        RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO();
+        ingredientDTO.setAlimentNom("Tomate");
+        ingredientDTO.setQuantite(200.0f);
+        ingredientDTO.setUnite("GRAMME");
+        newDTO.getIngredients().add(ingredientDTO);
+
+        Recette savedRecette = new Recette();
+        savedRecette.setId(10L);
+        savedRecette.setTitre("Nouvelle Recette");
+        savedRecette.setTempsTotal(30);
+        savedRecette.setIngredients(new ArrayList<>());
+        savedRecette.setEtapes(new ArrayList<>());
+
+        RecetteDTO savedDTO = new RecetteDTO();
+        savedDTO.setId(10L);
+        savedDTO.setTitre("Nouvelle Recette");
+        savedDTO.setTempsTotal(30);
+        savedDTO.setIngredients(new ArrayList<>());
+
+        RecetteDTO.IngredientDTO savedIngredientDTO = new RecetteDTO.IngredientDTO();
+        savedIngredientDTO.setAlimentNom("Tomate");
+        savedIngredientDTO.setQuantite(200.0f);
+        savedIngredientDTO.setUnite("GRAMME");
+        savedDTO.getIngredients().add(savedIngredientDTO);
+
+        when(recetteService.saveFromDTO(any(RecetteDTO.class))).thenReturn(savedRecette);
+        when(recetteMapper.toDTO(savedRecette)).thenReturn(savedDTO);
+
+        // When & Then
+        mockMvc.perform(post("/api/persistance/recettes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(10))
+                .andExpect(jsonPath("$.titre").value("Nouvelle Recette"));
+
+        verify(recetteService, times(1)).saveFromDTO(any(RecetteDTO.class));
     }
 
     @Test

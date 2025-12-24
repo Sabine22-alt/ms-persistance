@@ -23,8 +23,11 @@ public class Ingredient {
     private Recette recette;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "aliment_id", nullable = false, foreignKey = @ForeignKey(name = "fk_ingredient_aliment"))
+    @JoinColumn(name = "aliment_id", foreignKey = @ForeignKey(name = "fk_ingredient_aliment"))
     private Aliment aliment;
+
+    @Column(length = 100)
+    private String nomAliment;
 
     @Column
     private Float quantite;

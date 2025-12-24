@@ -52,8 +52,16 @@ public class RecetteMapper {
     private RecetteDTO.IngredientDTO ingredientToDTO(Ingredient ingredient) {
         RecetteDTO.IngredientDTO dto = new RecetteDTO.IngredientDTO();
         dto.setId(ingredient.getId());
-        dto.setAlimentId(ingredient.getAliment().getId());
-        dto.setAlimentNom(ingredient.getAliment().getNom());
+
+        // Si l'aliment est lié, utiliser ses données
+        if (ingredient.getAliment() != null) {
+            dto.setAlimentId(ingredient.getAliment().getId());
+            dto.setAlimentNom(ingredient.getAliment().getNom());
+        } else {
+            // Sinon, utiliser le nom directement stocké
+            dto.setAlimentNom(ingredient.getNomAliment());
+        }
+
         dto.setQuantite(ingredient.getQuantite());
         dto.setUnite(ingredient.getUnite() != null ? ingredient.getUnite().name() : null);
         dto.setPrincipal(ingredient.getPrincipal());
