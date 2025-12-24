@@ -11,5 +11,10 @@ import lombok.NoArgsConstructor;
 public class AlimentDTO {
     private Long id;
     private String nom;
-    private Aliment.CategorieAliment categorie;
+    private Float calories;
+    private Float proteines;
+    private Float glucides;
+    private Float lipides;
+    private Float fibres;
+    private Aliment.CategorieAliment categorieAliment;
 }

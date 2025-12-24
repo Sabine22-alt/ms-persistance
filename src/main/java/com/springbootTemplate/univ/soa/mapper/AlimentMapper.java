@@ -15,7 +15,12 @@ public class AlimentMapper {
         AlimentDTO dto = new AlimentDTO();
         dto.setId(aliment.getId());
         dto.setNom(aliment.getNom());
-        dto.setCategorie(aliment.getCategorie());
+        dto.setCalories(aliment.getCalories());
+        dto.setProteines(aliment.getProteines());
+        dto.setGlucides(aliment.getGlucides());
+        dto.setLipides(aliment.getLipides());
+        dto.setFibres(aliment.getFibres());
+        dto.setCategorieAliment(aliment.getCategorieAliment());
 
         return dto;
     }
@@ -28,7 +33,12 @@ public class AlimentMapper {
         Aliment aliment = new Aliment();
         aliment.setId(dto.getId());
         aliment.setNom(dto.getNom());
-        aliment.setCategorie(dto.getCategorie());
+        aliment.setCalories(dto.getCalories());
+        aliment.setProteines(dto.getProteines());
+        aliment.setGlucides(dto.getGlucides());
+        aliment.setLipides(dto.getLipides());
+        aliment.setFibres(dto.getFibres());
+        aliment.setCategorieAliment(dto.getCategorieAliment());
 
         return aliment;
     }

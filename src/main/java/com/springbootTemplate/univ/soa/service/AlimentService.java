@@ -40,7 +40,12 @@ public class AlimentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Aliment non trouvé avec l'ID: " + id));
 
         existing.setNom(aliment.getNom());
-        existing.setCategorie(aliment.getCategorie());
+        existing.setCategorieAliment(aliment.getCategorieAliment());
+        existing.setCalories(aliment.getCalories());
+        existing.setProteines(aliment.getProteines());
+        existing.setGlucides(aliment.getGlucides());
+        existing.setLipides(aliment.getLipides());
+        existing.setFibres(aliment.getFibres());
 
         return alimentRepository.save(existing);
     }

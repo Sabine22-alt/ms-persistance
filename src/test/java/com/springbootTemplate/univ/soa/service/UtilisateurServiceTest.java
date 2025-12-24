@@ -43,8 +43,8 @@ class UtilisateurServiceTest {
     void setUp() {
         aliment = new Aliment();
         aliment.setId(1L);
-        aliment.setNom("Arachide");
-        aliment.setCategorie(Aliment.CategorieAliment.GLUTEN);
+        aliment.setNom("Pâtes");
+        aliment.setCategorieAliment(Aliment.CategorieAliment.GLUTEN);
 
         utilisateur = new Utilisateur();
         utilisateur.setId(1L);

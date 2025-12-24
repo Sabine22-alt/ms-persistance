@@ -37,7 +37,7 @@ class AlimentServiceTest {
         aliment = new Aliment();
         aliment.setId(1L);
         aliment.setNom("Tomate");
-        aliment.setCategorie(CategorieAliment.LEGUME);
+        aliment.setCategorieAliment(CategorieAliment.LEGUME);
     }
 
     // ==================== Tests pour findAll() ====================
@@ -49,7 +49,7 @@ class AlimentServiceTest {
         Aliment aliment2 = new Aliment();
         aliment2.setId(2L);
         aliment2.setNom("Carotte");
-        aliment2.setCategorie(CategorieAliment.LEGUME);
+        aliment2.setCategorieAliment(CategorieAliment.LEGUME);
 
         List<Aliment> aliments = Arrays.asList(aliment, aliment2);
         when(alimentRepository.findAll()).thenReturn(aliments);
@@ -94,7 +94,7 @@ class AlimentServiceTest {
         // Then
         assertTrue(result.isPresent());
         assertEquals("Tomate", result.get().getNom());
-        assertEquals(CategorieAliment.LEGUME, result.get().getCategorie());
+        assertEquals(CategorieAliment.LEGUME, result.get().getCategorieAliment());
         verify(alimentRepository, times(1)).findById(1L);
     }
 
@@ -166,12 +166,12 @@ class AlimentServiceTest {
         // Given
         Aliment nouveauAliment = new Aliment();
         nouveauAliment.setNom("Poivron");
-        nouveauAliment.setCategorie(CategorieAliment.LEGUME);
+        nouveauAliment.setCategorieAliment(CategorieAliment.LEGUME);
 
         Aliment alimentSauvegarde = new Aliment();
         alimentSauvegarde.setId(3L);
         alimentSauvegarde.setNom("Poivron");
-        alimentSauvegarde.setCategorie(CategorieAliment.LEGUME);
+        alimentSauvegarde.setCategorieAliment(CategorieAliment.LEGUME);
 
         when(alimentRepository.save(any(Aliment.class))).thenReturn(alimentSauvegarde);
 
@@ -182,7 +182,7 @@ class AlimentServiceTest {
         assertNotNull(result);
         assertNotNull(result.getId());
         assertEquals("Poivron", result.getNom());
-        assertEquals(CategorieAliment.LEGUME, result.getCategorie());
+        assertEquals(CategorieAliment.LEGUME, result.getCategorieAliment());
         assertNull(nouveauAliment.getId()); // Vérifie que l'ID est bien mis à null avant save
         verify(alimentRepository, times(1)).save(any(Aliment.class));
     }
@@ -194,12 +194,12 @@ class AlimentServiceTest {
         Aliment alimentAvecId = new Aliment();
         alimentAvecId.setId(999L); // ID existant
         alimentAvecId.setNom("Courgette");
-        alimentAvecId.setCategorie(CategorieAliment.LEGUME);
+        alimentAvecId.setCategorieAliment(CategorieAliment.LEGUME);
 
         Aliment alimentSauvegarde = new Aliment();
         alimentSauvegarde.setId(4L); // Nouvel ID généré
         alimentSauvegarde.setNom("Courgette");
-        alimentSauvegarde.setCategorie(CategorieAliment.LEGUME);
+        alimentSauvegarde.setCategorieAliment(CategorieAliment.LEGUME);
 
         when(alimentRepository.save(any(Aliment.class))).thenReturn(alimentSauvegarde);
 
@@ -221,7 +221,7 @@ class AlimentServiceTest {
         // Given
         Aliment alimentMisAJour = new Aliment();
         alimentMisAJour.setNom("Tomate cerise");
-        alimentMisAJour.setCategorie(CategorieAliment.FRUIT);
+        alimentMisAJour.setCategorieAliment(CategorieAliment.FRUIT);
 
         when(alimentRepository.findById(1L)).thenReturn(Optional.of(aliment));
         when(alimentRepository.save(any(Aliment.class))).thenReturn(aliment);
@@ -232,7 +232,7 @@ class AlimentServiceTest {
         // Then
         assertNotNull(result);
         assertEquals("Tomate cerise", result.getNom());
-        assertEquals(CategorieAliment.FRUIT, result.getCategorie());
+        assertEquals(CategorieAliment.FRUIT, result.getCategorieAliment());
         verify(alimentRepository, times(1)).findById(1L);
         verify(alimentRepository, times(1)).save(aliment);
     }
@@ -243,7 +243,7 @@ class AlimentServiceTest {
         // Given
         Aliment alimentMisAJour = new Aliment();
         alimentMisAJour.setNom("Inconnu");
-        alimentMisAJour.setCategorie(CategorieAliment.LEGUME);
+        alimentMisAJour.setCategorieAliment(CategorieAliment.LEGUME);
 
         when(alimentRepository.findById(999L)).thenReturn(Optional.empty());
 

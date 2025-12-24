@@ -614,6 +614,88 @@
       }
     },
     {
+      "name": "21. Create Recette with Named Ingredients",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+              "pm.test(\"Response has id and ingredients with aliments created\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.environment.set('recetteWithNamedIngredientsId', jsonData.id);",
+              "    pm.expect(jsonData.ingredients).to.be.an('array').and.not.empty;",
+              "    pm.expect(jsonData.ingredients[0]).to.have.property('alimentNom');",
+              "    pm.expect(['Pâtes', 'Œufs', 'Bacon']).to.include(jsonData.ingredients[0].alimentNom);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"titre\": \"Pâtes Carbonara\", \"description\": \"Recette traditionnelle\", \"tempsTotal\": 30, \"ingredients\": [{\"alimentNom\": \"Pâtes\", \"quantite\": 250, \"unite\": \"GRAMME\"}, {\"alimentNom\": \"Œufs\", \"quantite\": 3, \"unite\": \"UNITE\"}, {\"alimentNom\": \"Bacon\", \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Cuire les pâtes\", \"temps\": 10}, {\"ordre\": 2, \"texte\": \"Mélanger avec les œufs et le bacon\", \"temps\": 5}]}"
+        },
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes"]}
+      }
+    },
+    {
+      "name": "22. Verify Auto-Created Aliments",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Aliments Pâtes, Œufs, Bacon have been created\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    var alimentNames = jsonData.map(a => a.nom);",
+              "    pm.expect(alimentNames).to.include('Pâtes');",
+              "    pm.expect(alimentNames).to.include('Œufs');",
+              "    pm.expect(alimentNames).to.include('Bacon');",
+              "    // Verify auto-created aliments have AUTRE category",
+              "    var pates = jsonData.find(a => a.nom === 'Pâtes');",
+              "    if (pates) pm.expect(pates.categorieAliment).to.equal('AUTRE');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {"raw": "{{baseUrl}}/api/persistance/aliments", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "aliments"]}
+      }
+    },
+    {
+      "name": "Rejeter Recette",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Recette rejetée\", function () { var jsonData = pm.response.json(); pm.expect(jsonData.statut).to.equal('REJETEE'); pm.expect(jsonData.motifRejet).to.be.a('string').and.not.empty; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"motif\": \"Recette incomplète, ingrédients et étapes manquants\"}"},
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes/{{recetteRejectionId}}/rejeter", "host": ["{{baseUrl}}"], "path": ["api","persistance","recettes","{{recetteRejectionId}}","rejeter"]}
+      }
+    },
+    {
       "name": "19. Delete Recette for CRUD",
       "event": [
         {
@@ -671,7 +753,26 @@
       }
     },
     {
-      "name": "22. Delete Aliment",
+      "name": "22. Delete Named Ingredients Recette",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {"raw": "{{baseUrl}}/api/persistance/recettes/{{recetteWithNamedIngredientsId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes", "{{recetteWithNamedIngredientsId}}"]}
+      }
+    },
+    {
+      "name": "23. Delete Aliment",
       "event": [
         {
           "listen": "test",

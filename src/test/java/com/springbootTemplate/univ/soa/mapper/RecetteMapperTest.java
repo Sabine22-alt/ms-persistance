@@ -166,6 +166,34 @@ class RecetteMapperTest {
         assertNull(dto.getIngredients().get(0).getUnite());
     }
 
+    @Test
+    @DisplayName("toDTO - ingrédient sans aliment référencé, devrait utiliser nomAliment")
+    void toDTO_ingredientSansAlimentReference_devraitUtiliserNomAliment() {
+        // Given
+        Ingredient ingredient = new Ingredient();
+        ingredient.setId(1L);
+        ingredient.setAliment(null);  // Pas de référence aliment
+        ingredient.setNomAliment("Sel de mer");  // Nom libre
+        ingredient.setQuantite(5.0f);
+        ingredient.setUnite(Ingredient.Unite.GRAMME);
+
+        Recette recette = new Recette();
+        recette.setId(10L);
+        recette.setTitre("Test");
+        recette.setIngredients(new ArrayList<>(Arrays.asList(ingredient)));
+
+        // When
+        RecetteDTO dto = recetteMapper.toDTO(recette);
+
+        // Then
+        assertNotNull(dto);
+        assertNotNull(dto.getIngredients());
+        RecetteDTO.IngredientDTO ingredientDTO = dto.getIngredients().get(0);
+        assertNull(ingredientDTO.getAlimentId());
+        assertEquals("Sel de mer", ingredientDTO.getAlimentNom()); // Le nom libre est copié dans alimentNom pour compatibilité frontend
+        assertEquals("Sel de mer", ingredientDTO.getNomAliment());
+    }
+
     // ==================== Tests pour toEntity() ====================
 
     @Test

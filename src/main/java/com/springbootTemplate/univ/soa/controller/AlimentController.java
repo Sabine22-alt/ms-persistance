@@ -76,18 +76,18 @@ public class AlimentController {
         }
 
         // Validation : catégorie requise
-        if (dto.getCategorie() == null) {
+        if (dto.getCategorieAliment() == null) {
             return ResponseEntity.badRequest()
                     .body(createErrorResponse("La catégorie est obligatoire"));
         }
 
         // Validation : catégorie valide
         try {
-            Aliment.CategorieAliment.valueOf(dto.getCategorie().name());
+            Aliment.CategorieAliment.valueOf(dto.getCategorieAliment().name());
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(createErrorResponse("Catégorie invalide. Valeurs acceptées: " +
-                            "FRUIT, LEGUME, VIANDE, POISSON, CEREALE, LAITIER, EPICE, GLUTEN"));
+                            "FRUIT, LEGUME, VIANDE, POISSON, CEREALE, LAITIER, EPICE, GLUTEN, AUTRE"));
         }
 
         try {
@@ -140,7 +140,7 @@ public class AlimentController {
         });
 
         // Validation : catégorie requise
-        if (dto.getCategorie() == null) {
+        if (dto.getCategorieAliment() == null) {
             return ResponseEntity.badRequest()
                     .body(createErrorResponse("La catégorie est obligatoire"));
         }

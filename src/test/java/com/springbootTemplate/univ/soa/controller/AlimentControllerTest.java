@@ -51,12 +51,12 @@ class AlimentControllerTest {
         aliment = new Aliment();
         aliment.setId(1L);
         aliment.setNom("Tomate");
-        aliment.setCategorie(Aliment.CategorieAliment.LEGUME);
+        aliment.setCategorieAliment(Aliment.CategorieAliment.LEGUME);
 
         alimentDTO = new AlimentDTO();
         alimentDTO.setId(1L);
         alimentDTO.setNom("Tomate");
-        alimentDTO.setCategorie(Aliment.CategorieAliment.LEGUME);
+        alimentDTO.setCategorieAliment(Aliment.CategorieAliment.LEGUME);
     }
 
     // ==================== Tests pour GET /api/persistance/aliments ====================
@@ -104,7 +104,7 @@ class AlimentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.nom").value("Tomate"))
-                .andExpect(jsonPath("$.categorie").value("LEGUME"));
+                .andExpect(jsonPath("$.categorieAliment").value("LEGUME"));
 
         verify(alimentService, times(1)).findById(1L);
         verify(alimentMapper, times(1)).toDTO(aliment);
@@ -132,21 +132,21 @@ class AlimentControllerTest {
         // Given
         AlimentDTO newDTO = new AlimentDTO();
         newDTO.setNom("Pomme");
-        newDTO.setCategorie(Aliment.CategorieAliment.FRUIT);
+        newDTO.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         Aliment newAliment = new Aliment();
         newAliment.setNom("Pomme");
-        newAliment.setCategorie(Aliment.CategorieAliment.FRUIT);
+        newAliment.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         Aliment savedAliment = new Aliment();
         savedAliment.setId(3L);
         savedAliment.setNom("Pomme");
-        savedAliment.setCategorie(Aliment.CategorieAliment.FRUIT);
+        savedAliment.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         AlimentDTO savedDTO = new AlimentDTO();
         savedDTO.setId(3L);
         savedDTO.setNom("Pomme");
-        savedDTO.setCategorie(Aliment.CategorieAliment.FRUIT);
+        savedDTO.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         when(alimentService.findByNom("Pomme")).thenReturn(Optional.empty());
         when(alimentMapper.toEntity(any(AlimentDTO.class))).thenReturn(newAliment);
@@ -160,7 +160,7 @@ class AlimentControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(3))
                 .andExpect(jsonPath("$.nom").value("Pomme"))
-                .andExpect(jsonPath("$.categorie").value("FRUIT"));
+                .andExpect(jsonPath("$.categorieAliment").value("FRUIT"));
 
         verify(alimentService, times(1)).findByNom("Pomme");
         verify(alimentService, times(1)).save(any(Aliment.class));
@@ -171,7 +171,7 @@ class AlimentControllerTest {
     void createAliment_sansNom_devraitRetourner400() throws Exception {
         // Given
         AlimentDTO dto = new AlimentDTO();
-        dto.setCategorie(Aliment.CategorieAliment.FRUIT);
+        dto.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         // When & Then
         mockMvc.perform(post("/api/persistance/aliments")
@@ -189,7 +189,7 @@ class AlimentControllerTest {
         // Given
         AlimentDTO dto = new AlimentDTO();
         dto.setNom("A");
-        dto.setCategorie(Aliment.CategorieAliment.FRUIT);
+        dto.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         // When & Then
         mockMvc.perform(post("/api/persistance/aliments")
@@ -207,7 +207,7 @@ class AlimentControllerTest {
         // Given
         AlimentDTO dto = new AlimentDTO();
         dto.setNom("Tomate");
-        dto.setCategorie(Aliment.CategorieAliment.LEGUME);
+        dto.setCategorieAliment(Aliment.CategorieAliment.LEGUME);
 
         when(alimentService.findByNom("Tomate")).thenReturn(Optional.of(aliment));
 
@@ -248,17 +248,17 @@ class AlimentControllerTest {
         // Given
         AlimentDTO updateDTO = new AlimentDTO();
         updateDTO.setNom("Tomate cerise");
-        updateDTO.setCategorie(Aliment.CategorieAliment.FRUIT);
+        updateDTO.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         Aliment updatedAliment = new Aliment();
         updatedAliment.setId(1L);
         updatedAliment.setNom("Tomate cerise");
-        updatedAliment.setCategorie(Aliment.CategorieAliment.FRUIT);
+        updatedAliment.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         AlimentDTO updatedDTO = new AlimentDTO();
         updatedDTO.setId(1L);
         updatedDTO.setNom("Tomate cerise");
-        updatedDTO.setCategorie(Aliment.CategorieAliment.FRUIT);
+        updatedDTO.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         when(alimentService.findById(1L)).thenReturn(Optional.of(aliment));
         when(alimentService.findByNom("Tomate cerise")).thenReturn(Optional.empty());
@@ -283,7 +283,7 @@ class AlimentControllerTest {
         // Given
         AlimentDTO dto = new AlimentDTO();
         dto.setNom("Test");
-        dto.setCategorie(Aliment.CategorieAliment.FRUIT);
+        dto.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         when(alimentService.findById(999L)).thenReturn(Optional.empty());
 

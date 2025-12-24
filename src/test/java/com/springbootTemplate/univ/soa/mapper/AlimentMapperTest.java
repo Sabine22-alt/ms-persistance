@@ -27,7 +27,7 @@ class AlimentMapperTest {
         Aliment aliment = new Aliment();
         aliment.setId(1L);
         aliment.setNom("Tomate");
-        aliment.setCategorie(Aliment.CategorieAliment.LEGUME);
+        aliment.setCategorieAliment(Aliment.CategorieAliment.LEGUME);
 
         // When
         AlimentDTO dto = alimentMapper.toDTO(aliment);
@@ -36,7 +36,7 @@ class AlimentMapperTest {
         assertNotNull(dto);
         assertEquals(1L, dto.getId());
         assertEquals("Tomate", dto.getNom());
-        assertEquals(Aliment.CategorieAliment.LEGUME, dto.getCategorie());
+        assertEquals(Aliment.CategorieAliment.LEGUME, dto.getCategorieAliment());
     }
 
     @Test
@@ -55,7 +55,7 @@ class AlimentMapperTest {
         // Given
         Aliment aliment = new Aliment();
         aliment.setNom("Carotte");
-        aliment.setCategorie(Aliment.CategorieAliment.LEGUME);
+        aliment.setCategorieAliment(Aliment.CategorieAliment.LEGUME);
 
         // When
         AlimentDTO dto = alimentMapper.toDTO(aliment);
@@ -75,7 +75,7 @@ class AlimentMapperTest {
         AlimentDTO dto = new AlimentDTO();
         dto.setId(1L);
         dto.setNom("Pomme");
-        dto.setCategorie(Aliment.CategorieAliment.FRUIT);
+        dto.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         // When
         Aliment aliment = alimentMapper.toEntity(dto);
@@ -84,7 +84,7 @@ class AlimentMapperTest {
         assertNotNull(aliment);
         assertEquals(1L, aliment.getId());
         assertEquals("Pomme", aliment.getNom());
-        assertEquals(Aliment.CategorieAliment.FRUIT, aliment.getCategorie());
+        assertEquals(Aliment.CategorieAliment.FRUIT, aliment.getCategorieAliment());
     }
 
     @Test
@@ -103,7 +103,7 @@ class AlimentMapperTest {
         // Given
         AlimentDTO dto = new AlimentDTO();
         dto.setNom("Banane");
-        dto.setCategorie(Aliment.CategorieAliment.FRUIT);
+        dto.setCategorieAliment(Aliment.CategorieAliment.FRUIT);
 
         // When
         Aliment aliment = alimentMapper.toEntity(dto);
@@ -123,7 +123,7 @@ class AlimentMapperTest {
         Aliment original = new Aliment();
         original.setId(5L);
         original.setNom("Poulet");
-        original.setCategorie(Aliment.CategorieAliment.VIANDE);
+        original.setCategorieAliment(Aliment.CategorieAliment.VIANDE);
 
         // When
         AlimentDTO dto = alimentMapper.toDTO(original);
@@ -133,6 +133,6 @@ class AlimentMapperTest {
         assertNotNull(converti);
         assertEquals(original.getId(), converti.getId());
         assertEquals(original.getNom(), converti.getNom());
-        assertEquals(original.getCategorie(), converti.getCategorie());
+        assertEquals(original.getCategorieAliment(), converti.getCategorieAliment());
     }
 }

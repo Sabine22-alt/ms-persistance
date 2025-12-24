@@ -33,7 +33,8 @@ public class RecetteDTO {
     public static class IngredientDTO {
         private Long id;
         private Long alimentId;
-        private String alimentNom;
+        private String alimentNom;  // Nom de l'aliment (depuis référence)
+        private String nomAliment;  // Nom libre de l'aliment (si pas de référence)
         private Float quantite;
         private String unite;
         private Boolean principal;

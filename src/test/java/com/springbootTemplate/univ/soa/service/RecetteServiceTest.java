@@ -46,7 +46,7 @@ class RecetteServiceTest {
         aliment = new Aliment();
         aliment.setId(1L);
         aliment.setNom("Tomate");
-        aliment.setCategorie(Aliment.CategorieAliment.LEGUME);
+        aliment.setCategorieAliment(Aliment.CategorieAliment.LEGUME);
 
         // Ingredient
         ingredient = new Ingredient();
@@ -304,6 +304,117 @@ class RecetteServiceTest {
         verify(recetteRepository, times(1)).save(recette);
     }
 
+    // ==================== Tests pour saveFromDTO() ====================
+
+    @Test
+    @DisplayName("saveFromDTO - avec ingrédient utilisant alimentId, devrait créer la recette")
+    void saveFromDTO_avecIngredientUtilisantAlimentId_devraitCreerRecette() {
+        // Given
+        com.springbootTemplate.univ.soa.dto.RecetteDTO dto = new com.springbootTemplate.univ.soa.dto.RecetteDTO();
+        dto.setTitre("Salade");
+        dto.setDescription("Une bonne salade");
+        dto.setTempsTotal(15);
+
+        com.springbootTemplate.univ.soa.dto.RecetteDTO.IngredientDTO ingredientDTO =
+            new com.springbootTemplate.univ.soa.dto.RecetteDTO.IngredientDTO();
+        ingredientDTO.setAlimentId(1L);
+        ingredientDTO.setQuantite(200.0f);
+        ingredientDTO.setUnite("GRAMME");
+
+        dto.setIngredients(Arrays.asList(ingredientDTO));
+
+        when(alimentRepository.findById(1L)).thenReturn(Optional.of(aliment));
+        when(recetteRepository.save(any(Recette.class))).thenAnswer(i -> {
+            Recette r = i.getArgument(0);
+            r.setId(1L);
+            return r;
+        });
+
+        // When
+        Recette result = recetteService.saveFromDTO(dto);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("Salade", result.getTitre());
+        assertEquals(1, result.getIngredients().size());
+        assertEquals(aliment, result.getIngredients().get(0).getAliment());
+        verify(alimentRepository, times(1)).findById(1L);
+        verify(recetteRepository, times(1)).save(any(Recette.class));
+    }
+
+    @Test
+    @DisplayName("saveFromDTO - avec ingrédient utilisant nomAliment, devrait créer la recette")
+    void saveFromDTO_avecIngredientUtilisantNomAliment_devraitCreerRecette() {
+        // Given
+        com.springbootTemplate.univ.soa.dto.RecetteDTO dto = new com.springbootTemplate.univ.soa.dto.RecetteDTO();
+        dto.setTitre("Salade");
+        dto.setDescription("Une bonne salade");
+        dto.setTempsTotal(15);
+
+        com.springbootTemplate.univ.soa.dto.RecetteDTO.IngredientDTO ingredientDTO =
+            new com.springbootTemplate.univ.soa.dto.RecetteDTO.IngredientDTO();
+        ingredientDTO.setNomAliment("Tomate cerise");  // Pas d'alimentId
+        ingredientDTO.setQuantite(150.0f);
+        ingredientDTO.setUnite("GRAMME");
+
+        dto.setIngredients(Arrays.asList(ingredientDTO));
+
+        // Mock pour la recherche d'aliments existants (aucun trouvé)
+        when(alimentRepository.findAll()).thenReturn(new ArrayList<>());
+
+        // Mock pour la création de l'aliment
+        when(alimentRepository.save(any(Aliment.class))).thenAnswer(i -> {
+            Aliment a = i.getArgument(0);
+            a.setId(99L); // ID généré
+            return a;
+        });
+
+        when(recetteRepository.save(any(Recette.class))).thenAnswer(i -> {
+            Recette r = i.getArgument(0);
+            r.setId(1L);
+            return r;
+        });
+
+        // When
+        Recette result = recetteService.saveFromDTO(dto);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("Salade", result.getTitre());
+        assertEquals(1, result.getIngredients().size());
+        assertNotNull(result.getIngredients().get(0).getAliment()); // L'aliment a été créé
+        assertEquals(99L, result.getIngredients().get(0).getAliment().getId());
+        assertEquals("Tomate cerise", result.getIngredients().get(0).getAliment().getNom());
+        assertEquals("Tomate cerise", result.getIngredients().get(0).getNomAliment());
+        verify(alimentRepository, times(1)).findAll(); // Vérifie la recherche d'aliments existants
+        verify(alimentRepository, times(1)).save(any(Aliment.class)); // Vérifie la création de l'aliment
+        verify(recetteRepository, times(1)).save(any(Recette.class));
+    }
+
+    @Test
+    @DisplayName("saveFromDTO - sans alimentId ni nomAliment, devrait lancer exception")
+    void saveFromDTO_sansAlimentIdNiNomAliment_devraitLancerException() {
+        // Given
+        com.springbootTemplate.univ.soa.dto.RecetteDTO dto = new com.springbootTemplate.univ.soa.dto.RecetteDTO();
+        dto.setTitre("Salade");
+
+        com.springbootTemplate.univ.soa.dto.RecetteDTO.IngredientDTO ingredientDTO =
+            new com.springbootTemplate.univ.soa.dto.RecetteDTO.IngredientDTO();
+        ingredientDTO.setQuantite(150.0f);
+        // Ni alimentId ni nomAliment
+
+        dto.setIngredients(Arrays.asList(ingredientDTO));
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> recetteService.saveFromDTO(dto)
+        );
+
+        assertEquals("L'ID ou le nom de l'aliment est requis pour chaque ingrédient", exception.getMessage());
+        verify(recetteRepository, never()).save(any());
+    }
+
     // ==================== Tests pour deleteById() ====================
 
     @Test
@@ -338,3 +449,4 @@ class RecetteServiceTest {
         verify(recetteRepository, never()).deleteById(any());
     }
 }
+

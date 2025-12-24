@@ -142,14 +142,52 @@ public class RecetteService {
                                     "Aliment non trouvé avec l'ID: " + ingredientDTO.getAlimentId()
                             ));
                     ingredient.setAliment(aliment);
-                } else if (ingredientDTO.getAlimentNom() != null && !ingredientDTO.getAlimentNom().trim().isEmpty()) {
-                    // Sinon, si un nom est fourni, l'utiliser directement
-                    ingredient.setNomAliment(ingredientDTO.getAlimentNom().trim());
                 } else {
-                    // Si ni ID ni nom fourni, erreur
-                    throw new IllegalArgumentException(
-                            "L'ID ou le nom de l'aliment est requis pour chaque ingrédient"
-                    );
+                    // Essayer d'abord alimentNom, sinon nomAliment
+                    final String nomAliment;
+                    if (ingredientDTO.getAlimentNom() != null && !ingredientDTO.getAlimentNom().trim().isEmpty()) {
+                        nomAliment = ingredientDTO.getAlimentNom().trim();
+                    } else if (ingredientDTO.getNomAliment() != null && !ingredientDTO.getNomAliment().trim().isEmpty()) {
+                        nomAliment = ingredientDTO.getNomAliment().trim();
+                    } else {
+                        nomAliment = null;
+                    }
+
+                    if (nomAliment != null) {
+                        // Si un nom est fourni, créer automatiquement l'aliment s'il n'existe pas
+                        // Chercher si l'aliment existe déjà (insensible à la casse)
+                        Optional<Aliment> alimentExistant = alimentRepository.findAll().stream()
+                                .filter(a -> a.getNom().equalsIgnoreCase(nomAliment))
+                                .findFirst();
+
+                        if (alimentExistant.isPresent()) {
+                            // L'aliment existe déjà, l'utiliser
+                            ingredient.setAliment(alimentExistant.get());
+                        } else {
+                            // L'aliment n'existe pas, le créer automatiquement
+                            Aliment nouvelAliment = new Aliment();
+                            nouvelAliment.setNom(nomAliment);
+                            // Valeurs par défaut pour les champs nutritionnels
+                            nouvelAliment.setCalories(0f);
+                            nouvelAliment.setProteines(0f);
+                            nouvelAliment.setGlucides(0f);
+                            nouvelAliment.setLipides(0f);
+                            nouvelAliment.setFibres(0f);
+                            nouvelAliment.setCategorieAliment(Aliment.CategorieAliment.AUTRE);
+
+                            // Sauvegarder le nouvel aliment
+                            Aliment alimentSauvegarde = alimentRepository.save(nouvelAliment);
+                            ingredient.setAliment(alimentSauvegarde);
+                        }
+
+                        // On garde aussi le nom libre pour compatibilité
+                        ingredient.setNomAliment(nomAliment);
+                    } else {
+                        // Si ni ID ni nom fourni, erreur
+                        throw new IllegalArgumentException(
+                                "L'ID ou le nom de l'aliment est requis pour chaque ingrédient"
+                        );
+                    }
                 }
 
                 ingredient.setQuantite(ingredientDTO.getQuantite());
@@ -209,14 +247,52 @@ public class RecetteService {
                                     "Aliment non trouvé avec l'ID: " + ingredientDTO.getAlimentId()
                             ));
                     ingredient.setAliment(aliment);
-                } else if (ingredientDTO.getAlimentNom() != null && !ingredientDTO.getAlimentNom().trim().isEmpty()) {
-                    // Sinon, si un nom est fourni, l'utiliser directement
-                    ingredient.setNomAliment(ingredientDTO.getAlimentNom().trim());
                 } else {
-                    // Si ni ID ni nom fourni, erreur
-                    throw new IllegalArgumentException(
-                            "L'ID ou le nom de l'aliment est requis pour chaque ingrédient"
-                    );
+                    // Essayer d'abord alimentNom, sinon nomAliment
+                    final String nomAliment;
+                    if (ingredientDTO.getAlimentNom() != null && !ingredientDTO.getAlimentNom().trim().isEmpty()) {
+                        nomAliment = ingredientDTO.getAlimentNom().trim();
+                    } else if (ingredientDTO.getNomAliment() != null && !ingredientDTO.getNomAliment().trim().isEmpty()) {
+                        nomAliment = ingredientDTO.getNomAliment().trim();
+                    } else {
+                        nomAliment = null;
+                    }
+
+                    if (nomAliment != null) {
+                        // Si un nom est fourni, créer automatiquement l'aliment s'il n'existe pas
+                        // Chercher si l'aliment existe déjà (insensible à la casse)
+                        Optional<Aliment> alimentExistant = alimentRepository.findAll().stream()
+                                .filter(a -> a.getNom().equalsIgnoreCase(nomAliment))
+                                .findFirst();
+
+                        if (alimentExistant.isPresent()) {
+                            // L'aliment existe déjà, l'utiliser
+                            ingredient.setAliment(alimentExistant.get());
+                        } else {
+                            // L'aliment n'existe pas, le créer automatiquement
+                            Aliment nouvelAliment = new Aliment();
+                            nouvelAliment.setNom(nomAliment);
+                            // Valeurs par défaut pour les champs nutritionnels
+                            nouvelAliment.setCalories(0f);
+                            nouvelAliment.setProteines(0f);
+                            nouvelAliment.setGlucides(0f);
+                            nouvelAliment.setLipides(0f);
+                            nouvelAliment.setFibres(0f);
+                            nouvelAliment.setCategorieAliment(Aliment.CategorieAliment.AUTRE);
+
+                            // Sauvegarder le nouvel aliment
+                            Aliment alimentSauvegarde = alimentRepository.save(nouvelAliment);
+                            ingredient.setAliment(alimentSauvegarde);
+                        }
+
+                        // On garde aussi le nom libre pour compatibilité
+                        ingredient.setNomAliment(nomAliment);
+                    } else {
+                        // Si ni ID ni nom fourni, erreur
+                        throw new IllegalArgumentException(
+                                "L'ID ou le nom de l'aliment est requis pour chaque ingrédient"
+                        );
+                    }
                 }
 
                 ingredient.setQuantite(ingredientDTO.getQuantite());

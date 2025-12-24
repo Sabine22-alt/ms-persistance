@@ -57,10 +57,13 @@ public class RecetteMapper {
         if (ingredient.getAliment() != null) {
             dto.setAlimentId(ingredient.getAliment().getId());
             dto.setAlimentNom(ingredient.getAliment().getNom());
-        } else {
-            // Sinon, utiliser le nom directement stocké
+        } else if (ingredient.getNomAliment() != null && !ingredient.getNomAliment().trim().isEmpty()) {
+            // Si pas de référence mais nom libre, l'utiliser aussi comme alimentNom pour compatibilité frontend
             dto.setAlimentNom(ingredient.getNomAliment());
         }
+
+        // Le nom libre de l'ingrédient (si pas de référence aliment)
+        dto.setNomAliment(ingredient.getNomAliment());
 
         dto.setQuantite(ingredient.getQuantite());
         dto.setUnite(ingredient.getUnite() != null ? ingredient.getUnite().name() : null);
