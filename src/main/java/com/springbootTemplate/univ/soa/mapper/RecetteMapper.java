@@ -29,6 +29,7 @@ public class RecetteMapper {
         dto.setActif(recette.getActif());
         dto.setStatut(recette.getStatut());
         dto.setMotifRejet(recette.getMotifRejet());
+        dto.setUtilisateurId(recette.getUtilisateurId());
 
         if (recette.getIngredients() != null) {
             dto.setIngredients(

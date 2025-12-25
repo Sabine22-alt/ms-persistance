@@ -6,7 +6,6 @@ import com.springbootTemplate.univ.soa.mapper.RecetteMapper;
 import com.springbootTemplate.univ.soa.model.Recette;
 import com.springbootTemplate.univ.soa.model.Recette.StatutRecette;
 import com.springbootTemplate.univ.soa.service.RecetteService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,18 +13,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/persistance/recettes")
 @CrossOrigin(origins = "*")
 public class RecetteController {
 
-    @Autowired
-    private RecetteService recetteService;
+    private final RecetteService recetteService;
+    private final RecetteMapper recetteMapper;
 
-    @Autowired
-    private RecetteMapper recetteMapper;
+    public RecetteController(RecetteService recetteService, RecetteMapper recetteMapper) {
+        this.recetteService = recetteService;
+        this.recetteMapper = recetteMapper;
+    }
 
     /**
      * GET /api/persistance/recettes - Récupérer toutes les recettes
@@ -34,7 +34,7 @@ public class RecetteController {
     public ResponseEntity<List<RecetteDTO>> getAllRecettes() {
         List<RecetteDTO> dtos = recetteService.findAll().stream()
                 .map(recetteMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
         return ResponseEntity.ok(dtos);
     }
 
@@ -45,7 +45,7 @@ public class RecetteController {
     public ResponseEntity<List<RecetteDTO>> getRecettesEnAttente() {
         List<RecetteDTO> dtos = recetteService.findByStatut(StatutRecette.EN_ATTENTE).stream()
                 .map(recetteMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
         return ResponseEntity.ok(dtos);
     }
 
@@ -315,6 +315,31 @@ public class RecetteController {
                     .body(createErrorResponse("Erreur lors de la suppression: " + e.getMessage()));
         }
     }
+
+    /**
+     * GET /api/persistance/recettes/validees - Récupérer recettes validées
+     */
+    @GetMapping("/validees")
+    public ResponseEntity<List<RecetteDTO>> getRecettesValidees() {
+        return ResponseEntity.ok(
+            recetteService.findByStatut(StatutRecette.VALIDEE).stream()
+                .map(recetteMapper::toDTO)
+                .toList()
+        );
+    }
+
+    /**
+     * GET /api/persistance/recettes/rejetees - Récupérer recettes rejetées
+     */
+    @GetMapping("/rejetees")
+    public ResponseEntity<List<RecetteDTO>> getRecettesRejetees() {
+        return ResponseEntity.ok(
+            recetteService.findByStatut(StatutRecette.REJETEE).stream()
+                .map(recetteMapper::toDTO)
+                .toList()
+        );
+    }
+
 
     // Méthode utilitaire
     private Map<String, String> createErrorResponse(String message) {

@@ -56,6 +56,9 @@ public class Recette {
     @Column(name = "motif_rejet", length = 500)
     private String motifRejet;
 
+    @Column(name = "utilisateur_id")
+    private Long utilisateurId;
+
     @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Ingredient> ingredients = new ArrayList<>();
 

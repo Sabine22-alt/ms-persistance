@@ -24,6 +24,7 @@ public class RecetteDTO {
     private Boolean actif;
     private Recette.StatutRecette statut;
     private String motifRejet;
+    private Long utilisateurId;
     private List<IngredientDTO> ingredients;
     private List<EtapeDTO> etapes;
 

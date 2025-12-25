@@ -4,6 +4,7 @@ import com.springbootTemplate.univ.soa.dto.RecetteDTO;
 import com.springbootTemplate.univ.soa.exception.ResourceNotFoundException;
 import com.springbootTemplate.univ.soa.model.*;
 import com.springbootTemplate.univ.soa.repository.AlimentRepository;
+import com.springbootTemplate.univ.soa.repository.NotificationRepository;
 import com.springbootTemplate.univ.soa.repository.RecetteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,9 @@ public class RecetteService {
 
     @Autowired
     private AlimentRepository alimentRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     public List<Recette> findAll() {
         return recetteRepository.findAll();
@@ -129,6 +133,7 @@ public class RecetteService {
         recette.setActif(Boolean.FALSE);
         recette.setStatut(Recette.StatutRecette.EN_ATTENTE);
         recette.setMotifRejet(null);
+        recette.setUtilisateurId(dto.getUtilisateurId());
 
         // Traiter les ingrédients depuis le DTO
         if (dto.getIngredients() != null && !dto.getIngredients().isEmpty()) {
@@ -343,7 +348,21 @@ public class RecetteService {
         recette.setStatut(Recette.StatutRecette.VALIDEE);
         recette.setMotifRejet(null);
 
-        return recetteRepository.save(recette);
+        Recette saved = recetteRepository.save(recette);
+
+        // Créer une notification pour l'utilisateur
+        if (saved.getUtilisateurId() != null) {
+            Notification notification = new Notification();
+            notification.setUtilisateurId(saved.getUtilisateurId());
+            notification.setRecetteId(saved.getId());
+            notification.setRecetteTitre(saved.getTitre());
+            notification.setType(Notification.TypeNotification.VALIDEE);
+            notification.setMessage("Votre recette \"" + saved.getTitre() + "\" a été validée et est maintenant visible par tous !");
+            notification.setLue(false);
+            notificationRepository.save(notification);
+        }
+
+        return saved;
     }
 
     /**
@@ -358,6 +377,64 @@ public class RecetteService {
         recette.setStatut(Recette.StatutRecette.REJETEE);
         recette.setMotifRejet(motif);
 
-        return recetteRepository.save(recette);
+        Recette saved = recetteRepository.save(recette);
+
+        // Créer une notification pour l'utilisateur
+        if (saved.getUtilisateurId() != null) {
+            Notification notification = new Notification();
+            notification.setUtilisateurId(saved.getUtilisateurId());
+            notification.setRecetteId(saved.getId());
+            notification.setRecetteTitre(saved.getTitre());
+            notification.setType(Notification.TypeNotification.REJETEE);
+            notification.setMessage("Votre recette \"" + saved.getTitre() + "\" a été rejetée. Motif : " + motif);
+            notification.setLue(false);
+            notificationRepository.save(notification);
+        }
+
+        return saved;
+    }
+
+    /**
+     * Récupérer toutes les notifications d'un utilisateur
+     */
+    public List<Notification> getNotificationsByUtilisateur(Long utilisateurId) {
+        return notificationRepository.findByUtilisateurIdOrderByDateCreationDesc(utilisateurId);
+    }
+
+    /**
+     * Récupérer les notifications non lues d'un utilisateur
+     */
+    public List<Notification> getNotificationsNonLues(Long utilisateurId) {
+        return notificationRepository.findByUtilisateurIdAndLueOrderByDateCreationDesc(utilisateurId, false);
+    }
+
+    /**
+     * Compter les notifications non lues d'un utilisateur
+     */
+    public long countNotificationsNonLues(Long utilisateurId) {
+        return notificationRepository.countByUtilisateurIdAndLue(utilisateurId, false);
+    }
+
+    /**
+     * Marquer une notification comme lue
+     */
+    @Transactional
+    public Notification marquerNotificationCommeLue(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification non trouvée avec l'ID: " + notificationId));
+
+        notification.setLue(true);
+        return notificationRepository.save(notification);
+    }
+
+    /**
+     * Marquer toutes les notifications d'un utilisateur comme lues
+     */
+    @Transactional
+    public void marquerToutesNotificationsCommeLues(Long utilisateurId) {
+        List<Notification> notifications = notificationRepository.findByUtilisateurIdAndLueOrderByDateCreationDesc(utilisateurId, false);
+        notifications.forEach(n -> n.setLue(true));
+        notificationRepository.saveAll(notifications);
     }
 }
+

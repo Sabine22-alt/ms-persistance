@@ -675,6 +675,142 @@
       }
     },
     {
+      "name": "23. Get Notifications for User 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response is array of notifications\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    if (jsonData.length > 0) {",
+              "        pm.expect(jsonData[0]).to.have.property('id');",
+              "        pm.expect(jsonData[0]).to.have.property('utilisateurId');",
+              "        pm.expect(jsonData[0]).to.have.property('recetteId');",
+              "        pm.expect(jsonData[0]).to.have.property('type');",
+              "        pm.expect(jsonData[0]).to.have.property('message');",
+              "        pm.expect(jsonData[0]).to.have.property('lue');",
+              "        pm.environment.set('notificationId', jsonData[0].id);",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {"raw": "{{baseUrl}}/api/persistance/notifications/utilisateur/1", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "notifications", "utilisateur", "1"]}
+      }
+    },
+    {
+      "name": "24. Get Unread Notifications for User 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"All notifications are unread\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    if (jsonData.length > 0) {",
+              "        jsonData.forEach(function(notification) {",
+              "            pm.expect(notification.lue).to.equal(false);",
+              "        });",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {"raw": "{{baseUrl}}/api/persistance/notifications/utilisateur/1/non-lues", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "notifications", "utilisateur", "1", "non-lues"]}
+      }
+    },
+    {
+      "name": "25. Count Unread Notifications",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response has count property\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('count');",
+              "    pm.expect(jsonData.count).to.be.a('number');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {"raw": "{{baseUrl}}/api/persistance/notifications/utilisateur/1/count", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "notifications", "utilisateur", "1", "count"]}
+      }
+    },
+    {
+      "name": "26. Mark Notification as Read",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.environment.get('notificationId')) {",
+              "    pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "    pm.test(\"Notification marked as read\", function () {",
+              "        var jsonData = pm.response.json();",
+              "        pm.expect(jsonData.lue).to.equal(true);",
+              "    });",
+              "} else {",
+              "    pm.test(\"Skipped - no notification ID available\", function () {",
+              "        pm.expect(true).to.equal(true);",
+              "    });",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {"raw": "{{baseUrl}}/api/persistance/notifications/{{notificationId}}/lire", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "notifications", "{{notificationId}}", "lire"]}
+      }
+    },
+    {
+      "name": "27. Mark All Notifications as Read",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Success message returned\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('message');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {"raw": "{{baseUrl}}/api/persistance/notifications/utilisateur/1/tout-lire", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "notifications", "utilisateur", "1", "tout-lire"]}
+      }
+    },
+    {
       "name": "19. Delete Recette for CRUD",
       "event": [
         {
