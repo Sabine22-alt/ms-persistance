@@ -187,6 +187,9 @@ public class RecetteController {
             Recette saved = recetteService.saveFromDTO(dto);
             RecetteDTO responseDto = recetteMapper.toDTO(saved);
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Erreur lors de la création: " + e.getMessage()));
@@ -267,6 +270,9 @@ public class RecetteController {
             Recette updated = recetteService.updateFromDTO(id, dto);
             RecetteDTO responseDto = recetteMapper.toDTO(updated);
             return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Erreur lors de la mise à jour: " + e.getMessage()));
