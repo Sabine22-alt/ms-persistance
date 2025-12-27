@@ -18,7 +18,7 @@ public class FichierRecetteDTO {
     private Long taille;
     private FichierRecette.TypeFichier type;
     private String urlTelechargement;
+    private String urlStream;
     private Long recetteId;
     private LocalDateTime dateUpload;
 }
-

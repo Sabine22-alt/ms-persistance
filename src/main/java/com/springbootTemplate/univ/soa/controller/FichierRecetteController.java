@@ -1,6 +1,7 @@
 package com.springbootTemplate.univ.soa.controller;
 
 import com.springbootTemplate.univ.soa.dto.FichierRecetteDTO;
+import com.springbootTemplate.univ.soa.model.FichierRecette;
 import com.springbootTemplate.univ.soa.service.FichierRecetteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -153,10 +154,69 @@ public class FichierRecetteController {
         }
     }
 
+    @GetMapping("/images/{fichierId}/content")
+    @Operation(summary = "Servir une image en streaming (inline)")
+    public ResponseEntity<?> streamImage(
+            @PathVariable Long recetteId,
+            @PathVariable Long fichierId) {
+
+        try {
+            FichierRecetteDTO fichier = fichierRecetteService.getFichierById(fichierId);
+
+            if (!fichier.getRecetteId().equals(recetteId) || fichier.getType() != FichierRecette.TypeFichier.IMAGE) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Image non trouvée pour cette recette"));
+            }
+
+            InputStream inputStream = fichierRecetteService.downloadFichier(fichierId);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fichier.getNomOriginal() + "\"");
+            headers.setContentType(MediaType.parseMediaType(fichier.getContentType()));
+
+            return ResponseEntity.ok()
+                .headers(headers)
+                .body(new InputStreamResource(inputStream));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(createErrorResponse("Erreur lors de la récupération de l'image: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{fichierId}/content")
+    @Operation(summary = "Servir un fichier en streaming (inline)")
+    public ResponseEntity<?> streamAny(
+            @PathVariable Long recetteId,
+            @PathVariable Long fichierId) {
+
+        try {
+            FichierRecetteDTO fichier = fichierRecetteService.getFichierById(fichierId);
+
+            if (!fichier.getRecetteId().equals(recetteId)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Fichier non trouvé pour cette recette"));
+            }
+
+            InputStream inputStream = fichierRecetteService.downloadFichier(fichierId);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fichier.getNomOriginal() + "\"");
+            headers.setContentType(MediaType.parseMediaType(fichier.getContentType()));
+
+            return ResponseEntity.ok()
+                .headers(headers)
+                .body(new InputStreamResource(inputStream));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(createErrorResponse("Erreur lors de la récupération du fichier: " + e.getMessage()));
+        }
+    }
+
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> error = new HashMap<>();
         error.put("error", message);
         return error;
     }
 }
-

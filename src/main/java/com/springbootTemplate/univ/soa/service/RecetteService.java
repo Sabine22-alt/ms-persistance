@@ -6,6 +6,7 @@ import com.springbootTemplate.univ.soa.model.*;
 import com.springbootTemplate.univ.soa.repository.AlimentRepository;
 import com.springbootTemplate.univ.soa.repository.NotificationRepository;
 import com.springbootTemplate.univ.soa.repository.RecetteRepository;
+import com.springbootTemplate.univ.soa.repository.UtilisateurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,9 @@ public class RecetteService {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
 
     public List<Recette> findAll() {
         return recetteRepository.findAll();
@@ -145,7 +149,7 @@ public class RecetteService {
         // LOG DEBUG : Vérifier que utilisateurId est bien set
         System.out.println("🔍 DEBUG saveFromDTO - utilisateurId set dans recette: " + recette.getUtilisateurId());
 
-        // Traiter les ingrédients depuis le DTO
+        // Valider et traiter les ingrédients depuis le DTO AVANT de sauvegarder
         if (dto.getIngredients() != null && !dto.getIngredients().isEmpty()) {
             for (RecetteDTO.IngredientDTO ingredientDTO : dto.getIngredients()) {
                 Ingredient ingredient = new Ingredient();
@@ -224,10 +228,33 @@ public class RecetteService {
             }
         }
 
+        // Sauvegarder la recette après validation des ingrédients/étapes
         Recette saved = recetteRepository.save(recette);
 
         // LOG DEBUG : Vérifier que utilisateurId est persisté
         System.out.println("✅ DEBUG saveFromDTO - Recette sauvegardée avec utilisateurId: " + saved.getUtilisateurId());
+
+        // Notifier tous les admins qu'une recette est en attente de validation
+        try {
+            if (utilisateurRepository != null && notificationRepository != null) {
+                List<Utilisateur> admins = utilisateurRepository.findByRole(Utilisateur.Role.ADMIN);
+                if (admins != null && !admins.isEmpty()) {
+                    for (Utilisateur admin : admins) {
+                        Notification notification = new Notification();
+                        notification.setUtilisateurId(admin.getId());
+                        notification.setRecetteId(saved.getId());
+                        notification.setRecetteTitre(saved.getTitre());
+                        notification.setType(Notification.TypeNotification.EN_ATTENTE);
+                        notification.setMessage("Une nouvelle recette \"" + saved.getTitre() + "\" est en attente de validation.");
+                        notification.setLue(false);
+                        notificationRepository.save(notification);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // En cas d'erreur de notification, on ne bloque pas la création de la recette
+            System.err.println("⚠️ Erreur lors de l'envoi des notifications admin: " + e.getMessage());
+        }
 
         return saved;
     }

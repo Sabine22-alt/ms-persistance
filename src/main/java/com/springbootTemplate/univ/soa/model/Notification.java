@@ -47,7 +47,7 @@ public class Notification {
 
     public enum TypeNotification {
         VALIDEE,
-        REJETEE
+        REJETEE,
+        EN_ATTENTE
     }
 }
-

@@ -68,10 +68,12 @@ public class FichierRecetteService {
         fichier = fichierRecetteRepository.save(fichier);
 
         String imageUrl = minioService.getPublicUrl(minioService.getRecettesBucket(), objectPath);
-        recette.setImageUrl(imageUrl);
+        // URL backend (stream) pour éviter la dépendance directe à MinIO côté front
+        String streamUrl = String.format("/api/persistance/recettes/%d/fichiers/images/%d/content", recetteId, fichier.getId());
+        recette.setImageUrl(streamUrl);
         recetteRepository.save(recette);
 
-        System.out.println("✅ Image uploadée et imageUrl mise à jour: " + imageUrl);
+        System.out.println("✅ Image uploadée; imageUrl (stream) mise à jour: " + streamUrl + " | public: " + imageUrl);
 
         return toDTO(fichier);
     }
@@ -187,8 +189,8 @@ public class FichierRecetteService {
             ? minioService.getRecettesBucket()
             : minioService.getDocumentsBucket();
         dto.setUrlTelechargement(minioService.getPresignedUrl(bucketName, fichier.getCheminMinio()));
+        dto.setUrlStream(String.format("/api/persistance/recettes/%d/fichiers/images/%d/content", fichier.getRecette().getId(), fichier.getId()));
 
         return dto;
     }
 }
-
