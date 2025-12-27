@@ -77,5 +77,16 @@ public class NotificationController {
         response.put("message", "Toutes les notifications ont été marquées comme lues");
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * DELETE /api/persistance/notifications/{id} - Supprimer une notification
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deleteNotification(@PathVariable Long id) {
+        recetteService.deleteNotification(id);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Notification supprimée avec succès");
+        return ResponseEntity.ok(response);
+    }
 }
 

@@ -133,6 +133,11 @@ public class RecetteService {
         // LOG DEBUG : Vérifier si utilisateurId est reçu
         System.out.println("🔍 DEBUG saveFromDTO - utilisateurId reçu: " + dto.getUtilisateurId());
 
+        // Validation précoce: au moins un ingrédient requis
+        if (dto.getIngredients() == null || dto.getIngredients().isEmpty()) {
+            throw new IllegalArgumentException("Au moins un ingrédient est requis pour créer une recette");
+        }
+
         Recette recette = new Recette();
         recette.setTitre(dto.getTitre());
         recette.setDescription(dto.getDescription());
@@ -146,12 +151,17 @@ public class RecetteService {
         recette.setMotifRejet(null);
         recette.setUtilisateurId(dto.getUtilisateurId());
 
-        // LOG DEBUG : Vérifier que utilisateurId est bien set
         System.out.println("🔍 DEBUG saveFromDTO - utilisateurId set dans recette: " + recette.getUtilisateurId());
 
-        // Valider et traiter les ingrédients depuis le DTO AVANT de sauvegarder
         if (dto.getIngredients() != null && !dto.getIngredients().isEmpty()) {
             for (RecetteDTO.IngredientDTO ingredientDTO : dto.getIngredients()) {
+                boolean hasNom = (ingredientDTO.getAlimentNom() != null && !ingredientDTO.getAlimentNom().trim().isEmpty())
+                        || (ingredientDTO.getNomAliment() != null && !ingredientDTO.getNomAliment().trim().isEmpty());
+                boolean hasId = ingredientDTO.getAlimentId() != null;
+                if (!hasNom && !hasId) {
+                    throw new IllegalArgumentException("L'ID ou le nom de l'aliment est requis pour chaque ingrédient");
+                }
+
                 Ingredient ingredient = new Ingredient();
 
                 // Essayer d'abord alimentNom, sinon nomAliment, sinon alimentId
@@ -470,5 +480,15 @@ public class RecetteService {
         notifications.forEach(n -> n.setLue(true));
         notificationRepository.saveAll(notifications);
     }
-}
 
+    /**
+     * Supprimer une notification par ID
+     */
+    @Transactional
+    public void deleteNotification(Long id) {
+        if (!notificationRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Notification non trouvée avec l'ID: " + id);
+        }
+        notificationRepository.deleteById(id);
+    }
+}
