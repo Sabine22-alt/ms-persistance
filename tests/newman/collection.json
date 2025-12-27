@@ -588,7 +588,7 @@
       "request": {
         "method": "POST",
         "header": [{"key": "Content-Type", "value": "application/json"}],
-        "body": {"mode": "raw", "raw": "{\"titre\": \"Recette incomplète\", \"ingredients\": [], \"etapes\": []}"},
+        "body": {"mode": "raw", "raw": "{\"titre\": \"Recette à rejeter\", \"description\": \"Recette de test pour rejeter\", \"ingredients\": [{\"alimentNom\": \"Farine\", \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Mélanger tous les ingrédients\", \"temps\": 5}]}"},
         "url": {"raw": "{{baseUrl}}/api/persistance/recettes", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes"]}
       }
     },
