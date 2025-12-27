@@ -4,12 +4,17 @@ import com.springbootTemplate.univ.soa.dto.RecetteDTO;
 import com.springbootTemplate.univ.soa.model.Etape;
 import com.springbootTemplate.univ.soa.model.Ingredient;
 import com.springbootTemplate.univ.soa.model.Recette;
+import com.springbootTemplate.univ.soa.service.MinioService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
 @Component
 public class RecetteMapper {
+
+    @Autowired
+    private MinioService minioService;
 
     public RecetteDTO toDTO(Recette recette) {
         if (recette == null) {
@@ -22,7 +27,25 @@ public class RecetteMapper {
         dto.setDescription(recette.getDescription());
         dto.setTempsTotal(recette.getTempsTotal());
         dto.setKcal(recette.getKcal());
-        dto.setImageUrl(recette.getImageUrl());
+
+        if (recette.getImageUrl() != null && !recette.getImageUrl().isEmpty()) {
+            if (recette.getImageUrl().startsWith("http://") || recette.getImageUrl().startsWith("https://")) {
+                dto.setImageUrl(recette.getImageUrl());
+            } else {
+                try {
+                    String presignedUrl = minioService.getPresignedUrl(
+                        minioService.getRecettesBucket(),
+                        recette.getImageUrl()
+                    );
+                    dto.setImageUrl(presignedUrl);
+                } catch (Exception e) {
+                    dto.setImageUrl(recette.getImageUrl());
+                }
+            }
+        } else {
+            dto.setImageUrl(null);
+        }
+
         dto.setDifficulte(recette.getDifficulte());
         dto.setDateCreation(recette.getDateCreation());
         dto.setDateModification(recette.getDateModification());
@@ -59,11 +82,8 @@ public class RecetteMapper {
             dto.setAlimentId(ingredient.getAliment().getId());
             dto.setAlimentNom(ingredient.getAliment().getNom());
         } else if (ingredient.getNomAliment() != null && !ingredient.getNomAliment().trim().isEmpty()) {
-            // Si pas de référence mais nom libre, l'utiliser aussi comme alimentNom pour compatibilité frontend
             dto.setAlimentNom(ingredient.getNomAliment());
         }
-
-        // Le nom libre de l'ingrédient (si pas de référence aliment)
         dto.setNomAliment(ingredient.getNomAliment());
 
         dto.setQuantite(ingredient.getQuantite());

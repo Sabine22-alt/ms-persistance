@@ -67,6 +67,12 @@ public class FichierRecetteService {
 
         fichier = fichierRecetteRepository.save(fichier);
 
+        String imageUrl = minioService.getPublicUrl(minioService.getRecettesBucket(), objectPath);
+        recette.setImageUrl(imageUrl);
+        recetteRepository.save(recette);
+
+        System.out.println("✅ Image uploadée et imageUrl mise à jour: " + imageUrl);
+
         return toDTO(fichier);
     }
 

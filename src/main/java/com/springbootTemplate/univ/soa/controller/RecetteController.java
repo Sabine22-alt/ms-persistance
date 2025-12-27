@@ -50,6 +50,17 @@ public class RecetteController {
     }
 
     /**
+     * GET /api/persistance/recettes/utilisateur/{utilisateurId} - Récupérer les recettes d'un utilisateur
+     */
+    @GetMapping("/utilisateur/{utilisateurId}")
+    public ResponseEntity<List<RecetteDTO>> getRecettesByUtilisateur(@PathVariable Long utilisateurId) {
+        List<RecetteDTO> dtos = recetteService.findByUtilisateurId(utilisateurId).stream()
+                .map(recetteMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
      * GET /api/persistance/recettes/{id} - Récupérer une recette par ID
      */
     @GetMapping("/{id}")

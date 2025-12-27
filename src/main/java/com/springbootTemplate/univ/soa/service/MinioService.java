@@ -23,6 +23,23 @@ public class MinioService {
     @Value("${minio.bucket.documents}")
     private String documentsBucket;
 
+    @Value("${minio.endpoint}")
+    private String minioEndpoint;
+
+    @Value("${minio.public-url}")
+    private String minioPublicUrl;
+
+    /**
+     * Génère l'URL publique d'un objet MinIO
+     * Format: http://localhost:9002/bucket-name/object-path
+     * @param bucketName le nom du bucket
+     * @param objectPath le chemin de l'objet dans le bucket
+     * @return l'URL publique complète
+     */
+    public String getPublicUrl(String bucketName, String objectPath) {
+        return String.format("%s/%s/%s", minioPublicUrl, bucketName, objectPath);
+    }
+
     public String uploadFile(MultipartFile file, String bucketName, String objectName) {
         try {
             InputStream inputStream = file.getInputStream();

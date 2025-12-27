@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface RecetteRepository extends JpaRepository<Recette, Long> {
     List<Recette> findByStatut(StatutRecette statut);
+    List<Recette> findByUtilisateurId(Long utilisateurId);
+    List<Recette> findByUtilisateurIdOrderByDateCreationDesc(Long utilisateurId);
 }

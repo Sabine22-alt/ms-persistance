@@ -359,8 +359,8 @@ class RecetteServiceTest {
 
         dto.setIngredients(Arrays.asList(ingredientDTO));
 
-        // Mock pour la recherche d'aliments existants (aucun trouvé)
-        when(alimentRepository.findAll()).thenReturn(new ArrayList<>());
+        // Mock pour la recherche d'aliments existants (aucun trouvé avec findByNomIgnoreCase)
+        when(alimentRepository.findByNomIgnoreCase("Tomate cerise")).thenReturn(Optional.empty());
 
         // Mock pour la création de l'aliment
         when(alimentRepository.save(any(Aliment.class))).thenAnswer(i -> {
@@ -386,7 +386,7 @@ class RecetteServiceTest {
         assertEquals(99L, result.getIngredients().get(0).getAliment().getId());
         assertEquals("Tomate cerise", result.getIngredients().get(0).getAliment().getNom());
         assertEquals("Tomate cerise", result.getIngredients().get(0).getNomAliment());
-        verify(alimentRepository, times(1)).findAll(); // Vérifie la recherche d'aliments existants
+        verify(alimentRepository, times(1)).findByNomIgnoreCase("Tomate cerise"); // Vérifie la recherche optimisée
         verify(alimentRepository, times(1)).save(any(Aliment.class)); // Vérifie la création de l'aliment
         verify(recetteRepository, times(1)).save(any(Recette.class));
     }
@@ -413,6 +413,52 @@ class RecetteServiceTest {
 
         assertEquals("L'ID ou le nom de l'aliment est requis pour chaque ingrédient", exception.getMessage());
         verify(recetteRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("saveFromDTO - avec alimentNom existant, devrait réutiliser l'aliment (optimisation)")
+    void saveFromDTO_avecAlimentNomExistant_devraitReutiliserAliment() {
+        // Given
+        com.springbootTemplate.univ.soa.dto.RecetteDTO dto = new com.springbootTemplate.univ.soa.dto.RecetteDTO();
+        dto.setTitre("Salade aux tomates");
+
+        com.springbootTemplate.univ.soa.dto.RecetteDTO.IngredientDTO ingredientDTO =
+            new com.springbootTemplate.univ.soa.dto.RecetteDTO.IngredientDTO();
+        ingredientDTO.setAlimentNom("Tomate");
+        ingredientDTO.setQuantite(100.0f);
+
+        dto.setIngredients(Arrays.asList(ingredientDTO));
+
+        // Aliment existant en base
+        Aliment alimentExistant = new Aliment();
+        alimentExistant.setId(50L);
+        alimentExistant.setNom("Tomate");
+        alimentExistant.setCalories(20f);
+        alimentExistant.setCategorieAliment(Aliment.CategorieAliment.LEGUME);
+
+        // Mock: L'aliment existe déjà (findByNomIgnoreCase le trouve)
+        when(alimentRepository.findByNomIgnoreCase("Tomate")).thenReturn(Optional.of(alimentExistant));
+
+        when(recetteRepository.save(any(Recette.class))).thenAnswer(i -> {
+            Recette r = i.getArgument(0);
+            r.setId(1L);
+            return r;
+        });
+
+        // When
+        Recette result = recetteService.saveFromDTO(dto);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.getIngredients().size());
+        assertEquals(50L, result.getIngredients().get(0).getAliment().getId()); // Réutilise l'ID existant
+        assertEquals("Tomate", result.getIngredients().get(0).getAliment().getNom());
+        assertEquals(Aliment.CategorieAliment.LEGUME, result.getIngredients().get(0).getAliment().getCategorieAliment());
+
+        // Vérifications importantes: l'aliment N'a PAS été créé
+        verify(alimentRepository, times(1)).findByNomIgnoreCase("Tomate"); // Recherche optimisée
+        verify(alimentRepository, never()).save(any(Aliment.class)); // Pas de création d'aliment
+        verify(recetteRepository, times(1)).save(any(Recette.class));
     }
 
     // ==================== Tests pour deleteById() ====================
