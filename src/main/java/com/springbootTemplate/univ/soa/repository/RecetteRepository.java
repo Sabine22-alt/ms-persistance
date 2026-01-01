@@ -14,19 +14,19 @@ import java.util.Optional;
 @Repository
 public interface RecetteRepository extends JpaRepository<Recette, Long> {
 
-    @EntityGraph(attributePaths = {"ingredients", "etapes", "feedbacks"})
+    @EntityGraph(attributePaths = {"ingredients", "etapes"})
     @Query("SELECT DISTINCT r FROM Recette r ORDER BY r.dateCreation DESC")
     List<Recette> findAllOptimized();
 
-    @EntityGraph(attributePaths = {"ingredients", "etapes", "feedbacks"})
+    @EntityGraph(attributePaths = {"ingredients", "etapes"})
     @Query("SELECT DISTINCT r FROM Recette r WHERE r.statut = :statut ORDER BY r.dateCreation DESC")
     List<Recette> findByStatutOptimized(@Param("statut") StatutRecette statut);
 
-    @EntityGraph(attributePaths = {"ingredients", "etapes", "feedbacks"})
+    @EntityGraph(attributePaths = {"ingredients", "etapes"})
     @Query("SELECT DISTINCT r FROM Recette r WHERE r.utilisateurId = :utilisateurId ORDER BY r.dateCreation DESC")
     List<Recette> findByUtilisateurIdOptimized(@Param("utilisateurId") Long utilisateurId);
 
-    @EntityGraph(attributePaths = {"ingredients", "etapes", "feedbacks"})
+    @EntityGraph(attributePaths = {"ingredients", "etapes"})
     @Query("SELECT r FROM Recette r WHERE r.id = :id")
     Optional<Recette> findByIdOptimized(@Param("id") Long id);
 
