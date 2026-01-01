@@ -8,6 +8,7 @@ import com.springbootTemplate.univ.soa.model.Recette.StatutRecette;
 import com.springbootTemplate.univ.soa.service.RecetteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -31,6 +32,7 @@ public class RecetteController {
      * GET /api/persistance/recettes - Récupérer toutes les recettes
      */
     @GetMapping
+    @Transactional(readOnly = true)
     public ResponseEntity<List<RecetteDTO>> getAllRecettes() {
         List<RecetteDTO> dtos = recetteService.findAll().stream()
                 .map(recetteMapper::toDTO)
@@ -42,6 +44,7 @@ public class RecetteController {
      * GET /api/persistance/recettes/en-attente - Récupérer recettes en attente de validation
      */
     @GetMapping("/en-attente")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<RecetteDTO>> getRecettesEnAttente() {
         List<RecetteDTO> dtos = recetteService.findByStatut(StatutRecette.EN_ATTENTE).stream()
                 .map(recetteMapper::toDTO)
@@ -53,6 +56,7 @@ public class RecetteController {
      * GET /api/persistance/recettes/utilisateur/{utilisateurId} - Récupérer les recettes d'un utilisateur
      */
     @GetMapping("/utilisateur/{utilisateurId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<RecetteDTO>> getRecettesByUtilisateur(@PathVariable Long utilisateurId) {
         List<RecetteDTO> dtos = recetteService.findByUtilisateurId(utilisateurId).stream()
                 .map(recetteMapper::toDTO)
@@ -64,6 +68,7 @@ public class RecetteController {
      * GET /api/persistance/recettes/{id} - Récupérer une recette par ID
      */
     @GetMapping("/{id}")
+    @Transactional(readOnly = true)
     public ResponseEntity<RecetteDTO> getRecetteById(@PathVariable Long id) {
         return recetteService.findById(id)
                 .map(recetteMapper::toDTO)

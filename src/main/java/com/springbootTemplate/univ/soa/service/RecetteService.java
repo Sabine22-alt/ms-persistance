@@ -29,20 +29,26 @@ public class RecetteService {
     @Autowired
     private UtilisateurRepository utilisateurRepository;
 
+    @Autowired
+    private ActiviteService activiteService;
+
     public List<Recette> findAll() {
-        return recetteRepository.findAll();
+        return recetteRepository.findAllOptimized();
     }
 
+    @Transactional(readOnly = true)
     public Optional<Recette> findById(Long id) {
-        return recetteRepository.findById(id);
+        return recetteRepository.findByIdOptimized(id);
     }
 
+    @Transactional(readOnly = true)
     public List<Recette> findByStatut(Recette.StatutRecette statut) {
-        return recetteRepository.findByStatut(statut);
+        return recetteRepository.findByStatutOptimized(statut);
     }
 
+    @Transactional(readOnly = true)
     public List<Recette> findByUtilisateurId(Long utilisateurId) {
-        return recetteRepository.findByUtilisateurIdOrderByDateCreationDesc(utilisateurId);
+        return recetteRepository.findByUtilisateurIdOptimized(utilisateurId);
     }
 
     @Transactional
@@ -243,6 +249,15 @@ public class RecetteService {
 
         // LOG DEBUG : Vérifier que utilisateurId est persisté
         System.out.println("✅ DEBUG saveFromDTO - Recette sauvegardée avec utilisateurId: " + saved.getUtilisateurId());
+
+        // Logger l'activité
+        if (saved.getUtilisateurId() != null) {
+            activiteService.logActivite(
+                saved.getUtilisateurId(),
+                Activite.TypeActivite.RECETTE_CREEE,
+                "Recette créée : " + saved.getTitre()
+            );
+        }
 
         // Notifier tous les admins qu'une recette est en attente de validation
         try {

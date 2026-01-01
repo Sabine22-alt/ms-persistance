@@ -53,6 +53,7 @@ public class RecetteMapper {
         dto.setStatut(recette.getStatut());
         dto.setMotifRejet(recette.getMotifRejet());
         dto.setUtilisateurId(recette.getUtilisateurId());
+        dto.setMoyenneEvaluation(recette.getMoyenneEvaluation());
 
         if (recette.getIngredients() != null) {
             dto.setIngredients(

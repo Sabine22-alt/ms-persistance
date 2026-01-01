@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
-@Table(name = "ingredients")
+@Table(name = "ingredients", indexes = {
+    @Index(name = "idx_ingredients_recette_id", columnList = "recette_id")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

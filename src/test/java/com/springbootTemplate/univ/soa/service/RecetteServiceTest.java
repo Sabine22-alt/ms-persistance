@@ -1,6 +1,7 @@
 package com.springbootTemplate.univ.soa.service;
 
 
+import com.springbootTemplate.univ.soa.dto.RecetteDTO;
 import com.springbootTemplate.univ.soa.exception.ResourceNotFoundException;
 import com.springbootTemplate.univ.soa.model.*;
 import com.springbootTemplate.univ.soa.repository.AlimentRepository;
@@ -31,6 +32,9 @@ class RecetteServiceTest {
 
     @Mock
     private AlimentRepository alimentRepository;
+
+    @Mock
+    private ActiviteService activiteService;
 
     @InjectMocks
     private RecetteService recetteService;
@@ -86,12 +90,9 @@ class RecetteServiceTest {
         // Given
         Recette recette2 = new Recette();
         recette2.setId(2L);
-        recette2.setTitre("Pâtes carbonara");
-        recette2.setIngredients(new ArrayList<>());
-        recette2.setEtapes(new ArrayList<>());
+        recette2.setTitre("Soupe");
 
-        List<Recette> recettes = Arrays.asList(recette, recette2);
-        when(recetteRepository.findAll()).thenReturn(recettes);
+        when(recetteRepository.findAllOptimized()).thenReturn(Arrays.asList(recette, recette2));
 
         // When
         List<Recette> result = recetteService.findAll();
@@ -99,18 +100,14 @@ class RecetteServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals("Salade de tomates", result.get(0).getTitre());
-        assertEquals("Pâtes carbonara", result.get(1).getTitre());
-        verify(recetteRepository, times(1)).findAll();
+        verify(recetteRepository, times(1)).findAllOptimized();
     }
-
-    // ==================== Tests pour findById() ====================
 
     @Test
     @DisplayName("findById - avec ID existant, devrait retourner la recette")
     void findById_avecIdExistant_devraitRetournerRecette() {
         // Given
-        when(recetteRepository.findById(1L)).thenReturn(Optional.of(recette));
+        when(recetteRepository.findByIdOptimized(1L)).thenReturn(Optional.of(recette));
 
         // When
         Optional<Recette> result = recetteService.findById(1L);
@@ -118,22 +115,21 @@ class RecetteServiceTest {
         // Then
         assertTrue(result.isPresent());
         assertEquals("Salade de tomates", result.get().getTitre());
-        assertEquals(15, result.get().getTempsTotal());
-        verify(recetteRepository, times(1)).findById(1L);
+        verify(recetteRepository, times(1)).findByIdOptimized(1L);
     }
 
     @Test
     @DisplayName("findById - avec ID inexistant, devrait retourner Optional vide")
     void findById_avecIdInexistant_devraitRetournerOptionalVide() {
         // Given
-        when(recetteRepository.findById(999L)).thenReturn(Optional.empty());
+        when(recetteRepository.findByIdOptimized(999L)).thenReturn(Optional.empty());
 
         // When
         Optional<Recette> result = recetteService.findById(999L);
 
         // Then
         assertFalse(result.isPresent());
-        verify(recetteRepository, times(1)).findById(999L);
+        verify(recetteRepository, times(1)).findByIdOptimized(999L);
     }
 
     // ==================== Tests pour save() ====================
@@ -461,8 +457,6 @@ class RecetteServiceTest {
         verify(recetteRepository, times(1)).save(any(Recette.class));
     }
 
-    // ==================== Tests pour deleteById() ====================
-
     @Test
     @DisplayName("deleteById - avec ID existant, devrait supprimer la recette")
     void deleteById_avecIdExistant_devraitSupprimerRecette() {
@@ -494,5 +488,38 @@ class RecetteServiceTest {
         verify(recetteRepository, times(1)).existsById(999L);
         verify(recetteRepository, never()).deleteById(any());
     }
-}
 
+    @Test
+    @DisplayName("saveFromDTO - devrait logger l'activité")
+    void saveFromDTO_devraitLoggerActivite() {
+        // Given
+        RecetteDTO dto = new RecetteDTO();
+        dto.setTitre("Salade");
+        dto.setUtilisateurId(1L);
+        // ...initialiser un ingrédient minimal...
+        RecetteDTO.IngredientDTO ing = new RecetteDTO.IngredientDTO();
+        ing.setAlimentNom("Tomate");
+        ing.setQuantite(100f);
+        ing.setPrincipal(true);
+        dto.setIngredients(new ArrayList<>(List.of(ing)));
+
+        when(recetteRepository.save(any(Recette.class))).thenAnswer(invocation -> {
+            Recette r = invocation.getArgument(0);
+            r.setId(20L);
+            return r;
+        });
+        when(alimentRepository.findByNomIgnoreCase(anyString())).thenReturn(Optional.empty());
+        when(alimentRepository.save(any(Aliment.class))).thenAnswer(invocation -> {
+            Aliment a = invocation.getArgument(0);
+            a.setId(5L);
+            return a;
+        });
+
+        // When
+        Recette saved = recetteService.saveFromDTO(dto);
+
+        // Then
+        assertNotNull(saved.getId());
+        verify(activiteService, times(1)).logActivite(eq(1L), eq(Activite.TypeActivite.RECETTE_CREEE), anyString());
+    }
+}

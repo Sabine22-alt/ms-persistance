@@ -4,13 +4,19 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "recettes")
+@Table(name = "recettes", indexes = {
+    @Index(name = "idx_recettes_utilisateur_id", columnList = "utilisateur_id"),
+    @Index(name = "idx_recettes_statut", columnList = "statut"),
+    @Index(name = "idx_recettes_date_creation", columnList = "date_creation")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -59,17 +65,24 @@ public class Recette {
     @Column(name = "utilisateur_id")
     private Long utilisateurId;
 
+    @Column(name = "moyenne_evaluation")
+    private Double moyenneEvaluation = 0.0; // Dénormalisée pour perf
+
     @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SUBSELECT)
     private List<Ingredient> ingredients = new ArrayList<>();
 
     @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("ordre ASC")
+    @Fetch(FetchMode.SUBSELECT)
     private List<Etape> etapes = new ArrayList<>();
 
     @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SUBSELECT)
     private List<Feedback> feedbacks = new ArrayList<>();
 
     @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SUBSELECT)
     private List<FichierRecette> fichiers = new ArrayList<>();
 
     @PrePersist

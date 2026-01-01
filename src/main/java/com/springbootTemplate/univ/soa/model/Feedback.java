@@ -9,7 +9,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "feedbacks")
+@Table(name = "feedbacks", indexes = {
+    @Index(name = "idx_feedbacks_recette_id", columnList = "recette_id"),
+    @Index(name = "idx_feedbacks_recette_evaluation", columnList = "recette_id,evaluation")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,7 +33,7 @@ public class Feedback {
     private Recette recette;
 
     @Column(nullable = false)
-    private Integer evaluation; // 1 à 5
+    private Integer evaluation;
 
     @Column(columnDefinition = "TEXT")
     private String commentaire;
