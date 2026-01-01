@@ -384,7 +384,18 @@ public class RecetteService {
             }
         }
 
-        return recetteRepository.save(existing);
+        Recette saved = recetteRepository.save(existing);
+
+        // Enregistrer l'activité de modification
+        if (saved.getUtilisateurId() != null) {
+            activiteService.logActivite(
+                saved.getUtilisateurId(),
+                Activite.TypeActivite.RECETTE_MODIFIEE,
+                "Recette modifiée : " + saved.getTitre()
+            );
+        }
+
+        return saved;
     }
 
     @Transactional

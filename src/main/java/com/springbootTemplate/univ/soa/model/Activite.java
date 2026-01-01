@@ -46,9 +46,15 @@ public class Activite {
         RECETTE_CREEE,
         RECETTE_VALIDEE,
         RECETTE_REJETEE,
+        RECETTE_MODIFIEE,
         FEEDBACK_AJOUT,
         FEEDBACK_MODIFIE,
+        FEEDBACK_SUPPRIME,
         REPAS_PLANIFIE,
+        REPAS_MODIFIE,
+        REPAS_SUPPRIME,
+        FAVORI_AJOUT,
+        FAVORI_SUPPRIME,
         UTILISATEUR_INSCRIT,
         PROFIL_MODIFIE
     }

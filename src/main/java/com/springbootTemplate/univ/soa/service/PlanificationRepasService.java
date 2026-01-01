@@ -1,6 +1,7 @@
 package com.springbootTemplate.univ.soa.service;
 
 import com.springbootTemplate.univ.soa.exception.ResourceNotFoundException;
+import com.springbootTemplate.univ.soa.model.Activite;
 import com.springbootTemplate.univ.soa.model.PlanificationRepas;
 import com.springbootTemplate.univ.soa.model.PlanificationJour;
 import com.springbootTemplate.univ.soa.model.RepasPlannifie;
@@ -17,6 +18,9 @@ public class PlanificationRepasService {
 
     @Autowired
     private PlanificationRepasRepository planificationRepasRepository;
+
+    @Autowired
+    private ActiviteService activiteService;
 
     /**
      * Récupère ou crée la planification pour une semaine donnée
@@ -68,6 +72,10 @@ public class PlanificationRepasService {
             .findFirst()
             .orElseThrow(() -> new ResourceNotFoundException("Jour non trouvé"));
 
+        // Vérifier si le repas existe déjà (modification) ou non (ajout)
+        boolean isModification = pj.getRepas().stream()
+            .anyMatch(r -> r.getTypeRepas().getValue() == typeRepas);
+
         // Chercher et supprimer si existe déjà ce type de repas
         pj.getRepas().removeIf(r -> r.getTypeRepas().getValue() == typeRepas);
 
@@ -80,7 +88,22 @@ public class PlanificationRepasService {
 
         pj.getRepas().add(repas);
 
-        return planificationRepasRepository.save(planification);
+        PlanificationRepas saved = planificationRepasRepository.save(planification);
+
+        // Enregistrer l'activité
+        String[] joursNoms = {"Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"};
+        String jourNom = joursNoms[jour];
+        String typeRepasNom = RepasPlannifie.TypeRepas.values()[typeRepas].getLabel();
+        String description = String.format("Repas planifié : %s - %s (Semaine %d/%d)",
+            jourNom, typeRepasNom, semaine, annee);
+
+        activiteService.logActivite(
+            utilisateurId,
+            isModification ? Activite.TypeActivite.REPAS_MODIFIE : Activite.TypeActivite.REPAS_PLANIFIE,
+            description
+        );
+
+        return saved;
     }
 
     /**
@@ -100,7 +123,22 @@ public class PlanificationRepasService {
 
         pj.getRepas().removeIf(r -> r.getTypeRepas().getValue() == typeRepas);
 
-        return planificationRepasRepository.save(planification);
+        PlanificationRepas saved = planificationRepasRepository.save(planification);
+
+        // Enregistrer l'activité
+        String[] joursNoms = {"Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"};
+        String jourNom = joursNoms[jour];
+        String typeRepasNom = RepasPlannifie.TypeRepas.values()[typeRepas].getLabel();
+        String description = String.format("Repas supprimé : %s - %s (Semaine %d/%d)",
+            jourNom, typeRepasNom, semaine, annee);
+
+        activiteService.logActivite(
+            utilisateurId,
+            Activite.TypeActivite.REPAS_SUPPRIME,
+            description
+        );
+
+        return saved;
     }
 
     /**

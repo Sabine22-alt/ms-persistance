@@ -29,6 +29,9 @@ class PlanificationRepasServiceTest {
     @Mock
     private PlanificationRepasRepository planificationRepasRepository;
 
+    @Mock
+    private ActiviteService activiteService;
+
     @InjectMocks
     private PlanificationRepasService planificationRepasService;
 

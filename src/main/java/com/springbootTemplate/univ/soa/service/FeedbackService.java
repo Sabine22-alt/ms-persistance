@@ -91,6 +91,13 @@ public class FeedbackService {
         // Mettre à jour la moyenne d'évaluation de la recette
         updateRecetteMoyenneEvaluation(existing.getRecette().getId());
 
+        // Enregistrer l'activité
+        activiteService.logActivite(
+            existing.getUtilisateur().getId(),
+            Activite.TypeActivite.FEEDBACK_MODIFIE,
+            "Avis modifié sur la recette : " + existing.getRecette().getTitre() + " (Note: " + updated.getEvaluation() + "/5)"
+        );
+
         return updated;
     }
 
@@ -100,10 +107,20 @@ public class FeedbackService {
                 .orElseThrow(() -> new ResourceNotFoundException("Feedback non trouvé avec l'ID: " + id));
 
         Long recetteId = feedback.getRecette().getId();
+        Long utilisateurId = feedback.getUtilisateur().getId();
+        String recetteTitre = feedback.getRecette().getTitre();
+
         feedbackRepository.deleteById(id);
 
         // Mettre à jour la moyenne d'évaluation de la recette
         updateRecetteMoyenneEvaluation(recetteId);
+
+        // Enregistrer l'activité
+        activiteService.logActivite(
+            utilisateurId,
+            Activite.TypeActivite.FEEDBACK_SUPPRIME,
+            "Avis supprimé de la recette : " + recetteTitre
+        );
     }
 
     /**
