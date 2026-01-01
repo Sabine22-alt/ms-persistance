@@ -160,7 +160,7 @@ class FeedbackControllerTest {
 
         when(utilisateurService.findById(1L)).thenReturn(Optional.of(utilisateur));
         when(recetteService.findById(1L)).thenReturn(Optional.of(recette));
-        when(feedbackService.findByUtilisateurId(1L)).thenReturn(new ArrayList<>());
+        when(feedbackService.existsByUtilisateurIdAndRecetteId(1L, 1L)).thenReturn(false);
         when(feedbackMapper.toEntity(any(FeedbackDTO.class))).thenReturn(savedFeedback);
         when(feedbackService.save(any(Feedback.class), eq(1L), eq(1L))).thenReturn(savedFeedback);
         when(feedbackMapper.toDTO(savedFeedback)).thenReturn(savedDTO);
@@ -245,7 +245,7 @@ class FeedbackControllerTest {
 
         when(utilisateurService.findById(1L)).thenReturn(Optional.of(utilisateur));
         when(recetteService.findById(1L)).thenReturn(Optional.of(recette));
-        when(feedbackService.findByUtilisateurId(1L)).thenReturn(Arrays.asList(feedback));
+        when(feedbackService.existsByUtilisateurIdAndRecetteId(1L, 1L)).thenReturn(true);
 
         // When & Then
         mockMvc.perform(post("/api/persistance/feedbacks")
