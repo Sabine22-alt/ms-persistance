@@ -125,11 +125,7 @@ public class FeedbackController {
         }
 
         // VALIDATION CRUCIALE : Vérifier qu'un feedback n'existe pas déjà pour cet utilisateur et cette recette
-        List<Feedback> existingFeedbacks = feedbackService.findByUtilisateurId(dto.getUtilisateurId());
-        boolean alreadyRated = existingFeedbacks.stream()
-                .anyMatch(f -> f.getRecette().getId().equals(dto.getRecetteId()));
-
-        if (alreadyRated) {
+        if (feedbackService.existsByUtilisateurIdAndRecetteId(dto.getUtilisateurId(), dto.getRecetteId())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse("Vous avez déjà noté cette recette."));
         }

@@ -26,4 +26,10 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
      */
     @Query("SELECT COUNT(f) FROM Feedback f WHERE f.recette.id = :recetteId")
     Long countByRecetteId(@Param("recetteId") Long recetteId);
+
+    /**
+     * Vérifie si un feedback existe déjà pour un utilisateur et une recette
+     */
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Feedback f WHERE f.utilisateur.id = :utilisateurId AND f.recette.id = :recetteId")
+    boolean existsByUtilisateurIdAndRecetteId(@Param("utilisateurId") Long utilisateurId, @Param("recetteId") Long recetteId);
 }

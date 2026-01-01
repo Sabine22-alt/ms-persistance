@@ -33,7 +33,7 @@ public class Feedback {
     private Recette recette;
 
     @Column(nullable = false)
-    private Integer evaluation; // 1 à 5
+    private Integer evaluation;
 
     @Column(columnDefinition = "TEXT")
     private String commentaire;

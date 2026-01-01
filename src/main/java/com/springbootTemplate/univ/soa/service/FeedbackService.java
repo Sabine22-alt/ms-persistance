@@ -38,6 +38,10 @@ public class FeedbackService {
         return feedbackRepository.findById(id);
     }
 
+    public boolean existsByUtilisateurIdAndRecetteId(Long utilisateurId, Long recetteId) {
+        return feedbackRepository.existsByUtilisateurIdAndRecetteId(utilisateurId, recetteId);
+    }
+
     public List<Feedback> findByUtilisateurId(Long utilisateurId) {
         return feedbackRepository.findByUtilisateurId(utilisateurId);
     }
