@@ -131,7 +131,7 @@ class FeedbackServiceTest {
     void findByUtilisateurId_devraitRetournerFeedbacksUtilisateur() {
         // Given
         List<Feedback> feedbacks = Collections.singletonList(feedback);
-        when(feedbackRepository.findByUtilisateurId(1L)).thenReturn(feedbacks);
+        when(feedbackRepository.findByUtilisateur_Id(1L)).thenReturn(feedbacks);
 
         // When
         List<Feedback> result = feedbackService.findByUtilisateurId(1L);
@@ -141,7 +141,7 @@ class FeedbackServiceTest {
         assertEquals(1, result.size());
         Feedback feedbackResult = result.get(0);
         assertEquals(1L, feedbackResult.getUtilisateur().getId());
-        verify(feedbackRepository, times(1)).findByUtilisateurId(1L);
+        verify(feedbackRepository, times(1)).findByUtilisateur_Id(1L);
     }
 
     // ==================== Tests pour findByRecetteId() ====================
@@ -151,7 +151,7 @@ class FeedbackServiceTest {
     void findByRecetteId_devraitRetournerFeedbacksRecette() {
         // Given
         List<Feedback> feedbacks = Collections.singletonList(feedback);
-        when(feedbackRepository.findByRecetteId(1L)).thenReturn(feedbacks);
+        when(feedbackRepository.findByRecette_Id(1L)).thenReturn(feedbacks);
 
         // When
         List<Feedback> result = feedbackService.findByRecetteId(1L);
@@ -161,7 +161,7 @@ class FeedbackServiceTest {
         assertEquals(1, result.size());
         Feedback feedbackResult = result.get(0);
         assertEquals(1L, feedbackResult.getRecette().getId());
-        verify(feedbackRepository, times(1)).findByRecetteId(1L);
+        verify(feedbackRepository, times(1)).findByRecette_Id(1L);
     }
 
     // ==================== Tests pour save() ====================
