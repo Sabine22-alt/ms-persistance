@@ -31,7 +31,6 @@ public class PlanificationRepasController {
      * Récupère la planification pour une semaine spécifique
      */
     @GetMapping("/{utilisateurId}/planification/{semaine}/{annee}")
-    @Transactional(readOnly = true)
     public ResponseEntity<?> getPlanification(@PathVariable Long utilisateurId,
                                               @PathVariable Integer semaine,
                                               @PathVariable Integer annee) {
