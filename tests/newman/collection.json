@@ -236,6 +236,10 @@
           "listen": "test",
           "script": {
             "exec": [
+              "if (pm.response.code !== 201) {",
+              "    console.log('ERREUR - Status:', pm.response.code);",
+              "    console.log('ERREUR - Body:', pm.response.text());",
+              "}",
               "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
               "pm.test(\"Response has id\", function () { var jsonData = pm.response.json(); pm.expect(jsonData).to.have.property('id'); pm.environment.set('feedbackId', jsonData.id); });"
             ],

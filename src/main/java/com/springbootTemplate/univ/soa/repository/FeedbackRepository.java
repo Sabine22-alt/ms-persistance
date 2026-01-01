@@ -11,8 +11,8 @@ import java.util.Optional;
 
 @Repository
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
-    List<Feedback> findByUtilisateurId(Long utilisateurId);
-    List<Feedback> findByRecetteId(Long recetteId);
+    List<Feedback> findByUtilisateur_Id(Long utilisateurId);
+    List<Feedback> findByRecette_Id(Long recetteId);
 
     /**
      * Calcule la moyenne d'évaluation pour une recette spécifique

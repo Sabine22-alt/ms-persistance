@@ -43,11 +43,11 @@ public class FeedbackService {
     }
 
     public List<Feedback> findByUtilisateurId(Long utilisateurId) {
-        return feedbackRepository.findByUtilisateurId(utilisateurId);
+        return feedbackRepository.findByUtilisateur_Id(utilisateurId);
     }
 
     public List<Feedback> findByRecetteId(Long recetteId) {
-        return feedbackRepository.findByRecetteId(recetteId);
+        return feedbackRepository.findByRecette_Id(recetteId);
     }
 
     @Transactional
