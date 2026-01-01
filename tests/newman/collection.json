@@ -203,7 +203,7 @@
       "request": {
         "method": "POST",
         "header": [{"key": "Content-Type", "value": "application/json"}],
-        "body": {"mode": "raw", "raw": "{\"titre\": \"Salade\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Mélanger les ingrédients\", \"temps\": 5}]}"},
+        "body": {"mode": "raw", "raw": "{\"titre\": \"Salade\", \"utilisateurId\": {{utilisateurId}}, \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Mélanger les ingrédients\", \"temps\": 5}]}"},
         "url": {"raw": "{{baseUrl}}/api/persistance/recettes", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes"]}
       }
     },
@@ -346,7 +346,7 @@
       "request": {
         "method": "PUT",
         "header": [{"key": "Content-Type", "value": "application/json"}],
-        "body": {"mode": "raw", "raw": "{\"titre\": \"Salade César\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 150, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Préparer la sauce\", \"temps\": 10}]}"},
+        "body": {"mode": "raw", "raw": "{\"titre\": \"Salade César\", \"utilisateurId\": {{utilisateurId}}, \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 150, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Préparer la sauce\", \"temps\": 10}]}"},
         "url": {"raw": "{{baseUrl}}/api/persistance/recettes/{{recetteId}}", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes", "{{recetteId}}"]}
       }
     },
@@ -547,7 +547,7 @@
       "request": {
         "method": "POST",
         "header": [{"key": "Content-Type", "value": "application/json"}],
-        "body": {"mode": "raw", "raw": "{\"titre\": \"Soupe à l'oignon\", \"description\": \"Une délicieuse soupe\", \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 200, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Couper les oignons\", \"temps\": 10}]}"},
+        "body": {"mode": "raw", "raw": "{\"titre\": \"Soupe à l'oignon\", \"description\": \"Une délicieuse soupe\", \"utilisateurId\": {{utilisateurId}}, \"ingredients\": [{\"alimentId\": {{alimentId}}, \"quantite\": 200, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Couper les oignons\", \"temps\": 10}]}"},
         "url": {"raw": "{{baseUrl}}/api/persistance/recettes", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes"]}
       }
     },
@@ -588,7 +588,7 @@
       "request": {
         "method": "POST",
         "header": [{"key": "Content-Type", "value": "application/json"}],
-        "body": {"mode": "raw", "raw": "{\"titre\": \"Recette à rejeter\", \"description\": \"Recette de test pour rejeter\", \"ingredients\": [{\"alimentNom\": \"Farine\", \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Mélanger tous les ingrédients\", \"temps\": 5}]}"},
+        "body": {"mode": "raw", "raw": "{\"titre\": \"Recette à rejeter\", \"description\": \"Recette de test pour rejeter\", \"utilisateurId\": {{utilisateurId}}, \"ingredients\": [{\"alimentNom\": \"Farine\", \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Mélanger tous les ingrédients\", \"temps\": 5}]}"},
         "url": {"raw": "{{baseUrl}}/api/persistance/recettes", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes"]}
       }
     },
@@ -639,7 +639,7 @@
         "header": [{"key": "Content-Type", "value": "application/json"}],
         "body": {
           "mode": "raw",
-          "raw": "{\"titre\": \"Pâtes Carbonara\", \"description\": \"Recette traditionnelle\", \"tempsTotal\": 30, \"ingredients\": [{\"alimentNom\": \"Pâtes\", \"quantite\": 250, \"unite\": \"GRAMME\"}, {\"alimentNom\": \"Œufs\", \"quantite\": 3, \"unite\": \"UNITE\"}, {\"alimentNom\": \"Bacon\", \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Cuire les pâtes\", \"temps\": 10}, {\"ordre\": 2, \"texte\": \"Mélanger avec les œufs et le bacon\", \"temps\": 5}]}"
+          "raw": "{\"titre\": \"Pâtes Carbonara\", \"description\": \"Recette traditionnelle\", \"tempsTotal\": 30, \"utilisateurId\": {{utilisateurId}}, \"ingredients\": [{\"alimentNom\": \"Pâtes\", \"quantite\": 250, \"unite\": \"GRAMME\"}, {\"alimentNom\": \"Œufs\", \"quantite\": 3, \"unite\": \"UNITE\"}, {\"alimentNom\": \"Bacon\", \"quantite\": 100, \"unite\": \"GRAMME\"}], \"etapes\": [{\"ordre\": 1, \"texte\": \"Cuire les pâtes\", \"temps\": 10}, {\"ordre\": 2, \"texte\": \"Mélanger avec les œufs et le bacon\", \"temps\": 5}]}"
         },
         "url": {"raw": "{{baseUrl}}/api/persistance/recettes", "host": ["{{baseUrl}}"], "path": ["api", "persistance", "recettes"]}
       }

@@ -16,11 +16,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +37,9 @@ class FeedbackServiceTest {
 
     @Mock
     private RecetteRepository recetteRepository;
+
+    @Mock
+    private ActiviteService activiteService;
 
     @InjectMocks
     private FeedbackService feedbackService;
@@ -125,7 +130,7 @@ class FeedbackServiceTest {
     @DisplayName("findByUtilisateurId - devrait retourner les feedbacks de l'utilisateur")
     void findByUtilisateurId_devraitRetournerFeedbacksUtilisateur() {
         // Given
-        List<Feedback> feedbacks = Arrays.asList(feedback);
+        List<Feedback> feedbacks = Collections.singletonList(feedback);
         when(feedbackRepository.findByUtilisateurId(1L)).thenReturn(feedbacks);
 
         // When
@@ -134,7 +139,8 @@ class FeedbackServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).getUtilisateur().getId());
+        Feedback feedbackResult = result.get(0);
+        assertEquals(1L, feedbackResult.getUtilisateur().getId());
         verify(feedbackRepository, times(1)).findByUtilisateurId(1L);
     }
 
@@ -144,7 +150,7 @@ class FeedbackServiceTest {
     @DisplayName("findByRecetteId - devrait retourner les feedbacks de la recette")
     void findByRecetteId_devraitRetournerFeedbacksRecette() {
         // Given
-        List<Feedback> feedbacks = Arrays.asList(feedback);
+        List<Feedback> feedbacks = Collections.singletonList(feedback);
         when(feedbackRepository.findByRecetteId(1L)).thenReturn(feedbacks);
 
         // When
@@ -153,30 +159,29 @@ class FeedbackServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).getRecette().getId());
+        Feedback feedbackResult = result.get(0);
+        assertEquals(1L, feedbackResult.getRecette().getId());
         verify(feedbackRepository, times(1)).findByRecetteId(1L);
     }
 
     // ==================== Tests pour save() ====================
 
     @Test
-    @DisplayName("save - avec données valides, devrait créer le feedback")
+    @DisplayName("save - avec données valides, devrait créer feedback")
     void save_avecDonneesValides_devraitCreerFeedback() {
         // Given
         Feedback nouveauFeedback = new Feedback();
         nouveauFeedback.setEvaluation(4);
         nouveauFeedback.setCommentaire("Bon");
 
-        Feedback feedbackSauvegarde = new Feedback();
-        feedbackSauvegarde.setId(2L);
-        feedbackSauvegarde.setEvaluation(4);
-        feedbackSauvegarde.setCommentaire("Bon");
-        feedbackSauvegarde.setUtilisateur(utilisateur);
-        feedbackSauvegarde.setRecette(recette);
-
         when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(utilisateur));
-        when(recetteRepository.findById(1L)).thenReturn(Optional.of(recette));
-        when(feedbackRepository.save(any(Feedback.class))).thenReturn(feedbackSauvegarde);
+        when(recetteRepository.findById(anyLong())).thenReturn(Optional.of(recette));
+        when(feedbackRepository.save(any(Feedback.class))).thenAnswer(invocation -> {
+            Feedback f = invocation.getArgument(0);
+            f.setId(10L);
+            return f;
+        });
+        when(feedbackRepository.calculateAverageEvaluationByRecetteId(1L)).thenReturn(Optional.of(4.5));
 
         // When
         Feedback result = feedbackService.save(nouveauFeedback, 1L, 1L);
@@ -184,13 +189,13 @@ class FeedbackServiceTest {
         // Then
         assertNotNull(result);
         assertNotNull(result.getId());
+        assertEquals(10L, result.getId());
         assertEquals(4, result.getEvaluation());
         assertEquals("Bon", result.getCommentaire());
         assertNotNull(result.getUtilisateur());
         assertNotNull(result.getRecette());
-        assertNull(nouveauFeedback.getId()); // Vérifie que l'ID est mis à null
         verify(utilisateurRepository, times(1)).findById(1L);
-        verify(recetteRepository, times(1)).findById(1L);
+        verify(recetteRepository, times(2)).findById(1L);
         verify(feedbackRepository, times(1)).save(any(Feedback.class));
     }
 
@@ -243,22 +248,25 @@ class FeedbackServiceTest {
     @DisplayName("update - avec ID existant, devrait mettre à jour le feedback")
     void update_avecIdExistant_devraitMettreAJourFeedback() {
         // Given
-        Feedback feedbackMisAJour = new Feedback();
-        feedbackMisAJour.setEvaluation(3);
-        feedbackMisAJour.setCommentaire("Moyen");
-
         when(feedbackRepository.findById(1L)).thenReturn(Optional.of(feedback));
-        when(feedbackRepository.save(any(Feedback.class))).thenReturn(feedback);
+        when(recetteRepository.findById(1L)).thenReturn(Optional.of(recette));
+        when(feedbackRepository.calculateAverageEvaluationByRecetteId(1L)).thenReturn(Optional.of(5.0));
+        when(feedbackRepository.save(any(Feedback.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Feedback updatedFeedback = new Feedback();
+        updatedFeedback.setEvaluation(3);
+        updatedFeedback.setCommentaire("Bien mais peut mieux faire");
+        updatedFeedback.setRecette(recette);
 
         // When
-        Feedback result = feedbackService.update(1L, feedbackMisAJour);
+        Feedback result = feedbackService.update(1L, updatedFeedback);
 
         // Then
         assertNotNull(result);
         assertEquals(3, result.getEvaluation());
-        assertEquals("Moyen", result.getCommentaire());
-        verify(feedbackRepository, times(1)).findById(1L);
-        verify(feedbackRepository, times(1)).save(feedback);
+        assertEquals("Bien mais peut mieux faire", result.getCommentaire());
+        verify(feedbackRepository, times(1)).save(any(Feedback.class));
+        verify(recetteRepository, times(1)).save(recette);
     }
 
     @Test
@@ -287,31 +295,26 @@ class FeedbackServiceTest {
     @DisplayName("deleteById - avec ID existant, devrait supprimer le feedback")
     void deleteById_avecIdExistant_devraitSupprimerFeedback() {
         // Given
-        when(feedbackRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(feedbackRepository).deleteById(1L);
+        when(feedbackRepository.findById(1L)).thenReturn(Optional.of(feedback));
+        when(recetteRepository.findById(1L)).thenReturn(Optional.of(recette));
+        when(feedbackRepository.calculateAverageEvaluationByRecetteId(1L)).thenReturn(Optional.of(4.0));
 
         // When
-        assertDoesNotThrow(() -> feedbackService.deleteById(1L));
+        feedbackService.deleteById(1L);
 
         // Then
-        verify(feedbackRepository, times(1)).existsById(1L);
         verify(feedbackRepository, times(1)).deleteById(1L);
+        verify(recetteRepository, times(1)).save(recette);
     }
 
     @Test
     @DisplayName("deleteById - avec ID inexistant, devrait lancer ResourceNotFoundException")
     void deleteById_avecIdInexistant_devraitLancerException() {
         // Given
-        when(feedbackRepository.existsById(999L)).thenReturn(false);
+        when(feedbackRepository.findById(999L)).thenReturn(Optional.empty());
 
         // When & Then
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> feedbackService.deleteById(999L)
-        );
-
-        assertEquals("Feedback non trouvé avec l'ID: 999", exception.getMessage());
-        verify(feedbackRepository, times(1)).existsById(999L);
+        assertThrows(ResourceNotFoundException.class, () -> feedbackService.deleteById(999L));
         verify(feedbackRepository, never()).deleteById(any());
     }
 }

@@ -15,9 +15,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -64,6 +67,14 @@ class FichierRecetteServiceTest {
         fichierRecette.setCheminMinio("recettes/1/images/unique-test.jpg");
         fichierRecette.setRecette(recette);
         fichierRecette.setDateUpload(LocalDateTime.now());
+    }
+
+    @BeforeEach
+    void setUpSecurity() {
+        SecurityContextHolder.setContext(mock(org.springframework.security.core.context.SecurityContext.class));
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getName()).thenReturn("test-user");
+        when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
     }
 
     @Test
@@ -172,15 +183,15 @@ class FichierRecetteServiceTest {
 
     @Test
     @DisplayName("Devrait télécharger un fichier")
-    void testDownloadFichier_Success() {
+    void testDownloadFichier_Success() throws IOException {
         InputStream expectedStream = new ByteArrayInputStream("test".getBytes());
         when(fichierRecetteRepository.findById(1L)).thenReturn(Optional.of(fichierRecette));
         when(minioService.getRecettesBucket()).thenReturn("recettes-bucket");
         when(minioService.downloadFile(anyString(), anyString())).thenReturn(expectedStream);
 
-        InputStream result = fichierRecetteService.downloadFichier(1L);
-
-        assertNotNull(result);
+        try (InputStream result = fichierRecetteService.downloadFichier(1L)) {
+            assertNotNull(result);
+        }
         verify(minioService).downloadFile(anyString(), anyString());
     }
 
@@ -189,9 +200,7 @@ class FichierRecetteServiceTest {
     void testDownloadFichier_NotFound() {
         when(fichierRecetteRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            fichierRecetteService.downloadFichier(1L);
-        });
+        assertThrows(ResourceNotFoundException.class, () -> fichierRecetteService.downloadFichier(1L));
     }
 
     @Test
@@ -227,4 +236,3 @@ class FichierRecetteServiceTest {
         verify(fichierRecetteRepository).deleteByRecetteId(1L);
     }
 }
-

@@ -3,8 +3,10 @@ package com.springbootTemplate.univ.soa.service;
 import com.springbootTemplate.univ.soa.dto.UtilisateurDTO;
 import com.springbootTemplate.univ.soa.exception.ResourceNotFoundException;
 import com.springbootTemplate.univ.soa.model.Aliment;
+import com.springbootTemplate.univ.soa.model.PasswordResetToken;
 import com.springbootTemplate.univ.soa.model.Utilisateur;
 import com.springbootTemplate.univ.soa.repository.AlimentRepository;
+import com.springbootTemplate.univ.soa.repository.PasswordResetTokenRepository;
 import com.springbootTemplate.univ.soa.repository.UtilisateurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class UtilisateurService {
@@ -27,6 +30,9 @@ public class UtilisateurService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     public List<Utilisateur> findAll() {
         return utilisateurRepository.findAll();
@@ -200,5 +206,57 @@ public class UtilisateurService {
 
         utilisateur.getAlimentsExclus().removeIf(a -> a.getId().equals(alimentId));
         utilisateurRepository.save(utilisateur);
+    }
+
+    /**
+     * Générer un token de réinitialisation de mot de passe
+     */
+    @Transactional
+    public String generatePasswordResetToken(Long utilisateurId) {
+        String token = UUID.randomUUID().toString();
+
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setUtilisateurId(utilisateurId);
+        resetToken.setUsed(false);
+
+        passwordResetTokenRepository.save(resetToken);
+        return token;
+    }
+
+    /**
+     * Valider et réinitialiser le mot de passe avec un token
+     */
+    @Transactional
+    public boolean resetPasswordWithToken(String token, String newPassword) {
+        Optional<PasswordResetToken> resetTokenOpt = passwordResetTokenRepository.findByToken(token);
+
+        if (resetTokenOpt.isEmpty()) {
+            return false;
+        }
+
+        PasswordResetToken resetToken = resetTokenOpt.get();
+
+        // Vérifier que le token est valide (non utilisé et non expiré)
+        if (!resetToken.isValid()) {
+            return false;
+        }
+
+        // Récupérer l'utilisateur
+        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findById(resetToken.getUtilisateurId());
+        if (utilisateurOpt.isEmpty()) {
+            return false;
+        }
+
+        // Mettre à jour le mot de passe
+        Utilisateur utilisateur = utilisateurOpt.get();
+        utilisateur.setMotDePasse(passwordEncoder.encode(newPassword));
+        utilisateurRepository.save(utilisateur);
+
+        // Marquer le token comme utilisé
+        resetToken.setUsed(true);
+        passwordResetTokenRepository.save(resetToken);
+
+        return true;
     }
 }

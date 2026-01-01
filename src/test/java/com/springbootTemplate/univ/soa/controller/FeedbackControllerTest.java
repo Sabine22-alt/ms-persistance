@@ -1,6 +1,7 @@
 package com.springbootTemplate.univ.soa.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.springbootTemplate.univ.soa.config.TestSecurityConfig;
 import com.springbootTemplate.univ.soa.dto.FeedbackDTO;
 import com.springbootTemplate.univ.soa.mapper.FeedbackMapper;
 import com.springbootTemplate.univ.soa.model.Feedback;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.test.context.ActiveProfiles;
 
 @WebMvcTest(FeedbackController.class)
+@Import(TestSecurityConfig.class)
 @ActiveProfiles("test")
 @DisplayName("Tests unitaires pour FeedbackController")
 class FeedbackControllerTest {
@@ -306,3 +309,4 @@ class FeedbackControllerTest {
         verify(feedbackService, times(1)).deleteById(1L);
     }
 }
+
