@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/persistance/feedbacks")
 @CrossOrigin(origins = "*")
 public class FeedbackController {
+
+    private static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
 
     @Autowired
     private FeedbackService feedbackService;
@@ -82,60 +86,77 @@ public class FeedbackController {
      */
     @PostMapping
     public ResponseEntity<?> createFeedback(@RequestBody FeedbackDTO dto) {
+        logger.info("DEBUG createFeedback - Requête reçue: utilisateurId={}, recetteId={}, evaluation={}, commentaire={}",
+            dto.getUtilisateurId(), dto.getRecetteId(), dto.getEvaluation(), dto.getCommentaire());
+
         // Validation : utilisateurId requis
         if (dto.getUtilisateurId() == null) {
+            logger.warn("Validation échouée: utilisateurId est null");
             return ResponseEntity.badRequest()
                     .body(createErrorResponse("L'ID de l'utilisateur est obligatoire"));
         }
 
         // Validation : recetteId requis
         if (dto.getRecetteId() == null) {
+            logger.warn("Validation échouée: recetteId est null");
             return ResponseEntity.badRequest()
                     .body(createErrorResponse("L'ID de la recette est obligatoire"));
         }
 
         // Validation : l'utilisateur existe
         if (utilisateurService.findById(dto.getUtilisateurId()).isEmpty()) {
+            logger.warn("Utilisateur non trouvé avec l'ID: {}", dto.getUtilisateurId());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Utilisateur non trouvé avec l'ID: " + dto.getUtilisateurId()));
         }
 
         // Validation : la recette existe
         if (recetteService.findById(dto.getRecetteId()).isEmpty()) {
+            logger.warn("Recette non trouvée avec l'ID: {}", dto.getRecetteId());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Recette non trouvée avec l'ID: " + dto.getRecetteId()));
         }
 
         // Validation : évaluation requise
         if (dto.getEvaluation() == null) {
+            logger.warn("Validation échouée: evaluation est null");
             return ResponseEntity.badRequest()
                     .body(createErrorResponse("L'évaluation est obligatoire"));
         }
 
         // Validation : évaluation entre 1 et 5
         if (dto.getEvaluation() < 1 || dto.getEvaluation() > 5) {
+            logger.warn("Évaluation invalide: {}. Doit être entre 1 et 5", dto.getEvaluation());
             return ResponseEntity.badRequest()
                     .body(createErrorResponse("L'évaluation doit être comprise entre 1 et 5 étoiles"));
         }
 
         // Validation : commentaire (optionnel mais avec longueur max)
         if (dto.getCommentaire() != null && dto.getCommentaire().length() > 1000) {
+            logger.warn("Commentaire trop long: {} caractères (max: 1000)", dto.getCommentaire().length());
             return ResponseEntity.badRequest()
                     .body(createErrorResponse("Le commentaire ne peut pas dépasser 1000 caractères"));
         }
 
         // VALIDATION CRUCIALE : Vérifier qu'un feedback n'existe pas déjà pour cet utilisateur et cette recette
         if (feedbackService.existsByUtilisateurIdAndRecetteId(dto.getUtilisateurId(), dto.getRecetteId())) {
+            logger.warn("Un feedback existe déjà pour utilisateurId={} et recetteId={}", dto.getUtilisateurId(), dto.getRecetteId());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse("Vous avez déjà noté cette recette."));
         }
 
         try {
+            logger.info("Toutes les validations sont passées. Création du feedback...");
             Feedback feedback = feedbackMapper.toEntity(dto);
+            logger.debug("Feedback mapper toEntity réussi");
+
             Feedback saved = feedbackService.save(feedback, dto.getUtilisateurId(), dto.getRecetteId());
+            logger.info("Feedback créé avec succès. ID: {}", saved.getId());
+
             FeedbackDTO responseDto = feedbackMapper.toDTO(saved);
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
         } catch (Exception e) {
+            logger.error("Erreur lors de la création du feedback: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Erreur lors de la création: " + e.getMessage()));
         }
@@ -204,7 +225,6 @@ public class FeedbackController {
         }
     }
 
-    // Méthode utilitaire
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> error = new HashMap<>();
         error.put("error", message);

@@ -211,6 +211,37 @@
       "name": "4. Create Feedback",
       "event": [
         {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Nettoyer les feedbacks existants pour cet utilisateur et cette recette",
+              "const utilisateurId = pm.environment.get('utilisateurId');",
+              "const recetteId = pm.environment.get('recetteId');",
+              "",
+              "if (utilisateurId && recetteId) {",
+              "    pm.sendRequest({",
+              "        url: pm.environment.get('baseUrl') + '/api/persistance/feedbacks/utilisateur/' + utilisateurId,",
+              "        method: 'GET'",
+              "    }, function (err, response) {",
+              "        if (!err && response.code === 200) {",
+              "            const feedbacks = response.json();",
+              "            const feedbackToDelete = feedbacks.find(f => f.recetteId === parseInt(recetteId));",
+              "            if (feedbackToDelete) {",
+              "                pm.sendRequest({",
+              "                    url: pm.environment.get('baseUrl') + '/api/persistance/feedbacks/' + feedbackToDelete.id,",
+              "                    method: 'DELETE'",
+              "                }, function (err, res) {",
+              "                    console.log('Feedback existant supprimé: ' + feedbackToDelete.id);",
+              "                });",
+              "            }",
+              "        }",
+              "    });",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
           "listen": "test",
           "script": {
             "exec": [
