@@ -225,9 +225,37 @@ public class FeedbackController {
         }
     }
 
+    /**
+     * DELETE /api/persistance/feedbacks/utilisateur/{utilisateurId}/recette/{recetteId} - Supprimer les feedbacks d'un utilisateur pour une recette
+     */
+    @DeleteMapping("/utilisateur/{utilisateurId}/recette/{recetteId}")
+    public ResponseEntity<?> deleteFeedbackByUtilisateurAndRecette(
+            @PathVariable Long utilisateurId,
+            @PathVariable Long recetteId) {
+        try {
+            List<Feedback> feedbacks = feedbackService.findByUtilisateurId(utilisateurId).stream()
+                    .filter(f -> f.getRecette().getId().equals(recetteId))
+                    .toList();
+
+            feedbacks.forEach(f -> feedbackService.deleteById(f.getId()));
+
+            return ResponseEntity.ok(createSuccessResponse("Feedbacks supprimés: " + feedbacks.size()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Erreur lors de la suppression: " + e.getMessage()));
+        }
+    }
+
+    // Méthode utilitaire
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> error = new HashMap<>();
         error.put("error", message);
         return error;
+    }
+
+    private Map<String, String> createSuccessResponse(String message) {
+        Map<String, String> success = new HashMap<>();
+        success.put("message", message);
+        return success;
     }
 }
