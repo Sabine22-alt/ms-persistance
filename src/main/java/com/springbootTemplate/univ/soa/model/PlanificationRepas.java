@@ -29,7 +29,7 @@ public class PlanificationRepas {
     private Long utilisateurId;
 
     @Column(nullable = false)
-    private Integer semaine; // 1-53
+    private Integer semaine;
 
     @Column(nullable = false)
     private Integer annee;

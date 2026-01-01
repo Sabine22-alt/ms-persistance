@@ -30,10 +30,9 @@ public class PlanificationJour {
     private PlanificationRepas planification;
 
     @Column(nullable = false)
-    private Integer jour; // 0=lundi, 1=mardi, ..., 6=dimanche
+    private Integer jour;
 
     @OneToMany(mappedBy = "planificationJour", cascade = CascadeType.ALL, orphanRemoval = true)
     @Fetch(FetchMode.SUBSELECT)
     private List<RepasPlannifie> repas = new ArrayList<>();
 }
-
