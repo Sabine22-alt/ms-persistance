@@ -1,6 +1,7 @@
 package com.springbootTemplate.univ.soa.service;
 
 import com.springbootTemplate.univ.soa.exception.ResourceNotFoundException;
+import com.springbootTemplate.univ.soa.model.Activite;
 import com.springbootTemplate.univ.soa.model.Feedback;
 import com.springbootTemplate.univ.soa.model.Recette;
 import com.springbootTemplate.univ.soa.model.Utilisateur;
@@ -26,6 +27,9 @@ public class FeedbackService {
     @Autowired
     private RecetteRepository recetteRepository;
 
+    @Autowired
+    private ActiviteService activiteService;
+
     public List<Feedback> findAll() {
         return feedbackRepository.findAll();
     }
@@ -34,12 +38,16 @@ public class FeedbackService {
         return feedbackRepository.findById(id);
     }
 
+    public boolean existsByUtilisateurIdAndRecetteId(Long utilisateurId, Long recetteId) {
+        return feedbackRepository.existsByUtilisateurIdAndRecetteId(utilisateurId, recetteId);
+    }
+
     public List<Feedback> findByUtilisateurId(Long utilisateurId) {
-        return feedbackRepository.findByUtilisateurId(utilisateurId);
+        return feedbackRepository.findByUtilisateur_Id(utilisateurId);
     }
 
     public List<Feedback> findByRecetteId(Long recetteId) {
-        return feedbackRepository.findByRecetteId(recetteId);
+        return feedbackRepository.findByRecette_Id(recetteId);
     }
 
     @Transactional
@@ -49,13 +57,25 @@ public class FeedbackService {
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + utilisateurId));
 
-        Recette recette = recetteRepository.findById(recetteId)
+        Recette recette = recetteRepository.findByIdSimple(recetteId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
 
         feedback.setUtilisateur(utilisateur);
         feedback.setRecette(recette);
 
-        return feedbackRepository.save(feedback);
+        Feedback saved = feedbackRepository.save(feedback);
+
+        // Logger l'activité
+        activiteService.logActivite(
+            utilisateurId,
+            Activite.TypeActivite.FEEDBACK_AJOUT,
+            "Avis ajouté à la recette : " + recette.getTitre() + " (Note: " + saved.getEvaluation() + "/5)"
+        );
+
+        // Mettre à jour la moyenne d'évaluation de la recette
+        updateRecetteMoyenneEvaluation(recetteId);
+
+        return saved;
     }
 
     @Transactional
@@ -66,14 +86,39 @@ public class FeedbackService {
         existing.setEvaluation(feedback.getEvaluation());
         existing.setCommentaire(feedback.getCommentaire());
 
-        return feedbackRepository.save(existing);
+        Feedback updated = feedbackRepository.save(existing);
+
+        // Mettre à jour la moyenne d'évaluation de la recette
+        updateRecetteMoyenneEvaluation(existing.getRecette().getId());
+
+        return updated;
     }
 
     @Transactional
     public void deleteById(Long id) {
-        if (!feedbackRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Feedback non trouvé avec l'ID: " + id);
-        }
+        Feedback feedback = feedbackRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Feedback non trouvé avec l'ID: " + id));
+
+        Long recetteId = feedback.getRecette().getId();
         feedbackRepository.deleteById(id);
+
+        // Mettre à jour la moyenne d'évaluation de la recette
+        updateRecetteMoyenneEvaluation(recetteId);
+    }
+
+    /**
+     * Recalcule et met à jour la moyenne d'évaluation pour une recette
+     */
+    @Transactional
+    public void updateRecetteMoyenneEvaluation(Long recetteId) {
+        Recette recette = recetteRepository.findByIdSimple(recetteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
+
+        // Calculer la moyenne via la requête BD
+        Optional<Double> moyenne = feedbackRepository.calculateAverageEvaluationByRecetteId(recetteId);
+
+        // Mettre à jour le champ dénormalisé
+        recette.setMoyenneEvaluation(moyenne.orElse(0.0));
+        recetteRepository.save(recette);
     }
 }

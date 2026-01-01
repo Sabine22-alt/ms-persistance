@@ -25,6 +25,7 @@ public class RecetteDTO {
     private Recette.StatutRecette statut;
     private String motifRejet;
     private Long utilisateurId;
+    private Double moyenneEvaluation; // Moyenne des notes
     private List<IngredientDTO> ingredients;
     private List<EtapeDTO> etapes;
 

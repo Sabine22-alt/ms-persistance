@@ -12,7 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "recettes")
+@Table(name = "recettes", indexes = {
+    @Index(name = "idx_recettes_utilisateur_id", columnList = "utilisateur_id"),
+    @Index(name = "idx_recettes_statut", columnList = "statut"),
+    @Index(name = "idx_recettes_date_creation", columnList = "date_creation")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -60,6 +64,9 @@ public class Recette {
 
     @Column(name = "utilisateur_id")
     private Long utilisateurId;
+
+    @Column(name = "moyenne_evaluation")
+    private Double moyenneEvaluation = 0.0; // Dénormalisée pour perf
 
     @OneToMany(mappedBy = "recette", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Fetch(FetchMode.SUBSELECT)

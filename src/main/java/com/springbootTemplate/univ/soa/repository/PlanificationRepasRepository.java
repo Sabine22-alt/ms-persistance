@@ -22,4 +22,3 @@ public interface PlanificationRepasRepository extends JpaRepository<Planificatio
     @Query("SELECT p FROM PlanificationRepas p WHERE p.utilisateurId = :utilisateurId ORDER BY p.annee DESC, p.semaine DESC")
     List<PlanificationRepas> findByUtilisateurIdOrderByWeekDesc(@Param("utilisateurId") Long utilisateurId);
 }
-

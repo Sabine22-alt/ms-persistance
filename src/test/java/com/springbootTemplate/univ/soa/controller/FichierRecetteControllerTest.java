@@ -1,5 +1,6 @@
 package com.springbootTemplate.univ.soa.controller;
 
+import com.springbootTemplate.univ.soa.config.TestSecurityConfig;
 import com.springbootTemplate.univ.soa.dto.FichierRecetteDTO;
 import com.springbootTemplate.univ.soa.model.FichierRecette;
 import com.springbootTemplate.univ.soa.service.FichierRecetteService;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,6 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(FichierRecetteController.class)
+@Import(TestSecurityConfig.class)
 @ActiveProfiles("test")
 @DisplayName("Tests unitaires pour FichierRecetteController")
 class FichierRecetteControllerTest {
@@ -235,4 +238,3 @@ class FichierRecetteControllerTest {
                 .andExpect(status().isInternalServerError());
     }
 }
-

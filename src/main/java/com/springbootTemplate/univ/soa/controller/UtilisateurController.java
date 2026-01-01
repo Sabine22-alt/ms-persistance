@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -201,6 +202,67 @@ public class UtilisateurController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Erreur lors de la suppression: " + e.getMessage()));
         }
+    }
+
+    /**
+     * POST /api/persistance/utilisateurs/forgot-password - Demander réinitialisation
+     * ENDPOINT PUBLIC - SANS AUTHENTIFICATION REQUISE
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                .body(createErrorResponse("L'email est requis"));
+        }
+
+        Optional<Utilisateur> userOpt = utilisateurService.findByEmail(email);
+
+        // Important : ne pas révéler si l'email existe (sécurité)
+        if (userOpt.isPresent()) {
+            String token = utilisateurService.generatePasswordResetToken(userOpt.get().getId());
+            // TODO: Envoyer l'email avec le lien de réinitialisation
+            // emailService.sendPasswordResetEmail(email, token);
+            System.out.println("🔑 Token de réinitialisation généré : " + token);
+        }
+
+        return ResponseEntity.ok(Map.of("message",
+            "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé"));
+    }
+
+    /**
+     * POST /api/persistance/utilisateurs/reset-password - Réinitialiser le mot de passe
+     * ENDPOINT PUBLIC - SANS AUTHENTIFICATION REQUISE
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+
+        if (token == null || token.trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                .body(createErrorResponse("Le token est requis"));
+        }
+
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                .body(createErrorResponse("Le nouveau mot de passe est requis"));
+        }
+
+        if (newPassword.length() < 6) {
+            return ResponseEntity.badRequest()
+                .body(createErrorResponse("Le mot de passe doit contenir au moins 6 caractères"));
+        }
+
+        boolean success = utilisateurService.resetPasswordWithToken(token, newPassword);
+
+        if (!success) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(createErrorResponse("Token invalide, expiré ou déjà utilisé"));
+        }
+
+        return ResponseEntity.ok(Map.of("message", "Mot de passe réinitialisé avec succès"));
     }
 
     // Méthodes utilitaires
