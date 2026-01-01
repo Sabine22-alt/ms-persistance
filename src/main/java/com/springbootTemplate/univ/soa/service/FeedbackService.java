@@ -57,7 +57,7 @@ public class FeedbackService {
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + utilisateurId));
 
-        Recette recette = recetteRepository.findById(recetteId)
+        Recette recette = recetteRepository.findByIdSimple(recetteId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
 
         feedback.setUtilisateur(utilisateur);
@@ -111,7 +111,7 @@ public class FeedbackService {
      */
     @Transactional
     public void updateRecetteMoyenneEvaluation(Long recetteId) {
-        Recette recette = recetteRepository.findById(recetteId)
+        Recette recette = recetteRepository.findByIdSimple(recetteId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
 
         // Calculer la moyenne via la requête BD

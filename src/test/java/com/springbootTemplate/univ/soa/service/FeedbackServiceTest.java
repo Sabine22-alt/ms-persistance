@@ -175,7 +175,7 @@ class FeedbackServiceTest {
         nouveauFeedback.setCommentaire("Bon");
 
         when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(utilisateur));
-        when(recetteRepository.findById(anyLong())).thenReturn(Optional.of(recette));
+        when(recetteRepository.findByIdSimple(anyLong())).thenReturn(Optional.of(recette));
         when(feedbackRepository.save(any(Feedback.class))).thenAnswer(invocation -> {
             Feedback f = invocation.getArgument(0);
             f.setId(10L);
@@ -195,7 +195,7 @@ class FeedbackServiceTest {
         assertNotNull(result.getUtilisateur());
         assertNotNull(result.getRecette());
         verify(utilisateurRepository, times(1)).findById(1L);
-        verify(recetteRepository, times(2)).findById(1L);
+        verify(recetteRepository, times(2)).findByIdSimple(1L);
         verify(feedbackRepository, times(1)).save(any(Feedback.class));
     }
 
@@ -216,7 +216,7 @@ class FeedbackServiceTest {
 
         assertEquals("Utilisateur non trouvé avec l'ID: 999", exception.getMessage());
         verify(utilisateurRepository, times(1)).findById(999L);
-        verify(recetteRepository, never()).findById(any());
+        verify(recetteRepository, never()).findByIdSimple(any());
         verify(feedbackRepository, never()).save(any());
     }
 
@@ -228,7 +228,7 @@ class FeedbackServiceTest {
         nouveauFeedback.setEvaluation(4);
 
         when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(utilisateur));
-        when(recetteRepository.findById(999L)).thenReturn(Optional.empty());
+        when(recetteRepository.findByIdSimple(999L)).thenReturn(Optional.empty());
 
         // When & Then
         ResourceNotFoundException exception = assertThrows(
@@ -238,7 +238,7 @@ class FeedbackServiceTest {
 
         assertEquals("Recette non trouvée avec l'ID: 999", exception.getMessage());
         verify(utilisateurRepository, times(1)).findById(1L);
-        verify(recetteRepository, times(1)).findById(999L);
+        verify(recetteRepository, times(1)).findByIdSimple(999L);
         verify(feedbackRepository, never()).save(any());
     }
 
@@ -249,7 +249,7 @@ class FeedbackServiceTest {
     void update_avecIdExistant_devraitMettreAJourFeedback() {
         // Given
         when(feedbackRepository.findById(1L)).thenReturn(Optional.of(feedback));
-        when(recetteRepository.findById(1L)).thenReturn(Optional.of(recette));
+        when(recetteRepository.findByIdSimple(1L)).thenReturn(Optional.of(recette));
         when(feedbackRepository.calculateAverageEvaluationByRecetteId(1L)).thenReturn(Optional.of(5.0));
         when(feedbackRepository.save(any(Feedback.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -296,7 +296,7 @@ class FeedbackServiceTest {
     void deleteById_avecIdExistant_devraitSupprimerFeedback() {
         // Given
         when(feedbackRepository.findById(1L)).thenReturn(Optional.of(feedback));
-        when(recetteRepository.findById(1L)).thenReturn(Optional.of(recette));
+        when(recetteRepository.findByIdSimple(1L)).thenReturn(Optional.of(recette));
         when(feedbackRepository.calculateAverageEvaluationByRecetteId(1L)).thenReturn(Optional.of(4.0));
 
         // When

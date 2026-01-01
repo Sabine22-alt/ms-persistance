@@ -30,6 +30,10 @@ public interface RecetteRepository extends JpaRepository<Recette, Long> {
     @Query("SELECT r FROM Recette r WHERE r.id = :id")
     Optional<Recette> findByIdOptimized(@Param("id") Long id);
 
+    // Méthode simple sans EntityGraph pour éviter MultipleBagFetchException
+    @Query("SELECT r FROM Recette r WHERE r.id = :id")
+    Optional<Recette> findByIdSimple(@Param("id") Long id);
+
     // Méthodes originales pour compatibilité
     List<Recette> findByStatut(StatutRecette statut);
     List<Recette> findByUtilisateurId(Long utilisateurId);
