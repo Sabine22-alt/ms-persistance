@@ -19,7 +19,9 @@ public class UtilisateurDTO {
     private String prenom;
     private Boolean actif;
     private Utilisateur.Role role;
-    private Set<Long> alimentsExclusIds;
+    private Set<Long> regimesIds;
+    private Set<Long> allergenesIds;
+    private Set<Long> typesCuisinePreferesIds;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
 }

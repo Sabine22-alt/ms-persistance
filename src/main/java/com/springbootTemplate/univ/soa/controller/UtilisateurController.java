@@ -2,6 +2,7 @@ package com.springbootTemplate.univ.soa.controller;
 
 import com.springbootTemplate.univ.soa.dto.UtilisateurDTO;
 import com.springbootTemplate.univ.soa.mapper.UtilisateurMapper;
+import com.springbootTemplate.univ.soa.model.PasswordResetToken;
 import com.springbootTemplate.univ.soa.model.Utilisateur;
 import com.springbootTemplate.univ.soa.service.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -204,68 +205,6 @@ public class UtilisateurController {
         }
     }
 
-    /**
-     * POST /api/persistance/utilisateurs/forgot-password - Demander réinitialisation
-     * ENDPOINT PUBLIC - SANS AUTHENTIFICATION REQUISE
-     */
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-
-        if (email == null || email.trim().isEmpty()) {
-            return ResponseEntity.badRequest()
-                .body(createErrorResponse("L'email est requis"));
-        }
-
-        Optional<Utilisateur> userOpt = utilisateurService.findByEmail(email);
-
-        // Important : ne pas révéler si l'email existe (sécurité)
-        if (userOpt.isPresent()) {
-            String token = utilisateurService.generatePasswordResetToken(userOpt.get().getId());
-            // TODO: Envoyer l'email avec le lien de réinitialisation
-            // emailService.sendPasswordResetEmail(email, token);
-            System.out.println("🔑 Token de réinitialisation généré : " + token);
-        }
-
-        return ResponseEntity.ok(Map.of("message",
-            "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé"));
-    }
-
-    /**
-     * POST /api/persistance/utilisateurs/reset-password - Réinitialiser le mot de passe
-     * ENDPOINT PUBLIC - SANS AUTHENTIFICATION REQUISE
-     */
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
-        String token = request.get("token");
-        String newPassword = request.get("newPassword");
-
-        if (token == null || token.trim().isEmpty()) {
-            return ResponseEntity.badRequest()
-                .body(createErrorResponse("Le token est requis"));
-        }
-
-        if (newPassword == null || newPassword.trim().isEmpty()) {
-            return ResponseEntity.badRequest()
-                .body(createErrorResponse("Le nouveau mot de passe est requis"));
-        }
-
-        if (newPassword.length() < 6) {
-            return ResponseEntity.badRequest()
-                .body(createErrorResponse("Le mot de passe doit contenir au moins 6 caractères"));
-        }
-
-        boolean success = utilisateurService.resetPasswordWithToken(token, newPassword);
-
-        if (!success) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(createErrorResponse("Token invalide, expiré ou déjà utilisé"));
-        }
-
-        return ResponseEntity.ok(Map.of("message", "Mot de passe réinitialisé avec succès"));
-    }
-
-    // Méthodes utilitaires
     private boolean isValidEmail(String email) {
         return email != null && email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
@@ -274,5 +213,88 @@ public class UtilisateurController {
         Map<String, String> error = new HashMap<>();
         error.put("error", message);
         return error;
+    }
+
+    /**
+     * GET /api/persistance/utilisateurs/auth/{email} - Récupérer les infos d'authentification
+     * Cet endpoint retourne le hash du mot de passe pour permettre la validation côté ms-utilisateur
+     */
+    @GetMapping("/auth/{email}")
+    public ResponseEntity<UtilisateurDTO> getUtilisateurForAuth(@PathVariable String email) {
+        Optional<Utilisateur> utilisateurOpt = utilisateurService.findByEmail(email);
+
+        if (utilisateurOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Utilisateur utilisateur = utilisateurOpt.get();
+
+        // Créer un DTO avec le hash du mot de passe (uniquement pour l'auth)
+        UtilisateurDTO dto = new UtilisateurDTO();
+        dto.setId(utilisateur.getId());
+        dto.setEmail(utilisateur.getEmail());
+        dto.setMotDePasse(utilisateur.getMotDePasse()); // ✅ Hash inclus
+        dto.setNom(utilisateur.getNom());
+        dto.setPrenom(utilisateur.getPrenom());
+        dto.setActif(utilisateur.getActif());
+        dto.setRole(utilisateur.getRole());
+
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
+     * POST /api/persistance/utilisateurs/{id}/generate-reset-token
+     */
+    @PostMapping("/{id}/generate-reset-token")
+    public ResponseEntity<Map<String, String>> generateResetToken(@PathVariable Long id) {
+        String token = utilisateurService.generatePasswordResetToken(id);
+        return ResponseEntity.ok(Map.of("token", token));
+    }
+
+    /**
+     * GET /api/persistance/utilisateurs/validate-token/{token}
+     */
+    @GetMapping("/validate-token/{token}")
+    public ResponseEntity<?> validateToken(@PathVariable String token) {
+        Optional<PasswordResetToken> resetTokenOpt = utilisateurService.findValidToken(token);
+
+        if (resetTokenOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("valid", false, "message", "Token invalide ou expiré"));
+        }
+
+        PasswordResetToken resetToken = resetTokenOpt.get();
+        return ResponseEntity.ok(Map.of(
+                "valid", true,
+                "utilisateurId", resetToken.getUtilisateurId()
+        ));
+    }
+
+    /**
+     * PUT /api/persistance/utilisateurs/{id}/update-password
+     */
+    @PutMapping("/{id}/update-password")
+    public ResponseEntity<?> updatePassword(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request) {
+
+        String hashedPassword = request.get("hashedPassword");
+
+        if (hashedPassword == null || hashedPassword.trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("Le mot de passe hashé est requis"));
+        }
+
+        utilisateurService.updatePassword(id, hashedPassword);
+        return ResponseEntity.ok(Map.of("message", "Mot de passe mis à jour"));
+    }
+
+    /**
+     * POST /api/persistance/utilisateurs/mark-token-used/{token}
+     */
+    @PostMapping("/mark-token-used/{token}")
+    public ResponseEntity<?> markTokenAsUsed(@PathVariable String token) {
+        utilisateurService.markTokenAsUsed(token);
+        return ResponseEntity.ok(Map.of("message", "Token marqué comme utilisé"));
     }
 }

@@ -1,7 +1,9 @@
 package com.springbootTemplate.univ.soa.mapper;
 
 import com.springbootTemplate.univ.soa.dto.UtilisateurDTO;
-import com.springbootTemplate.univ.soa.model.Aliment;
+import com.springbootTemplate.univ.soa.model.Allergene;
+import com.springbootTemplate.univ.soa.model.RegimeAlimentaire;
+import com.springbootTemplate.univ.soa.model.TypeCuisine;
 import com.springbootTemplate.univ.soa.model.Utilisateur;
 import org.springframework.stereotype.Component;
 
@@ -25,10 +27,29 @@ public class UtilisateurMapper {
         dto.setDateCreation(utilisateur.getDateCreation());
         dto.setDateModification(utilisateur.getDateModification());
 
-        if (utilisateur.getAlimentsExclus() != null) {
-            dto.setAlimentsExclusIds(
-                    utilisateur.getAlimentsExclus().stream()
-                            .map(Aliment::getId)
+        // ✅ MAPPER LES RÉGIMES ALIMENTAIRES
+        if (utilisateur.getRegimes() != null) {
+            dto.setRegimesIds(
+                    utilisateur.getRegimes().stream()
+                            .map(RegimeAlimentaire::getId)
+                            .collect(Collectors.toSet())
+            );
+        }
+
+        // ✅ MAPPER LES ALLERGÈNES
+        if (utilisateur.getAllergenes() != null) {
+            dto.setAllergenesIds(
+                    utilisateur.getAllergenes().stream()
+                            .map(Allergene::getId)
+                            .collect(Collectors.toSet())
+            );
+        }
+
+        // ✅ MAPPER LES TYPES DE CUISINE
+        if (utilisateur.getTypesCuisinePreferes() != null) {
+            dto.setTypesCuisinePreferesIds(
+                    utilisateur.getTypesCuisinePreferes().stream()
+                            .map(TypeCuisine::getId)
                             .collect(Collectors.toSet())
             );
         }
@@ -49,6 +70,10 @@ public class UtilisateurMapper {
         utilisateur.setPrenom(dto.getPrenom());
         utilisateur.setActif(dto.getActif());
         utilisateur.setRole(dto.getRole());
+
+        // Note : Les relations ManyToMany (regimes, allergenes, typesCuisinePreferes)
+        // sont gérées dans le service via les repositories
+        // On ne les mappe pas ici pour éviter les problèmes de cascade
 
         return utilisateur;
     }

@@ -2,12 +2,8 @@ package com.springbootTemplate.univ.soa.service;
 
 import com.springbootTemplate.univ.soa.dto.UtilisateurDTO;
 import com.springbootTemplate.univ.soa.exception.ResourceNotFoundException;
-import com.springbootTemplate.univ.soa.model.Aliment;
-import com.springbootTemplate.univ.soa.model.PasswordResetToken;
-import com.springbootTemplate.univ.soa.model.Utilisateur;
-import com.springbootTemplate.univ.soa.repository.AlimentRepository;
-import com.springbootTemplate.univ.soa.repository.PasswordResetTokenRepository;
-import com.springbootTemplate.univ.soa.repository.UtilisateurRepository;
+import com.springbootTemplate.univ.soa.model.*;
+import com.springbootTemplate.univ.soa.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,13 +22,24 @@ public class UtilisateurService {
     private UtilisateurRepository utilisateurRepository;
 
     @Autowired
-    private AlimentRepository alimentRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    // ✅ NOUVEAUX REPOSITORIES
+    @Autowired
+    private RegimeAlimentaireRepository regimeAlimentaireRepository;
+
+    @Autowired
+    private AllergeneRepository allergeneRepository;
+
+    @Autowired
+    private TypeCuisineRepository typeCuisineRepository;
+
+    // ===============================
+    // OPÉRATIONS CRUD DE BASE
+    // ===============================
 
     public List<Utilisateur> findAll() {
         return utilisateurRepository.findAll();
@@ -50,12 +57,10 @@ public class UtilisateurService {
     public Utilisateur save(Utilisateur utilisateur) {
         utilisateur.setId(null);
 
-        // Hasher le mot de passe
         if (utilisateur.getMotDePasse() != null && !utilisateur.getMotDePasse().isEmpty()) {
             utilisateur.setMotDePasse(passwordEncoder.encode(utilisateur.getMotDePasse()));
         }
 
-        // Ensure defaults if null
         if (utilisateur.getActif() == null) {
             utilisateur.setActif(true);
         }
@@ -67,33 +72,16 @@ public class UtilisateurService {
     }
 
     @Transactional
-    public Utilisateur update(Long id, Utilisateur utilisateur) {
-        Utilisateur existing = utilisateurRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + id));
-
-        existing.setEmail(utilisateur.getEmail());
-        existing.setNom(utilisateur.getNom());
-        existing.setPrenom(utilisateur.getPrenom());
-        // Only update actif/role if provided (avoid setting null into NOT NULL column)
-        if (utilisateur.getActif() != null) {
-            existing.setActif(utilisateur.getActif());
+    public void deleteById(Long id) {
+        if (!utilisateurRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + id);
         }
-        if (utilisateur.getRole() != null) {
-            existing.setRole(utilisateur.getRole());
-        }
-
-        // Mettre à jour le mot de passe seulement s'il est fourni
-        if (utilisateur.getMotDePasse() != null && !utilisateur.getMotDePasse().isEmpty()) {
-            existing.setMotDePasse(passwordEncoder.encode(utilisateur.getMotDePasse()));
-        }
-
-        // Mettre à jour les aliments exclus
-        if (utilisateur.getAlimentsExclus() != null) {
-            existing.setAlimentsExclus(utilisateur.getAlimentsExclus());
-        }
-
-        return utilisateurRepository.save(existing);
+        utilisateurRepository.deleteById(id);
     }
+
+    // ===============================
+    // OPÉRATIONS AVEC DTO
+    // ===============================
 
     /**
      * Créer un utilisateur depuis un DTO
@@ -104,6 +92,7 @@ public class UtilisateurService {
         utilisateur.setEmail(dto.getEmail());
         utilisateur.setNom(dto.getNom());
         utilisateur.setPrenom(dto.getPrenom());
+
         if (dto.getActif() != null) {
             utilisateur.setActif(dto.getActif());
         }
@@ -115,16 +104,43 @@ public class UtilisateurService {
             utilisateur.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
         }
 
-        if (dto.getAlimentsExclusIds() != null && !dto.getAlimentsExclusIds().isEmpty()) {
-            Set<Aliment> alimentsExclus = new HashSet<>();
-            for (Long alimentId : dto.getAlimentsExclusIds()) {
-                Aliment aliment = alimentRepository.findById(alimentId)
+        // ✅ GESTION DES RÉGIMES ALIMENTAIRES
+        if (dto.getRegimesIds() != null && !dto.getRegimesIds().isEmpty()) {
+            Set<RegimeAlimentaire> regimes = new HashSet<>();
+            for (Long regimeId : dto.getRegimesIds()) {
+                RegimeAlimentaire regime = regimeAlimentaireRepository.findById(regimeId)
                         .orElseThrow(() -> new ResourceNotFoundException(
-                                "Aliment non trouvé avec l'ID: " + alimentId
+                                "Régime alimentaire non trouvé avec l'ID: " + regimeId
                         ));
-                alimentsExclus.add(aliment);
+                regimes.add(regime);
             }
-            utilisateur.setAlimentsExclus(alimentsExclus);
+            utilisateur.setRegimes(regimes);
+        }
+
+        // ✅ GESTION DES ALLERGÈNES
+        if (dto.getAllergenesIds() != null && !dto.getAllergenesIds().isEmpty()) {
+            Set<Allergene> allergenes = new HashSet<>();
+            for (Long allergeneId : dto.getAllergenesIds()) {
+                Allergene allergene = allergeneRepository.findById(allergeneId)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Allergène non trouvé avec l'ID: " + allergeneId
+                        ));
+                allergenes.add(allergene);
+            }
+            utilisateur.setAllergenes(allergenes);
+        }
+
+        // ✅ GESTION DES TYPES DE CUISINE
+        if (dto.getTypesCuisinePreferesIds() != null && !dto.getTypesCuisinePreferesIds().isEmpty()) {
+            Set<TypeCuisine> typesCuisine = new HashSet<>();
+            for (Long typeCuisineId : dto.getTypesCuisinePreferesIds()) {
+                TypeCuisine typeCuisine = typeCuisineRepository.findById(typeCuisineId)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Type de cuisine non trouvé avec l'ID: " + typeCuisineId
+                        ));
+                typesCuisine.add(typeCuisine);
+            }
+            utilisateur.setTypesCuisinePreferes(typesCuisine);
         }
 
         if (utilisateur.getActif() == null) {
@@ -148,7 +164,7 @@ public class UtilisateurService {
         existing.setEmail(dto.getEmail());
         existing.setNom(dto.getNom());
         existing.setPrenom(dto.getPrenom());
-        // Only update actif/role if provided
+
         if (dto.getActif() != null) {
             existing.setActif(dto.getActif());
         }
@@ -156,61 +172,68 @@ public class UtilisateurService {
             existing.setRole(dto.getRole());
         }
 
-        // Mettre à jour le mot de passe seulement s'il est fourni
         if (dto.getMotDePasse() != null && !dto.getMotDePasse().isEmpty()) {
-            existing.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
+            existing.setMotDePasse(dto.getMotDePasse());
         }
 
-        // Mettre à jour les aliments exclus
-        existing.getAlimentsExclus().clear();
+        // ✅ MISE À JOUR DES RÉGIMES ALIMENTAIRES
+        if (dto.getRegimesIds() != null) {
+            existing.getRegimes().clear();
 
-        if (dto.getAlimentsExclusIds() != null && !dto.getAlimentsExclusIds().isEmpty()) {
-            Set<Aliment> alimentsExclus = new HashSet<>();
-            for (Long alimentId : dto.getAlimentsExclusIds()) {
-                Aliment aliment = alimentRepository.findById(alimentId)
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Aliment non trouvé avec l'ID: " + alimentId
-                        ));
-                alimentsExclus.add(aliment);
+            if (!dto.getRegimesIds().isEmpty()) {
+                for (Long regimeId : dto.getRegimesIds()) {
+                    if (regimeId != null && regimeId > 0) {
+                        RegimeAlimentaire regime = regimeAlimentaireRepository.findById(regimeId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                        "Régime alimentaire non trouvé avec l'ID: " + regimeId
+                                ));
+                        existing.getRegimes().add(regime);
+                    }
+                }
             }
-            existing.setAlimentsExclus(alimentsExclus);
+        }
+
+        // ✅ MISE À JOUR DES ALLERGÈNES
+        if (dto.getAllergenesIds() != null) {
+            existing.getAllergenes().clear();
+
+            if (!dto.getAllergenesIds().isEmpty()) {
+                for (Long allergeneId : dto.getAllergenesIds()) {
+                    if (allergeneId != null && allergeneId > 0) {
+                        Allergene allergene = allergeneRepository.findById(allergeneId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                        "Allergène non trouvé avec l'ID: " + allergeneId
+                                ));
+                        existing.getAllergenes().add(allergene);
+                    }
+                }
+            }
+        }
+
+        // ✅ MISE À JOUR DES TYPES DE CUISINE
+        if (dto.getTypesCuisinePreferesIds() != null) {
+            existing.getTypesCuisinePreferes().clear();
+
+            if (!dto.getTypesCuisinePreferesIds().isEmpty()) {
+                for (Long typeCuisineId : dto.getTypesCuisinePreferesIds()) {
+                    if (typeCuisineId != null && typeCuisineId > 0) {
+                        TypeCuisine typeCuisine = typeCuisineRepository.findById(typeCuisineId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                        "Type de cuisine non trouvé avec l'ID: " + typeCuisineId
+                                ));
+                        existing.getTypesCuisinePreferes().add(typeCuisine);
+                    }
+                }
+            }
         }
 
         return utilisateurRepository.save(existing);
     }
 
-    @Transactional
-    public void deleteById(Long id) {
-        if (!utilisateurRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + id);
-        }
-        utilisateurRepository.deleteById(id);
-    }
+    // ===============================
+    // GESTION DES TOKENS DE RÉINITIALISATION
+    // ===============================
 
-    @Transactional
-    public void addAlimentExclu(Long userId, Long alimentId) {
-        Utilisateur utilisateur = utilisateurRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
-
-        Aliment aliment = alimentRepository.findById(alimentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Aliment non trouvé"));
-
-        utilisateur.getAlimentsExclus().add(aliment);
-        utilisateurRepository.save(utilisateur);
-    }
-
-    @Transactional
-    public void removeAlimentExclu(Long userId, Long alimentId) {
-        Utilisateur utilisateur = utilisateurRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
-
-        utilisateur.getAlimentsExclus().removeIf(a -> a.getId().equals(alimentId));
-        utilisateurRepository.save(utilisateur);
-    }
-
-    /**
-     * Générer un token de réinitialisation de mot de passe
-     */
     @Transactional
     public String generatePasswordResetToken(Long utilisateurId) {
         String token = UUID.randomUUID().toString();
@@ -224,39 +247,38 @@ public class UtilisateurService {
         return token;
     }
 
-    /**
-     * Valider et réinitialiser le mot de passe avec un token
-     */
-    @Transactional
-    public boolean resetPasswordWithToken(String token, String newPassword) {
+    public Optional<PasswordResetToken> findValidToken(String token) {
         Optional<PasswordResetToken> resetTokenOpt = passwordResetTokenRepository.findByToken(token);
 
         if (resetTokenOpt.isEmpty()) {
-            return false;
+            return Optional.empty();
         }
 
         PasswordResetToken resetToken = resetTokenOpt.get();
 
-        // Vérifier que le token est valide (non utilisé et non expiré)
         if (!resetToken.isValid()) {
-            return false;
+            return Optional.empty();
         }
 
-        // Récupérer l'utilisateur
-        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findById(resetToken.getUtilisateurId());
-        if (utilisateurOpt.isEmpty()) {
-            return false;
-        }
+        return resetTokenOpt;
+    }
 
-        // Mettre à jour le mot de passe
-        Utilisateur utilisateur = utilisateurOpt.get();
-        utilisateur.setMotDePasse(passwordEncoder.encode(newPassword));
+    @Transactional
+    public void markTokenAsUsed(String token) {
+        Optional<PasswordResetToken> resetTokenOpt = passwordResetTokenRepository.findByToken(token);
+        if (resetTokenOpt.isPresent()) {
+            PasswordResetToken resetToken = resetTokenOpt.get();
+            resetToken.setUsed(true);
+            passwordResetTokenRepository.save(resetToken);
+        }
+    }
+
+    @Transactional
+    public void updatePassword(Long utilisateurId, String hashedPassword) {
+        Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + utilisateurId));
+
+        utilisateur.setMotDePasse(hashedPassword);
         utilisateurRepository.save(utilisateur);
-
-        // Marquer le token comme utilisé
-        resetToken.setUsed(true);
-        passwordResetTokenRepository.save(resetToken);
-
-        return true;
     }
 }

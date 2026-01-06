@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,7 +60,9 @@ class UtilisateurControllerTest {
         utilisateur.setPrenom("John");
         utilisateur.setActif(true);
         utilisateur.setRole(Utilisateur.Role.USER);
-        utilisateur.setAlimentsExclus(new HashSet<>());
+        utilisateur.setRegimes(new HashSet<>());
+        utilisateur.setAllergenes(new HashSet<>());
+        utilisateur.setTypesCuisinePreferes(new HashSet<>());
 
         utilisateurDTO = new UtilisateurDTO();
         utilisateurDTO.setId(1L);
@@ -68,7 +71,9 @@ class UtilisateurControllerTest {
         utilisateurDTO.setPrenom("John");
         utilisateurDTO.setActif(true);
         utilisateurDTO.setRole(Utilisateur.Role.USER);
-        utilisateurDTO.setAlimentsExclusIds(new HashSet<>());
+        utilisateurDTO.setRegimesIds(new HashSet<>());
+        utilisateurDTO.setAllergenesIds(new HashSet<>());
+        utilisateurDTO.setTypesCuisinePreferesIds(new HashSet<>());
     }
 
     // ==================== Tests pour GET /api/persistance/utilisateurs ====================
@@ -205,6 +210,51 @@ class UtilisateurControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(3))
                 .andExpect(jsonPath("$.email").value("new@test.com"));
+
+        verify(utilisateurService, times(1)).saveFromDTO(any(UtilisateurDTO.class));
+    }
+
+    @Test
+    @DisplayName("POST /api/persistance/utilisateurs - avec préférences alimentaires, devrait créer l'utilisateur")
+    void createUtilisateur_avecPreferencesAlimentaires_devraitCreerUtilisateur() throws Exception {
+        // Given
+        UtilisateurDTO newDTO = new UtilisateurDTO();
+        newDTO.setEmail("new@test.com");
+        newDTO.setMotDePasse("password123");
+        newDTO.setNom("New");
+        newDTO.setPrenom("User");
+        newDTO.setRegimesIds(Set.of(1L)); // Végétarien
+        newDTO.setAllergenesIds(Set.of(8L)); // Fruits à coque
+        newDTO.setTypesCuisinePreferesIds(Set.of(2L, 5L)); // Italien, Japonais
+
+        Utilisateur savedUtilisateur = new Utilisateur();
+        savedUtilisateur.setId(3L);
+        savedUtilisateur.setEmail("new@test.com");
+        savedUtilisateur.setNom("New");
+        savedUtilisateur.setPrenom("User");
+
+        UtilisateurDTO savedDTO = new UtilisateurDTO();
+        savedDTO.setId(3L);
+        savedDTO.setEmail("new@test.com");
+        savedDTO.setNom("New");
+        savedDTO.setPrenom("User");
+        savedDTO.setRegimesIds(Set.of(1L));
+        savedDTO.setAllergenesIds(Set.of(8L));
+        savedDTO.setTypesCuisinePreferesIds(Set.of(2L, 5L));
+
+        when(utilisateurService.findByEmail("new@test.com")).thenReturn(Optional.empty());
+        when(utilisateurService.saveFromDTO(any(UtilisateurDTO.class))).thenReturn(savedUtilisateur);
+        when(utilisateurMapper.toDTO(savedUtilisateur)).thenReturn(savedDTO);
+
+        // When & Then
+        mockMvc.perform(post("/api/persistance/utilisateurs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(3))
+                .andExpect(jsonPath("$.email").value("new@test.com"))
+                .andExpect(jsonPath("$.regimesIds[0]").value(1))
+                .andExpect(jsonPath("$.allergenesIds[0]").value(8));
 
         verify(utilisateurService, times(1)).saveFromDTO(any(UtilisateurDTO.class));
     }
@@ -395,6 +445,44 @@ class UtilisateurControllerTest {
     }
 
     @Test
+    @DisplayName("PUT /api/persistance/utilisateurs/{id} - avec préférences alimentaires, devrait mettre à jour")
+    void updateUtilisateur_avecPreferencesAlimentaires_devraitMettreAJour() throws Exception {
+        // Given
+        UtilisateurDTO updateDTO = new UtilisateurDTO();
+        updateDTO.setEmail("john@test.com");
+        updateDTO.setNom("Doe");
+        updateDTO.setPrenom("John");
+        updateDTO.setRegimesIds(Set.of(1L, 2L)); // Végétarien + Vegan
+        updateDTO.setAllergenesIds(Set.of(7L, 8L)); // Lait + Fruits à coque
+        updateDTO.setTypesCuisinePreferesIds(Set.of(2L, 3L, 5L)); // Italien, Asiatique, Japonais
+
+        Utilisateur updatedUtilisateur = new Utilisateur();
+        updatedUtilisateur.setId(1L);
+        updatedUtilisateur.setEmail("john@test.com");
+
+        UtilisateurDTO updatedDTO = new UtilisateurDTO();
+        updatedDTO.setId(1L);
+        updatedDTO.setEmail("john@test.com");
+        updatedDTO.setRegimesIds(Set.of(1L, 2L));
+        updatedDTO.setAllergenesIds(Set.of(7L, 8L));
+        updatedDTO.setTypesCuisinePreferesIds(Set.of(2L, 3L, 5L));
+
+        when(utilisateurService.findById(1L)).thenReturn(Optional.of(utilisateur));
+        when(utilisateurService.findByEmail("john@test.com")).thenReturn(Optional.of(utilisateur));
+        when(utilisateurService.updateFromDTO(eq(1L), any(UtilisateurDTO.class))).thenReturn(updatedUtilisateur);
+        when(utilisateurMapper.toDTO(updatedUtilisateur)).thenReturn(updatedDTO);
+
+        // When & Then
+        mockMvc.perform(put("/api/persistance/utilisateurs/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+
+        verify(utilisateurService, times(1)).updateFromDTO(eq(1L), any(UtilisateurDTO.class));
+    }
+
+    @Test
     @DisplayName("PUT /api/persistance/utilisateurs/{id} - avec ID inexistant, devrait retourner 404")
     void updateUtilisateur_avecIdInexistant_devraitRetourner404() throws Exception {
         // Given
@@ -444,4 +532,3 @@ class UtilisateurControllerTest {
         verify(utilisateurService, never()).deleteById(any());
     }
 }
-
