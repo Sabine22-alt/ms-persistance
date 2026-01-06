@@ -1,0 +1,37 @@
+package com.mspersistance.univ.soa.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Entity
+@Table(name = "etapes", indexes = {
+    @Index(name = "idx_etapes_recette_id", columnList = "recette_id")
+})
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Etape {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recette_id", nullable = false, foreignKey = @ForeignKey(name = "fk_etape_recette"))
+    @JsonBackReference("recette-etapes")
+    private Recette recette;
+
+    @Column(nullable = false)
+    private Integer ordre;
+
+    @Column
+    private Integer temps; // en minutes
+
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String texte;
+}
