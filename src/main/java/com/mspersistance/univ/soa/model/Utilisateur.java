@@ -1,8 +1,7 @@
-package com.mspersistance.univ.soa.model;
+package com.springbootTemplate.univ.soa.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +14,6 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Utilisateur {
 
     @Id
@@ -34,33 +32,39 @@ public class Utilisateur {
     @Column(length = 100)
     private String prenom;
 
-    @Column(length = 20, nullable = true)
-    private String telephone; // optionnel
-
-    @Column(length = 500, nullable = true)
-    private String bio; // optionnel
-
-    @Column(length = 500, nullable = true)
-    private String adresse; // optionnel
-
-
     @Column(nullable = false)
-    @Builder.Default
     private Boolean actif = true;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    @Builder.Default
     private Role role = Role.USER;
 
+    // RÉGIMES ALIMENTAIRES
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-            name = "aliments_exclus",
-            joinColumns = @JoinColumn(name = "utilisateur_id", foreignKey = @ForeignKey(name = "fk_aliments_exclus_utilisateur")),
-            inverseJoinColumns = @JoinColumn(name = "aliment_id", foreignKey = @ForeignKey(name = "fk_aliments_exclus_aliment"))
+            name = "utilisateur_regimes",
+            joinColumns = @JoinColumn(name = "utilisateur_id", foreignKey = @ForeignKey(name = "fk_user_regimes")),
+            inverseJoinColumns = @JoinColumn(name = "regime_id", foreignKey = @ForeignKey(name = "fk_regime_user"))
     )
-    @Builder.Default
-    private Set<Aliment> alimentsExclus = new HashSet<>();
+    private Set<RegimeAlimentaire> regimes = new HashSet<>();
+
+    // ALLERGÈNES
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "utilisateur_allergenes",
+            joinColumns = @JoinColumn(name = "utilisateur_id", foreignKey = @ForeignKey(name = "fk_user_allergenes")),
+            inverseJoinColumns = @JoinColumn(name = "allergene_id", foreignKey = @ForeignKey(name = "fk_allergene_user"))
+    )
+    private Set<Allergene> allergenes = new HashSet<>();
+
+    // TYPES DE CUISINE PRÉFÉRÉS
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "utilisateur_cuisines",
+            joinColumns = @JoinColumn(name = "utilisateur_id", foreignKey = @ForeignKey(name = "fk_user_cuisines")),
+            inverseJoinColumns = @JoinColumn(name = "type_cuisine_id", foreignKey = @ForeignKey(name = "fk_cuisine_user"))
+    )
+    private Set<TypeCuisine> typesCuisinePreferes = new HashSet<>();
 
     @Column(name = "date_creation", updatable = false)
     private LocalDateTime dateCreation;
