@@ -8,6 +8,8 @@ import com.mspersistance.univ.soa.repository.FichierRecetteRepository;
 import com.mspersistance.univ.soa.repository.RecetteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +45,7 @@ public class FichierRecetteService {
     );
 
     @Transactional
+    @CacheEvict(value = {"recettes", "fichiers"}, allEntries = true)
     public FichierRecetteDTO uploadImage(Long recetteId, MultipartFile file) {
         Recette recette = recetteRepository.findById(recetteId)
             .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
@@ -84,6 +87,7 @@ public class FichierRecetteService {
     }
 
     @Transactional
+    @CacheEvict(value = {"recettes", "fichiers"}, allEntries = true)
     public FichierRecetteDTO uploadDocument(Long recetteId, MultipartFile file) {
         Recette recette = recetteRepository.findById(recetteId)
             .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
@@ -115,18 +119,21 @@ public class FichierRecetteService {
         return toDTO(fichier);
     }
 
+    @Cacheable(value = "fichiers", key = "'recette:' + #recetteId")
     public List<FichierRecetteDTO> getFichiersByRecette(Long recetteId) {
         return fichierRecetteRepository.findByRecetteId(recetteId).stream()
             .map(this::toDTO)
             .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "fichiers", key = "'recette:' + #recetteId + ':images'")
     public List<FichierRecetteDTO> getImagesByRecette(Long recetteId) {
         return fichierRecetteRepository.findByRecetteIdAndType(recetteId, FichierRecette.TypeFichier.IMAGE).stream()
             .map(this::toDTO)
             .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "fichiers", key = "'recette:' + #recetteId + ':documents'")
     public List<FichierRecetteDTO> getDocumentsByRecette(Long recetteId) {
         return fichierRecetteRepository.findByRecetteIdAndType(recetteId, FichierRecette.TypeFichier.DOCUMENT).stream()
             .map(this::toDTO)
@@ -144,6 +151,7 @@ public class FichierRecetteService {
         return minioService.downloadFile(bucketName, fichier.getCheminMinio());
     }
 
+    @Cacheable(value = "fichiers", key = "#fichierId")
     public FichierRecetteDTO getFichierById(Long fichierId) {
         FichierRecette fichier = fichierRecetteRepository.findById(fichierId)
             .orElseThrow(() -> new ResourceNotFoundException("Fichier non trouvé avec l'ID: " + fichierId));
@@ -151,6 +159,7 @@ public class FichierRecetteService {
     }
 
     @Transactional
+    @CacheEvict(value = {"recettes", "fichiers"}, allEntries = true)
     public void deleteFichier(Long fichierId) {
         FichierRecette fichier = fichierRecetteRepository.findById(fichierId)
             .orElseThrow(() -> new ResourceNotFoundException("Fichier non trouvé avec l'ID: " + fichierId));
@@ -165,6 +174,7 @@ public class FichierRecetteService {
     }
 
     @Transactional
+    @CacheEvict(value = {"recettes", "fichiers"}, allEntries = true)
     public void deleteAllFichiersByRecette(Long recetteId) {
         List<FichierRecette> fichiers = fichierRecetteRepository.findByRecetteId(recetteId);
 

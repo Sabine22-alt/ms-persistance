@@ -17,7 +17,9 @@ import java.util.List;
 @Table(name = "recettes", indexes = {
     @Index(name = "idx_recettes_utilisateur_id", columnList = "utilisateur_id"),
     @Index(name = "idx_recettes_statut", columnList = "statut"),
-    @Index(name = "idx_recettes_date_creation", columnList = "date_creation")
+    @Index(name = "idx_recettes_date_creation", columnList = "date_creation DESC"),
+    @Index(name = "idx_recettes_statut_date", columnList = "statut,date_creation DESC"),
+    @Index(name = "idx_recettes_user_statut", columnList = "utilisateur_id,statut")
 })
 @Data
 @NoArgsConstructor

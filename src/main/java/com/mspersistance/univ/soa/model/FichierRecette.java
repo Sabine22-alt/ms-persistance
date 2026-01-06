@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "fichiers_recette", indexes = {
-    @Index(name = "idx_fichiers_recette_id", columnList = "recette_id")
+    @Index(name = "idx_fichiers_recette_id", columnList = "recette_id"),
+    @Index(name = "idx_fichiers_recette_type", columnList = "recette_id,type"),
+    @Index(name = "idx_fichiers_date_upload", columnList = "date_upload DESC")
 })
 @Data
 @NoArgsConstructor

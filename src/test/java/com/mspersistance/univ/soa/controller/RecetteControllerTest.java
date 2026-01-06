@@ -85,8 +85,8 @@ class RecetteControllerTest {
         RecetteDTO dto2 = new RecetteDTO(2L, "Salade", null, null, null, null, null, null, null, null, null, null, null, null, new ArrayList<>(), new ArrayList<>());
 
         when(recetteService.findAll()).thenReturn(Arrays.asList(recette, recette2));
-        when(recetteMapper.toDTO(recette)).thenReturn(recetteDTO);
-        when(recetteMapper.toDTO(recette2)).thenReturn(dto2);
+        when(recetteMapper.toDTOLight(recette)).thenReturn(recetteDTO);
+        when(recetteMapper.toDTOLight(recette2)).thenReturn(dto2);
 
         // When & Then
         mockMvc.perform(get("/api/persistance/recettes"))
@@ -98,7 +98,7 @@ class RecetteControllerTest {
                 .andExpect(jsonPath("$[1].titre").value("Salade"));
 
         verify(recetteService, times(1)).findAll();
-        verify(recetteMapper, times(2)).toDTO(any(Recette.class));
+        verify(recetteMapper, times(2)).toDTOLight(any(Recette.class));
     }
 
     // ==================== Tests pour GET /api/persistance/recettes/{id} ====================

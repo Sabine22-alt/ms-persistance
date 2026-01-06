@@ -32,13 +32,22 @@ public class RecetteController {
     }
 
     /**
-     * GET /api/persistance/recettes - Récupérer toutes les recettes
+     * GET /api/persistance/recettes - Récupérer toutes les recettes (VERSION OPTIMISÉE)
      */
     @GetMapping
     @Transactional(readOnly = true)
-    public ResponseEntity<List<RecetteDTO>> getAllRecettes() {
+    public ResponseEntity<List<RecetteDTO>> getAllRecettes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+
+        // Validation pagination
+        if (size > 100) size = 100;
+        if (page < 0) page = 0;
+
         List<RecetteDTO> dtos = recetteService.findAll().stream()
-                .map(recetteMapper::toDTO)
+                .skip((long) page * size)
+                .limit(size)
+                .map(recetteMapper::toDTOLight) // VERSION LÉGÈRE sans collections
                 .toList();
         return ResponseEntity.ok(dtos);
     }
@@ -50,7 +59,7 @@ public class RecetteController {
     @Transactional(readOnly = true)
     public ResponseEntity<List<RecetteDTO>> getRecettesEnAttente() {
         List<RecetteDTO> dtos = recetteService.findByStatut(StatutRecette.EN_ATTENTE).stream()
-                .map(recetteMapper::toDTO)
+                .map(recetteMapper::toDTOLight) // VERSION LÉGÈRE
                 .toList();
         return ResponseEntity.ok(dtos);
     }
@@ -62,19 +71,19 @@ public class RecetteController {
     @Transactional(readOnly = true)
     public ResponseEntity<List<RecetteDTO>> getRecettesByUtilisateur(@PathVariable Long utilisateurId) {
         List<RecetteDTO> dtos = recetteService.findByUtilisateurId(utilisateurId).stream()
-                .map(recetteMapper::toDTO)
+                .map(recetteMapper::toDTOLight) // VERSION LÉGÈRE
                 .toList();
         return ResponseEntity.ok(dtos);
     }
 
     /**
-     * GET /api/persistance/recettes/{id} - Récupérer une recette par ID
+     * GET /api/persistance/recettes/{id} - Récupérer une recette par ID (VERSION COMPLÈTE)
      */
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     public ResponseEntity<RecetteDTO> getRecetteById(@PathVariable Long id) {
         return recetteService.findById(id)
-                .map(recetteMapper::toDTO)
+                .map(recetteMapper::toDTO) // VERSION COMPLÈTE avec collections
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

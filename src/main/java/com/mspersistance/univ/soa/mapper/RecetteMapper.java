@@ -7,7 +7,6 @@ import com.mspersistance.univ.soa.model.Recette;
 import com.mspersistance.univ.soa.service.MinioService;
 import org.springframework.stereotype.Component;
 
-import java.util.stream.Collectors;
 
 /**
  * Mapper pour convertir entre Recette et RecetteDTO (Record).
@@ -23,7 +22,8 @@ public class RecetteMapper {
     }
 
     /**
-     * Convertit une entité Recette en DTO Record
+     * Convertit une entité Recette en DTO Record (VERSION OPTIMISÉE)
+     * N'accède aux collections lazy QUE si déjà initialisées (évite N+1)
      */
     public RecetteDTO toDTO(Recette recette) {
         if (recette == null) {
@@ -33,18 +33,18 @@ public class RecetteMapper {
         // Gérer l'URL de l'image (MinIO presigned URL)
         String imageUrl = resolveImageUrl(recette.getImageUrl());
 
-        // Convertir les ingrédients
-        var ingredients = recette.getIngredients() != null
+        // Convertir les ingrédients SEULEMENT si la collection est initialisée ET non-null
+        var ingredients = (recette.getIngredients() != null && isCollectionInitialized(recette.getIngredients()))
                 ? recette.getIngredients().stream()
                         .map(this::ingredientToDTO)
-                        .collect(Collectors.toList())
+                        .toList()
                 : null;
 
-        // Convertir les étapes
-        var etapes = recette.getEtapes() != null
+        // Convertir les étapes SEULEMENT si la collection est initialisée ET non-null
+        var etapes = (recette.getEtapes() != null && isCollectionInitialized(recette.getEtapes()))
                 ? recette.getEtapes().stream()
                         .map(this::etapeToDTO)
-                        .collect(Collectors.toList())
+                        .toList()
                 : null;
 
         // Constructeur Record complet
@@ -66,6 +66,43 @@ public class RecetteMapper {
                 ingredients,
                 etapes
         );
+    }
+
+    /**
+     * Version légère pour listes (pas de collections)
+     */
+    public RecetteDTO toDTOLight(Recette recette) {
+        if (recette == null) {
+            return null;
+        }
+
+        String imageUrl = resolveImageUrl(recette.getImageUrl());
+
+        return new RecetteDTO(
+                recette.getId(),
+                recette.getTitre(),
+                recette.getDescription(),
+                recette.getTempsTotal(),
+                recette.getKcal(),
+                imageUrl,
+                recette.getDifficulte(),
+                recette.getDateCreation(),
+                recette.getDateModification(),
+                recette.getActif(),
+                recette.getStatut(),
+                recette.getMotifRejet(),
+                recette.getUtilisateurId(),
+                recette.getMoyenneEvaluation(),
+                null, // pas d'ingredients
+                null  // pas d'etapes
+        );
+    }
+
+    /**
+     * Vérifie si une collection Hibernate est déjà initialisée (évite le lazy loading)
+     */
+    private boolean isCollectionInitialized(Object collection) {
+        return org.hibernate.Hibernate.isInitialized(collection);
     }
 
     /**

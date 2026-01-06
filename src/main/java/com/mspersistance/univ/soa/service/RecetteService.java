@@ -59,21 +59,25 @@ public class RecetteService {
     // ============ MÉTHODES DE LECTURE (avec Cache) ============
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "recettes", key = "'all'")
     public List<Recette> findAll() {
         return recetteRepository.findAllOptimized();
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "recettes", key = "#id")
     public Optional<Recette> findById(Long id) {
         return recetteRepository.findByIdOptimized(id);
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "recettes", key = "'statut:' + #statut")
     public List<Recette> findByStatut(Recette.StatutRecette statut) {
         return recetteRepository.findByStatutOptimized(statut);
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "recettes", key = "'user:' + #utilisateurId")
     public List<Recette> findByUtilisateurId(Long utilisateurId) {
         return recetteRepository.findByUtilisateurIdOptimized(utilisateurId);
     }

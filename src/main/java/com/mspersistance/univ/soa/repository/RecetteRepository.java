@@ -14,31 +14,27 @@ import java.util.Optional;
 public interface RecetteRepository extends JpaRepository<Recette, Long> {
 
     /**
-     * Récupère toutes les recettes avec ingredients (JOIN FETCH sur 1 seule collection)
-     * Les etapes seront chargées en lazy mais c'est OK car @Transactional(readOnly=true) les gardera en session
+     * Récupère toutes les recettes SANS collections (ultra rapide, pas de N+1)
+     * Les collections seront chargées uniquement si nécessaire via DTO projection
      */
-    @Query("SELECT DISTINCT r FROM Recette r " +
-           "LEFT JOIN FETCH r.ingredients " +
-           "ORDER BY r.dateCreation DESC")
+    @Query("SELECT r FROM Recette r ORDER BY r.dateCreation DESC")
     List<Recette> findAllOptimized();
 
-    @Query("SELECT DISTINCT r FROM Recette r " +
-           "LEFT JOIN FETCH r.ingredients " +
-           "WHERE r.statut = :statut " +
-           "ORDER BY r.dateCreation DESC")
+    @Query("SELECT r FROM Recette r WHERE r.statut = :statut ORDER BY r.dateCreation DESC")
     List<Recette> findByStatutOptimized(@Param("statut") StatutRecette statut);
 
-    @Query("SELECT DISTINCT r FROM Recette r " +
-           "LEFT JOIN FETCH r.ingredients " +
-           "WHERE r.utilisateurId = :utilisateurId " +
-           "ORDER BY r.dateCreation DESC")
+    @Query("SELECT r FROM Recette r WHERE r.utilisateurId = :utilisateurId ORDER BY r.dateCreation DESC")
     List<Recette> findByUtilisateurIdOptimized(@Param("utilisateurId") Long utilisateurId);
 
     /**
-     * Récupère une recette par ID avec tous ses ingrédients chargés
+     * Récupère une recette par ID avec TOUTES ses collections en 3 queries (pas N+1)
+     * Query 1: Recette + ingredients (JOIN FETCH)
+     * Query 2: etapes (SUBSELECT)
+     * Query 3: fichiers (SUBSELECT)
      */
-    @Query("SELECT r FROM Recette r " +
-           "LEFT JOIN FETCH r.ingredients " +
+    @Query("SELECT DISTINCT r FROM Recette r " +
+           "LEFT JOIN FETCH r.ingredients i " +
+           "LEFT JOIN FETCH i.aliment " +
            "WHERE r.id = :id")
     Optional<Recette> findByIdOptimized(@Param("id") Long id);
 
