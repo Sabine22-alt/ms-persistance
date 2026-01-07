@@ -65,24 +65,24 @@ public class FeedbackService {
         feedback.setId(null);
 
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + utilisateurId));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvÃ© avec l'ID: " + utilisateurId));
 
         Recette recette = recetteRepository.findByIdSimple(recetteId)
-                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
+                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvÃ©e avec l'ID: " + recetteId));
 
         feedback.setUtilisateur(utilisateur);
         feedback.setRecette(recette);
 
         Feedback saved = feedbackRepository.save(feedback);
 
-        // Logger l'activité
+        // Logger l'activitÃ©
         activiteService.logActivite(
             utilisateurId,
             Activite.TypeActivite.FEEDBACK_AJOUT,
-            "Avis ajouté à la recette : " + recette.getTitre() + " (Note: " + saved.getEvaluation() + "/5)"
+            "Avis ajoutÃ© Ã  la recette : " + recette.getTitre() + " (Note: " + saved.getEvaluation() + "/5)"
         );
 
-        // Mettre à jour la moyenne d'évaluation de la recette
+        // Mettre Ã  jour la moyenne d'Ã©valuation de la recette
         updateRecetteMoyenneEvaluation(recetteId);
 
         return saved;
@@ -91,21 +91,21 @@ public class FeedbackService {
     @Transactional
     public Feedback update(Long id, Feedback feedback) {
         Feedback existing = feedbackRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Feedback non trouvé avec l'ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Feedback non trouvÃ© avec l'ID: " + id));
 
         existing.setEvaluation(feedback.getEvaluation());
         existing.setCommentaire(feedback.getCommentaire());
 
         Feedback updated = feedbackRepository.save(existing);
 
-        // Mettre à jour la moyenne d'évaluation de la recette
+        // Mettre Ã  jour la moyenne d'Ã©valuation de la recette
         updateRecetteMoyenneEvaluation(existing.getRecette().getId());
 
-        // Enregistrer l'activité
+        // Enregistrer l'activitÃ©
         activiteService.logActivite(
             existing.getUtilisateur().getId(),
             Activite.TypeActivite.FEEDBACK_MODIFIE,
-            "Avis modifié sur la recette : " + existing.getRecette().getTitre() + " (Note: " + updated.getEvaluation() + "/5)"
+            "Avis modifiÃ© sur la recette : " + existing.getRecette().getTitre() + " (Note: " + updated.getEvaluation() + "/5)"
         );
 
         return updated;
@@ -114,7 +114,7 @@ public class FeedbackService {
     @Transactional
     public void deleteById(Long id) {
         Feedback feedback = feedbackRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Feedback non trouvé avec l'ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Feedback non trouvÃ© avec l'ID: " + id));
 
         Long recetteId = feedback.getRecette().getId();
         Long utilisateurId = feedback.getUtilisateur().getId();
@@ -122,29 +122,29 @@ public class FeedbackService {
 
         feedbackRepository.deleteById(id);
 
-        // Mettre à jour la moyenne d'évaluation de la recette
+        // Mettre Ã  jour la moyenne d'Ã©valuation de la recette
         updateRecetteMoyenneEvaluation(recetteId);
 
-        // Enregistrer l'activité
+        // Enregistrer l'activitÃ©
         activiteService.logActivite(
             utilisateurId,
             Activite.TypeActivite.FEEDBACK_SUPPRIME,
-            "Avis supprimé de la recette : " + recetteTitre
+            "Avis supprimÃ© de la recette : " + recetteTitre
         );
     }
 
     /**
-     * Recalcule et met à jour la moyenne d'évaluation pour une recette
+     * Recalcule et met Ã  jour la moyenne d'Ã©valuation pour une recette
      */
     @Transactional
     public void updateRecetteMoyenneEvaluation(Long recetteId) {
         Recette recette = recetteRepository.findByIdSimple(recetteId)
-                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
+                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvÃ©e avec l'ID: " + recetteId));
 
-        // Calculer la moyenne via la requête BD
+        // Calculer la moyenne via la requÃªte BD
         Optional<Double> moyenne = feedbackRepository.calculateAverageEvaluationByRecetteId(recetteId);
 
-        // Mettre à jour le champ dénormalisé
+        // Mettre Ã  jour le champ dÃ©normalisÃ©
         recette.setMoyenneEvaluation(moyenne.orElse(0.0));
         recetteRepository.save(recette);
     }

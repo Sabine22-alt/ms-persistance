@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class FeedbackMapper {
 
     /**
-     * Convertit une entité Feedback en DTO Record
+     * Convertit une entitÃ© Feedback en DTO Record
      */
     public FeedbackDTO toDTO(Feedback feedback) {
         if (feedback == null) {
@@ -30,8 +30,8 @@ public class FeedbackMapper {
     }
 
     /**
-     * Convertit un DTO Record en entité Feedback (partiel)
-     * Note: Les relations (utilisateur/recette) doivent être résolues séparément
+     * Convertit un DTO Record en entitÃ© Feedback (partiel)
+     * Note: Les relations (utilisateur/recette) doivent Ãªtre rÃ©solues sÃ©parÃ©ment
      */
     public Feedback toEntity(FeedbackDTO dto) {
         if (dto == null) {

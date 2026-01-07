@@ -22,7 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/persistance/recettes/{recetteId}/fichiers")
 @CrossOrigin(origins = "*")
-@Tag(name = "Fichiers de Recettes", description = "Gestion des images et documents associés aux recettes")
+@Tag(name = "Fichiers de Recettes", description = "Gestion des images et documents associÃ©s aux recettes")
 public class FichierRecetteController {
 
     private final FichierRecetteService fichierRecetteService;
@@ -81,28 +81,28 @@ public class FichierRecetteController {
     }
 
     @GetMapping
-    @Operation(summary = "Récupérer tous les fichiers d'une recette")
+    @Operation(summary = "RÃ©cupÃ©rer tous les fichiers d'une recette")
     public ResponseEntity<List<FichierRecetteDTO>> getAllFichiers(@PathVariable Long recetteId) {
         List<FichierRecetteDTO> fichiers = fichierRecetteService.getFichiersByRecette(recetteId);
         return ResponseEntity.ok(fichiers);
     }
 
     @GetMapping("/images")
-    @Operation(summary = "Récupérer les images d'une recette")
+    @Operation(summary = "RÃ©cupÃ©rer les images d'une recette")
     public ResponseEntity<List<FichierRecetteDTO>> getImages(@PathVariable Long recetteId) {
         List<FichierRecetteDTO> images = fichierRecetteService.getImagesByRecette(recetteId);
         return ResponseEntity.ok(images);
     }
 
     @GetMapping("/documents")
-    @Operation(summary = "Récupérer les documents d'une recette")
+    @Operation(summary = "RÃ©cupÃ©rer les documents d'une recette")
     public ResponseEntity<List<FichierRecetteDTO>> getDocuments(@PathVariable Long recetteId) {
         List<FichierRecetteDTO> documents = fichierRecetteService.getDocumentsByRecette(recetteId);
         return ResponseEntity.ok(documents);
     }
 
     @GetMapping("/{fichierId}/download")
-    @Operation(summary = "Télécharger un fichier")
+    @Operation(summary = "TÃ©lÃ©charger un fichier")
     public ResponseEntity<?> downloadFichier(@PathVariable Long recetteId, @PathVariable Long fichierId) {
         try {
             FichierRecetteDTO fichier = fichierRecetteService.getFichierById(fichierId);
@@ -118,19 +118,19 @@ public class FichierRecetteController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(createErrorResponse("Erreur lors du téléchargement: " + e.getMessage()));
+                .body(createErrorResponse("Erreur lors du tÃ©lÃ©chargement: " + e.getMessage()));
         }
     }
 
     @GetMapping("/{fichierId}")
-    @Operation(summary = "Récupérer les métadonnées d'un fichier")
+    @Operation(summary = "RÃ©cupÃ©rer les mÃ©tadonnÃ©es d'un fichier")
     public ResponseEntity<?> getFichierMetadata(@PathVariable Long recetteId, @PathVariable Long fichierId) {
         try {
             FichierRecetteDTO fichier = fichierRecetteService.getFichierById(fichierId);
             return ResponseEntity.ok(fichier);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(createErrorResponse("Fichier non trouvé"));
+                .body(createErrorResponse("Fichier non trouvÃ©"));
         }
     }
 
@@ -169,7 +169,7 @@ public class FichierRecetteController {
 
             if (!fichier.getRecetteId().equals(recetteId) || fichier.getType() != FichierRecette.TypeFichier.IMAGE) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(createErrorResponse("Image non trouvée pour cette recette"));
+                    .body(createErrorResponse("Image non trouvÃ©e pour cette recette"));
             }
 
             InputStream inputStream = fichierRecetteService.downloadFichier(fichierId);
@@ -184,7 +184,7 @@ public class FichierRecetteController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(createErrorResponse("Erreur lors de la récupération de l'image: " + e.getMessage()));
+                .body(createErrorResponse("Erreur lors de la rÃ©cupÃ©ration de l'image: " + e.getMessage()));
         }
     }
 
@@ -199,7 +199,7 @@ public class FichierRecetteController {
 
             if (!fichier.getRecetteId().equals(recetteId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(createErrorResponse("Fichier non trouvé pour cette recette"));
+                    .body(createErrorResponse("Fichier non trouvÃ© pour cette recette"));
             }
 
             InputStream inputStream = fichierRecetteService.downloadFichier(fichierId);
@@ -214,7 +214,7 @@ public class FichierRecetteController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(createErrorResponse("Erreur lors de la récupération du fichier: " + e.getMessage()));
+                .body(createErrorResponse("Erreur lors de la rÃ©cupÃ©ration du fichier: " + e.getMessage()));
         }
     }
 

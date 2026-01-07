@@ -10,7 +10,7 @@ import com.mspersistance.univ.soa.repository.UtilisateurRepository;
 import org.springframework.stereotype.Component;
 
 /**
- * Factory pour créer des entités Feedback.
+ * Factory pour crÃ©er des entitÃ©s Feedback.
  * Design Pattern: Factory Method + Builder
  */
 @Component
@@ -25,14 +25,14 @@ public class FeedbackFactory {
     }
 
     /**
-     * Crée un Feedback depuis un DTO Record
+     * CrÃ©e un Feedback depuis un DTO Record
      */
     public Feedback createFromDTO(FeedbackDTO dto) {
         Utilisateur utilisateur = utilisateurRepository.findById(dto.utilisateurId())
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + dto.utilisateurId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvÃ© avec l'ID: " + dto.utilisateurId()));
 
         Recette recette = recetteRepository.findByIdSimple(dto.recetteId())
-                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + dto.recetteId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvÃ©e avec l'ID: " + dto.recetteId()));
 
         return Feedback.builder()
                 .evaluation(dto.evaluation())
@@ -43,7 +43,7 @@ public class FeedbackFactory {
     }
 
     /**
-     * Met à jour un Feedback existant
+     * Met Ã  jour un Feedback existant
      */
     public Feedback updateFromDTO(Feedback existing, FeedbackDTO dto) {
         existing.setEvaluation(dto.evaluation());
@@ -52,7 +52,7 @@ public class FeedbackFactory {
     }
 
     /**
-     * Convertit une entité en DTO Record
+     * Convertit une entitÃ© en DTO Record
      */
     public FeedbackDTO toDTO(Feedback feedback) {
         return new FeedbackDTO(

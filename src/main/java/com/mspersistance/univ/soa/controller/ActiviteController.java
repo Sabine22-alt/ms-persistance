@@ -27,7 +27,7 @@ public class ActiviteController {
 
     /**
      * GET /api/persistance/utilisateurs/{utilisateurId}/activite
-     * Récupère l'historique complet d'activité d'un utilisateur
+     * RÃ©cupÃ¨re l'historique complet d'activitÃ© d'un utilisateur
      */
     @GetMapping("/{utilisateurId}/activite")
     @Transactional(readOnly = true)
@@ -42,7 +42,7 @@ public class ActiviteController {
 
     /**
      * GET /api/persistance/utilisateurs/{utilisateurId}/activite/recent
-     * Récupère les 10 dernières activités d'un utilisateur (pour le dashboard)
+     * RÃ©cupÃ¨re les 10 derniÃ¨res activitÃ©s d'un utilisateur (pour le dashboard)
      */
     @GetMapping("/{utilisateurId}/activite/recent")
     @Transactional(readOnly = true)

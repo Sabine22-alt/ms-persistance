@@ -43,7 +43,6 @@ public class Utilisateur {
     @Column(length = 500, nullable = true)
     private String adresse; // optionnel
 
-
     @Column(nullable = false)
     @Builder.Default
     private Boolean actif = true;
@@ -53,14 +52,45 @@ public class Utilisateur {
     @Builder.Default
     private Role role = Role.USER;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    // ALIMENTS EXCLUS
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "aliments_exclus",
-            joinColumns = @JoinColumn(name = "utilisateur_id", foreignKey = @ForeignKey(name = "fk_aliments_exclus_utilisateur")),
-            inverseJoinColumns = @JoinColumn(name = "aliment_id", foreignKey = @ForeignKey(name = "fk_aliments_exclus_aliment"))
+            name = "utilisateur_aliments_exclus",
+            joinColumns = @JoinColumn(name = "utilisateur_id"),
+            inverseJoinColumns = @JoinColumn(name = "aliment_id")
     )
     @Builder.Default
     private Set<Aliment> alimentsExclus = new HashSet<>();
+
+    // RÉGIMES ALIMENTAIRES
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "utilisateur_regimes",
+            joinColumns = @JoinColumn(name = "utilisateur_id"),
+            inverseJoinColumns = @JoinColumn(name = "regime_id")
+    )
+    @Builder.Default
+    private Set<RegimeAlimentaire> regimesAlimentaires = new HashSet<>();
+
+    // ALLERGÈNES
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "utilisateur_allergenes",
+            joinColumns = @JoinColumn(name = "utilisateur_id"),
+            inverseJoinColumns = @JoinColumn(name = "allergene_id")
+    )
+    @Builder.Default
+    private Set<Allergene> allergenes = new HashSet<>();
+
+    // TYPES DE CUISINE PRÉFÉRÉS
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "utilisateur_types_cuisine",
+            joinColumns = @JoinColumn(name = "utilisateur_id"),
+            inverseJoinColumns = @JoinColumn(name = "type_cuisine_id")
+    )
+    @Builder.Default
+    private Set<TypeCuisine> typesCuisinePreferences = new HashSet<>();
 
     @Column(name = "date_creation", updatable = false)
     private LocalDateTime dateCreation;
@@ -90,3 +120,4 @@ public class Utilisateur {
         ADMIN
     }
 }
+

@@ -13,7 +13,7 @@ class AlimentFactoryTest {
     private final AlimentFactory alimentFactory = new AlimentFactory();
 
     @Test
-    @DisplayName("createFromDTO - avec DTO complet, devrait créer aliment")
+    @DisplayName("createFromDTO - avec DTO complet, devrait crÃ©er aliment")
     void createFromDTO_avecDTOComplet_devraitCreerAliment() {
         AlimentDTO dto = new AlimentDTO(
             null, "Pomme", 52f, 0.3f, 14f, 0.2f, 2.4f, Aliment.CategorieAliment.FRUIT
@@ -48,7 +48,7 @@ class AlimentFactoryTest {
     }
 
     @Test
-    @DisplayName("updateFromDTO - devrait mettre à jour aliment existant")
+    @DisplayName("updateFromDTO - devrait mettre Ã  jour aliment existant")
     void updateFromDTO_devraitMettreAJourAlimentExistant() {
         Aliment existing = new Aliment();
         existing.setId(1L);

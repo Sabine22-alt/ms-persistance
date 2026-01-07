@@ -57,7 +57,7 @@ class FeedbackServiceTest {
 
         recette = new Recette();
         recette.setId(1L);
-        recette.setTitre("Pâtes carbonara");
+        recette.setTitre("PÃ¢tes carbonara");
 
         feedback = new Feedback();
         feedback.setId(1L);
@@ -76,7 +76,7 @@ class FeedbackServiceTest {
         Feedback feedback2 = new Feedback();
         feedback2.setId(2L);
         feedback2.setEvaluation(4);
-        feedback2.setCommentaire("Très bon");
+        feedback2.setCommentaire("TrÃ¨s bon");
 
         List<Feedback> feedbacks = Arrays.asList(feedback, feedback2);
         when(feedbackRepository.findAll()).thenReturn(feedbacks);
@@ -167,7 +167,7 @@ class FeedbackServiceTest {
     // ==================== Tests pour save() ====================
 
     @Test
-    @DisplayName("save - avec données valides, devrait créer feedback")
+    @DisplayName("save - avec donnÃ©es valides, devrait crÃ©er feedback")
     void save_avecDonneesValides_devraitCreerFeedback() {
         // Given
         Feedback nouveauFeedback = new Feedback();
@@ -214,7 +214,7 @@ class FeedbackServiceTest {
                 () -> feedbackService.save(nouveauFeedback, 999L, 1L)
         );
 
-        assertEquals("Utilisateur non trouvé avec l'ID: 999", exception.getMessage());
+        assertEquals("Utilisateur non trouvÃ© avec l'ID: 999", exception.getMessage());
         verify(utilisateurRepository, times(1)).findById(999L);
         verify(recetteRepository, never()).findByIdSimple(any());
         verify(feedbackRepository, never()).save(any());
@@ -236,7 +236,7 @@ class FeedbackServiceTest {
                 () -> feedbackService.save(nouveauFeedback, 1L, 999L)
         );
 
-        assertEquals("Recette non trouvée avec l'ID: 999", exception.getMessage());
+        assertEquals("Recette non trouvÃ©e avec l'ID: 999", exception.getMessage());
         verify(utilisateurRepository, times(1)).findById(1L);
         verify(recetteRepository, times(1)).findByIdSimple(999L);
         verify(feedbackRepository, never()).save(any());
@@ -245,7 +245,7 @@ class FeedbackServiceTest {
     // ==================== Tests pour update() ====================
 
     @Test
-    @DisplayName("update - avec ID existant, devrait mettre à jour le feedback")
+    @DisplayName("update - avec ID existant, devrait mettre Ã  jour le feedback")
     void update_avecIdExistant_devraitMettreAJourFeedback() {
         // Given
         when(feedbackRepository.findById(1L)).thenReturn(Optional.of(feedback));
@@ -284,7 +284,7 @@ class FeedbackServiceTest {
                 () -> feedbackService.update(999L, feedbackMisAJour)
         );
 
-        assertEquals("Feedback non trouvé avec l'ID: 999", exception.getMessage());
+        assertEquals("Feedback non trouvÃ© avec l'ID: 999", exception.getMessage());
         verify(feedbackRepository, times(1)).findById(999L);
         verify(feedbackRepository, never()).save(any());
     }

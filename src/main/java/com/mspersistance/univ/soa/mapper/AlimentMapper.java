@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class AlimentMapper {
 
     /**
-     * Convertit une entité Aliment en DTO Record
+     * Convertit une entitÃ© Aliment en DTO Record
      */
     public AlimentDTO toDTO(Aliment aliment) {
         if (aliment == null) {
@@ -31,7 +31,7 @@ public class AlimentMapper {
     }
 
     /**
-     * Convertit un DTO Record en entité Aliment
+     * Convertit un DTO Record en entitÃ© Aliment
      */
     public Aliment toEntity(AlimentDTO dto) {
         if (dto == null) {

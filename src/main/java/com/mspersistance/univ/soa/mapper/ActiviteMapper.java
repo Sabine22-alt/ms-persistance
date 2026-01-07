@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class ActiviteMapper {
 
     /**
-     * Convertit une entité Activite en DTO Record
+     * Convertit une entitÃ© Activite en DTO Record
      */
     public ActiviteDTO toDTO(Activite activite) {
         if (activite == null) {
@@ -29,7 +29,7 @@ public class ActiviteMapper {
     }
 
     /**
-     * Convertit un DTO Record en entité Activite
+     * Convertit un DTO Record en entitÃ© Activite
      */
     public Activite toEntity(ActiviteDTO dto) {
         if (dto == null) {

@@ -26,7 +26,7 @@ class UtilisateurMapperTest {
     // ==================== Tests pour toDTO() ====================
 
     @Test
-    @DisplayName("toDTO - avec entité complète, devrait convertir en DTO")
+    @DisplayName("toDTO - avec entitÃ© complÃ¨te, devrait convertir en DTO")
     void toDTO_avecEntiteComplete_devraitConvertirEnDTO() {
         // Given
         Aliment aliment1 = new Aliment();
@@ -74,7 +74,7 @@ class UtilisateurMapperTest {
     }
 
     @Test
-    @DisplayName("toDTO - avec entité null, devrait retourner null")
+    @DisplayName("toDTO - avec entitÃ© null, devrait retourner null")
     void toDTO_avecEntiteNull_devraitRetournerNull() {
         // When
         UtilisateurDTO dto = utilisateurMapper.toDTO(null);
@@ -84,7 +84,7 @@ class UtilisateurMapperTest {
     }
 
     @Test
-    @DisplayName("toDTO - sans aliments exclus, liste devrait être null")
+    @DisplayName("toDTO - sans aliments exclus, liste devrait Ãªtre null")
     void toDTO_sansAlimentsExclus_listeDevraitEtreNull() {
         // Given
         Utilisateur utilisateur = new Utilisateur();
@@ -121,7 +121,7 @@ class UtilisateurMapperTest {
     // ==================== Tests pour toEntity() ====================
 
     @Test
-    @DisplayName("toEntity - avec DTO valide, devrait convertir en entité")
+    @DisplayName("toEntity - avec DTO valide, devrait convertir en entitÃ©")
     void toEntity_avecDTOValide_devraitConvertirEnEntite() {
         Set<Long> alimentsExclusIds = new HashSet<>();
         alimentsExclusIds.add(1L);
@@ -130,7 +130,7 @@ class UtilisateurMapperTest {
         UtilisateurDTO dto = new UtilisateurDTO(
             10L, "jane@test.com", "password123", "Smith", "Jane",
             null, null, null, false, Utilisateur.Role.ADMIN,
-            alimentsExclusIds, null, null
+            null, null, null, alimentsExclusIds, null, null
         );
 
         Utilisateur utilisateur = utilisateurMapper.toEntity(dto);
@@ -143,7 +143,7 @@ class UtilisateurMapperTest {
         assertEquals("Jane", utilisateur.getPrenom());
         assertFalse(utilisateur.getActif());
         assertEquals(Utilisateur.Role.ADMIN, utilisateur.getRole());
-        // Note: alimentsExclus n'est pas mappé dans toEntity (IDs seulement)
+        // Note: alimentsExclus n'est pas mappÃ© dans toEntity (IDs seulement)
         assertTrue(utilisateur.getAlimentsExclus().isEmpty());
     }
 
@@ -160,7 +160,24 @@ class UtilisateurMapperTest {
     @Test
     @DisplayName("toEntity - avec ID null, devrait fonctionner")
     void toEntity_avecIdNull_devraitFonctionner() {
-        UtilisateurDTO dto = new UtilisateurDTO(null, "new@test.com", null, "New", "User", null, null, null, null, null, null, null, null);
+        UtilisateurDTO dto = new UtilisateurDTO(
+            null, // id
+            "new@test.com", // email
+            null, // motDePasse
+            "New", // nom
+            "User", // prenom
+            null, // telephone
+            null, // bio
+            null, // adresse
+            null, // actif
+            null, // role
+            null, // regimesIds
+            null, // allergenesIds
+            null, // typesCuisinePreferesIds
+            null, // alimentsExclusIds
+            null, // dateCreation
+            null // dateModification
+        );
         Utilisateur utilisateur = utilisateurMapper.toEntity(dto);
         assertNotNull(utilisateur);
         assertNull(utilisateur.getId());
@@ -170,7 +187,24 @@ class UtilisateurMapperTest {
     @Test
     @DisplayName("toEntity - avec mot de passe null, devrait fonctionner")
     void toEntity_avecMotDePasseNull_devraitFonctionner() {
-        UtilisateurDTO dto = new UtilisateurDTO(null, "test@test.com", null, null, null, null, null, null, null, null, null, null, null);
+        UtilisateurDTO dto = new UtilisateurDTO(
+            null, // id
+            "test@test.com", // email
+            null, // motDePasse
+            null, // nom
+            null, // prenom
+            null, // telephone
+            null, // bio
+            null, // adresse
+            null, // actif
+            null, // role
+            null, // regimesIds
+            null, // allergenesIds
+            null, // typesCuisinePreferesIds
+            null, // alimentsExclusIds
+            null, // dateCreation
+            null // dateModification
+        );
         Utilisateur utilisateur = utilisateurMapper.toEntity(dto);
         assertNotNull(utilisateur);
         assertNull(utilisateur.getMotDePasse());
@@ -179,7 +213,7 @@ class UtilisateurMapperTest {
     // ==================== Tests de conversion bidirectionnelle ====================
 
     @Test
-    @DisplayName("conversion bidirectionnelle - devrait préserver les données principales")
+    @DisplayName("conversion bidirectionnelle - devrait prÃ©server les donnÃ©es principales")
     void conversionBidirectionnelle_devraitPreserverLesDonneesPrincipales() {
         // Given
         Utilisateur original = new Utilisateur();
@@ -199,7 +233,7 @@ class UtilisateurMapperTest {
         assertNotNull(converti);
         assertEquals(original.getId(), converti.getId());
         assertEquals(original.getEmail(), converti.getEmail());
-        // Note: le mot de passe n'est pas présent dans le DTO après toDTO()
+        // Note: le mot de passe n'est pas prÃ©sent dans le DTO aprÃ¨s toDTO()
         assertEquals(original.getNom(), converti.getNom());
         assertEquals(original.getPrenom(), converti.getPrenom());
         assertEquals(original.getActif(), converti.getActif());

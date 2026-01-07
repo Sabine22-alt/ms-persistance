@@ -78,7 +78,7 @@ class FichierRecetteServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait uploader une image avec succès")
+    @DisplayName("Devrait uploader une image avec succÃ¨s")
     void testUploadImage_Success() {
         MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.getOriginalFilename()).thenReturn("test.jpg");
@@ -114,7 +114,7 @@ class FichierRecetteServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait rejeter un type de fichier non autorisé pour l'image")
+    @DisplayName("Devrait rejeter un type de fichier non autorisÃ© pour l'image")
     void testUploadImage_InvalidFileType() {
         MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.getContentType()).thenReturn("application/pdf");
@@ -126,7 +126,7 @@ class FichierRecetteServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait uploader un document avec succès")
+    @DisplayName("Devrait uploader un document avec succÃ¨s")
     void testUploadDocument_Success() {
         MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.getOriginalFilename()).thenReturn("test.pdf");
@@ -151,7 +151,7 @@ class FichierRecetteServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait récupérer tous les fichiers d'une recette")
+    @DisplayName("Devrait rÃ©cupÃ©rer tous les fichiers d'une recette")
     void testGetFichiersByRecette() {
         List<FichierRecette> fichiers = Arrays.asList(fichierRecette);
         when(fichierRecetteRepository.findByRecetteId(1L)).thenReturn(fichiers);
@@ -166,7 +166,7 @@ class FichierRecetteServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait récupérer uniquement les images d'une recette")
+    @DisplayName("Devrait rÃ©cupÃ©rer uniquement les images d'une recette")
     void testGetImagesByRecette() {
         List<FichierRecette> images = Arrays.asList(fichierRecette);
         when(fichierRecetteRepository.findByRecetteIdAndType(1L, FichierRecette.TypeFichier.IMAGE))
@@ -182,7 +182,7 @@ class FichierRecetteServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait télécharger un fichier")
+    @DisplayName("Devrait tÃ©lÃ©charger un fichier")
     void testDownloadFichier_Success() throws IOException {
         InputStream expectedStream = new ByteArrayInputStream("test".getBytes());
         when(fichierRecetteRepository.findById(1L)).thenReturn(Optional.of(fichierRecette));
@@ -196,7 +196,7 @@ class FichierRecetteServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait lancer une exception si le fichier à télécharger n'existe pas")
+    @DisplayName("Devrait lancer une exception si le fichier Ã  tÃ©lÃ©charger n'existe pas")
     void testDownloadFichier_NotFound() {
         when(fichierRecetteRepository.findById(1L)).thenReturn(Optional.empty());
 

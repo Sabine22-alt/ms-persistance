@@ -1,8 +1,7 @@
 package com.mspersistance.univ.soa.mapper;
 
 import com.mspersistance.univ.soa.dto.UtilisateurDTO;
-import com.mspersistance.univ.soa.model.Aliment;
-import com.mspersistance.univ.soa.model.Utilisateur;
+import com.mspersistance.univ.soa.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -11,12 +10,14 @@ import java.util.stream.Collectors;
  * Mapper pour convertir entre Utilisateur et UtilisateurDTO (Record).
  * Note: Les Records utilisent des accesseurs directs (email() au lieu de getEmail())
  * et des constructeurs complets au lieu de setters.
+ *
+ * GÃ¨re tous les champs incluant les relations ManyToMany (regimes, allergenes, types de cuisine)
  */
 @Component
 public class UtilisateurMapper {
 
     /**
-     * Convertit une entité Utilisateur en DTO Record
+     * Convertit une entitÃ© Utilisateur en DTO Record
      */
     public UtilisateurDTO toDTO(Utilisateur utilisateur) {
         if (utilisateur == null) {
@@ -34,6 +35,25 @@ public class UtilisateurMapper {
                 utilisateur.getAdresse(),
                 utilisateur.getActif(),
                 utilisateur.getRole(),
+                // Mapper les régimes alimentaires
+                utilisateur.getRegimesAlimentaires() != null
+                        ? utilisateur.getRegimesAlimentaires().stream()
+                                .map(RegimeAlimentaire::getId)
+                                .collect(Collectors.toSet())
+                        : null,
+                // Mapper les allergènes
+                utilisateur.getAllergenes() != null
+                        ? utilisateur.getAllergenes().stream()
+                                .map(Allergene::getId)
+                                .collect(Collectors.toSet())
+                        : null,
+                // Mapper les types de cuisine préférés
+                utilisateur.getTypesCuisinePreferences() != null
+                        ? utilisateur.getTypesCuisinePreferences().stream()
+                                .map(TypeCuisine::getId)
+                                .collect(Collectors.toSet())
+                        : null,
+                // Mapper les aliments exclus
                 utilisateur.getAlimentsExclus() != null
                         ? utilisateur.getAlimentsExclus().stream()
                                 .map(Aliment::getId)
@@ -45,7 +65,7 @@ public class UtilisateurMapper {
     }
 
     /**
-     * Convertit un DTO Record en entité Utilisateur
+     * Convertit un DTO Record en entitÃ© Utilisateur
      */
     public Utilisateur toEntity(UtilisateurDTO dto) {
         if (dto == null) {
@@ -64,6 +84,11 @@ public class UtilisateurMapper {
         utilisateur.setActif(dto.actif());
         utilisateur.setRole(dto.role());
 
+        // Note : Les relations ManyToMany (regimes, allergenes, typesCuisinePreferes, alimentsExclus)
+        // sont gÃ©rÃ©es dans le service via les repositories
+        // On ne les mappe pas ici pour Ã©viter les problÃ¨mes de cascade
+
         return utilisateur;
     }
 }
+

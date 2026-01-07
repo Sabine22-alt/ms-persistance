@@ -5,14 +5,14 @@ import com.mspersistance.univ.soa.model.Aliment;
 import org.springframework.stereotype.Component;
 
 /**
- * Factory pour créer des entités Aliment.
+ * Factory pour crÃ©er des entitÃ©s Aliment.
  * Design Pattern: Factory Method + Builder
  */
 @Component
 public class AlimentFactory {
 
     /**
-     * Crée un Aliment depuis un DTO Record
+     * CrÃ©e un Aliment depuis un DTO Record
      */
     public Aliment createFromDTO(AlimentDTO dto) {
         return Aliment.builder()
@@ -27,7 +27,7 @@ public class AlimentFactory {
     }
 
     /**
-     * Met à jour un Aliment existant avec les données du DTO
+     * Met Ã  jour un Aliment existant avec les donnÃ©es du DTO
      */
     public Aliment updateFromDTO(Aliment existing, AlimentDTO dto) {
         if (dto.nom() != null) {
@@ -45,7 +45,7 @@ public class AlimentFactory {
     }
 
     /**
-     * Convertit une entité en DTO Record
+     * Convertit une entitÃ© en DTO Record
      */
     public AlimentDTO toDTO(Aliment aliment) {
         return new AlimentDTO(

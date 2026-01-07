@@ -13,13 +13,13 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 /**
- * Factory pour créer des entités Recette.
+ * Factory pour crÃ©er des entitÃ©s Recette.
  * Design Pattern: Factory Method + Builder
  *
- * Gère la complexité de création des Recettes avec:
- * - Ingrédients imbriqués
- * - Étapes imbriquées
- * - Création automatique d'aliments
+ * GÃ¨re la complexitÃ© de crÃ©ation des Recettes avec:
+ * - IngrÃ©dients imbriquÃ©s
+ * - Ã‰tapes imbriquÃ©es
+ * - CrÃ©ation automatique d'aliments
  */
 @Component
 public class RecetteFactory {
@@ -31,15 +31,15 @@ public class RecetteFactory {
     }
 
     /**
-     * Crée une Recette depuis un DTO avec gestion des ingrédients/étapes
+     * CrÃ©e une Recette depuis un DTO avec gestion des ingrÃ©dients/Ã©tapes
      */
     public Recette createFromDTO(RecetteDTO dto) {
         // Validation
         if (dto.ingredients() == null || dto.ingredients().isEmpty()) {
-            throw new IllegalArgumentException("Au moins un ingrédient est requis");
+            throw new IllegalArgumentException("Au moins un ingrÃ©dient est requis");
         }
 
-        // Création recette avec Builder
+        // CrÃ©ation recette avec Builder
         Recette recette = Recette.builder()
                 .titre(dto.titre())
                 .description(dto.description())
@@ -47,20 +47,20 @@ public class RecetteFactory {
                 .kcal(dto.kcal())
                 .imageUrl(dto.imageUrl())
                 .difficulte(dto.difficulte())
-                .actif(Boolean.FALSE)  // Par défaut inactif
+                .actif(Boolean.FALSE)  // Par dÃ©faut inactif
                 .statut(Recette.StatutRecette.EN_ATTENTE)  // En attente validation
                 .utilisateurId(dto.utilisateurId())
                 .ingredients(new ArrayList<>())
                 .etapes(new ArrayList<>())
                 .build();
 
-        // Traiter les ingrédients
+        // Traiter les ingrÃ©dients
         for (RecetteDTO.IngredientDTO ingredientDTO : dto.ingredients()) {
             Ingredient ingredient = createIngredient(ingredientDTO, recette);
             recette.getIngredients().add(ingredient);
         }
 
-        // Traiter les étapes
+        // Traiter les Ã©tapes
         if (dto.etapes() != null && !dto.etapes().isEmpty()) {
             for (RecetteDTO.EtapeDTO etapeDTO : dto.etapes()) {
                 Etape etape = createEtape(etapeDTO, recette);
@@ -72,10 +72,10 @@ public class RecetteFactory {
     }
 
     /**
-     * Met à jour une Recette existante depuis un DTO
+     * Met Ã  jour une Recette existante depuis un DTO
      */
     public Recette updateFromDTO(Recette existing, RecetteDTO dto) {
-        // Mise à jour champs de base
+        // Mise Ã  jour champs de base
         existing.setTitre(dto.titre());
         existing.setDescription(dto.description());
         existing.setTempsTotal(dto.tempsTotal());
@@ -83,7 +83,7 @@ public class RecetteFactory {
         existing.setImageUrl(dto.imageUrl());
         existing.setDifficulte(dto.difficulte());
 
-        // Mise à jour ingrédients
+        // Mise Ã  jour ingrÃ©dients
         existing.getIngredients().clear();
         if (dto.ingredients() != null && !dto.ingredients().isEmpty()) {
             for (RecetteDTO.IngredientDTO ingredientDTO : dto.ingredients()) {
@@ -92,7 +92,7 @@ public class RecetteFactory {
             }
         }
 
-        // Mise à jour étapes
+        // Mise Ã  jour Ã©tapes
         existing.getEtapes().clear();
         if (dto.etapes() != null && !dto.etapes().isEmpty()) {
             for (RecetteDTO.EtapeDTO etapeDTO : dto.etapes()) {
@@ -105,8 +105,8 @@ public class RecetteFactory {
     }
 
     /**
-     * Crée un Ingredient depuis un DTO
-     * Gère la création automatique d'aliments
+     * CrÃ©e un Ingredient depuis un DTO
+     * GÃ¨re la crÃ©ation automatique d'aliments
      */
     private Ingredient createIngredient(RecetteDTO.IngredientDTO dto, Recette recette) {
         // Extraction du nom d'aliment
@@ -117,7 +117,7 @@ public class RecetteFactory {
             throw new IllegalArgumentException("L'ID ou le nom de l'aliment est requis");
         }
 
-        // Création de l'ingrédient avec Builder
+        // CrÃ©ation de l'ingrÃ©dient avec Builder
         Ingredient.IngredientBuilder builder = Ingredient.builder()
                 .quantite(dto.quantite())
                 .unite(dto.unite() != null ? Ingredient.Unite.valueOf(dto.unite()) : null)
@@ -125,7 +125,7 @@ public class RecetteFactory {
                 .nomAliment(nomAliment)
                 .recette(recette);
 
-        // Résolution de l'aliment
+        // RÃ©solution de l'aliment
         Aliment aliment = resolveAliment(nomAliment, dto.alimentId());
         builder.aliment(aliment);
 
@@ -133,7 +133,7 @@ public class RecetteFactory {
     }
 
     /**
-     * Crée une Etape depuis un DTO
+     * CrÃ©e une Etape depuis un DTO
      */
     private Etape createEtape(RecetteDTO.EtapeDTO dto, Recette recette) {
         return Etape.builder()
@@ -145,7 +145,7 @@ public class RecetteFactory {
     }
 
     /**
-     * Extrait le nom d'aliment depuis le DTO (gère plusieurs champs)
+     * Extrait le nom d'aliment depuis le DTO (gÃ¨re plusieurs champs)
      */
     private String extractNomAliment(RecetteDTO.IngredientDTO dto) {
         if (dto.alimentNom() != null && !dto.alimentNom().trim().isEmpty()) {
@@ -158,16 +158,16 @@ public class RecetteFactory {
     }
 
     /**
-     * Résout un Aliment par nom ou ID
-     * Crée automatiquement l'aliment s'il n'existe pas
-     * Priorité à l'ID pour éviter les ambiguïtés
+     * RÃ©sout un Aliment par nom ou ID
+     * CrÃ©e automatiquement l'aliment s'il n'existe pas
+     * PrioritÃ© Ã  l'ID pour Ã©viter les ambiguÃ¯tÃ©s
      */
     private Aliment resolveAliment(String nomAliment, Long alimentId) {
-        // Priorité à l'ID pour éviter ambiguïté
+        // PrioritÃ© Ã  l'ID pour Ã©viter ambiguÃ¯tÃ©
         if (alimentId != null) {
             return alimentRepository.findById(alimentId)
                     .orElseThrow(() -> new ResourceNotFoundException(
-                            "Aliment non trouvé avec l'ID: " + alimentId));
+                            "Aliment non trouvÃ© avec l'ID: " + alimentId));
         }
 
         // Sinon utiliser le nom
@@ -179,7 +179,7 @@ public class RecetteFactory {
     }
 
     /**
-     * Trouve ou crée un aliment par nom
+     * Trouve ou crÃ©e un aliment par nom
      */
     private Aliment findOrCreateAliment(String nom) {
         Optional<Aliment> existant = alimentRepository.findByNomIgnoreCase(nom);
@@ -188,7 +188,7 @@ public class RecetteFactory {
             return existant.get();
         }
 
-        // Créer un nouvel aliment avec Builder
+        // CrÃ©er un nouvel aliment avec Builder
         Aliment nouvelAliment = Aliment.builder()
                 .nom(nom)
                 .calories(0f)

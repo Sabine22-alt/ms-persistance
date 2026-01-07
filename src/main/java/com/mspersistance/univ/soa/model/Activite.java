@@ -62,7 +62,7 @@ public class Activite {
         PLANIFICATION_AJOUT,
         PLANIFICATION_MODIFIE,
         PLANIFICATION_SUPPRIME,
-        REPAS_PLANIFIE,        // Alias pour PLANIFICATION_AJOUT (compatibilité)
+        REPAS_PLANIFIE,        // Alias pour PLANIFICATION_AJOUT (compatibilitÃ©)
         REPAS_MODIFIE,         // Alias pour PLANIFICATION_MODIFIE
         REPAS_SUPPRIME,        // Alias pour PLANIFICATION_SUPPRIME
 

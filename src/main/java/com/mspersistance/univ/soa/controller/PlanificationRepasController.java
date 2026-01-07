@@ -31,7 +31,7 @@ public class PlanificationRepasController {
 
     /**
      * GET /api/persistance/utilisateurs/{utilisateurId}/planification/{semaine}/{annee}
-     * Récupère la planification pour une semaine spécifique
+     * RÃ©cupÃ¨re la planification pour une semaine spÃ©cifique
      */
     @GetMapping("/{utilisateurId}/planification/{semaine}/{annee}")
     public ResponseEntity<?> getPlanification(@PathVariable Long utilisateurId,
@@ -40,7 +40,7 @@ public class PlanificationRepasController {
         var planif = planificationRepasService.getPlanification(utilisateurId, semaine, annee);
 
         if (planif.isEmpty()) {
-            // Créer une planification vide si elle n'existe pas
+            // CrÃ©er une planification vide si elle n'existe pas
             PlanificationRepas newPlanif = planificationRepasService
                 .getOrCreatePlanification(utilisateurId, semaine, annee);
             return ResponseEntity.ok(planificationRepasMapper.toDTO(newPlanif));
@@ -70,7 +70,7 @@ public class PlanificationRepasController {
 
             if (typeRepas == null || (typeRepas < 0 || typeRepas > 2)) {
                 return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Type de repas invalide (0=petit-déj, 1=déjeuner, 2=dîner)"));
+                    .body(Map.of("error", "Type de repas invalide (0=petit-dÃ©j, 1=dÃ©jeuner, 2=dÃ®ner)"));
             }
 
             if (jour < 0 || jour > 6) {
@@ -90,7 +90,7 @@ public class PlanificationRepasController {
 
     /**
      * DELETE /api/persistance/utilisateurs/{utilisateurId}/planification/{semaine}/{annee}/jour/{jour}/repas/{typeRepas}
-     * Supprimer un repas planifié
+     * Supprimer un repas planifiÃ©
      */
     @DeleteMapping("/{utilisateurId}/planification/{semaine}/{annee}/jour/{jour}/repas/{typeRepas}")
     @Transactional
@@ -113,13 +113,13 @@ public class PlanificationRepasController {
             return ResponseEntity.ok(planificationRepasMapper.toDTO(planif));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("error", "Planification non trouvée"));
+                .body(Map.of("error", "Planification non trouvÃ©e"));
         }
     }
 
     /**
      * GET /api/persistance/utilisateurs/{utilisateurId}/planifications/historique
-     * Récupère l'historique des planifications
+     * RÃ©cupÃ¨re l'historique des planifications
      */
     @GetMapping("/{utilisateurId}/planifications/historique")
     @Transactional(readOnly = true)

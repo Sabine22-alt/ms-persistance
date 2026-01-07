@@ -33,7 +33,7 @@ class UtilisateurFactoryTest {
     }
 
     @Test
-    @DisplayName("createFromDTO - avec DTO complet, devrait créer utilisateur")
+    @DisplayName("createFromDTO - avec DTO complet, devrait crÃ©er utilisateur")
     void createFromDTO_avecDTOComplet_devraitCreerUtilisateur() {
         Set<Long> alimentsExclusIds = new HashSet<>();
         alimentsExclusIds.add(1L);
@@ -42,7 +42,7 @@ class UtilisateurFactoryTest {
         UtilisateurDTO dto = new UtilisateurDTO(
             null, "john@test.com", "password123", "Doe", "John",
             "0612345678", "Développeur Java", "123 rue Test",
-            true, Utilisateur.Role.USER, alimentsExclusIds, null, null
+            true, Utilisateur.Role.USER, null, null, null, alimentsExclusIds, null, null
         );
 
         Utilisateur utilisateur = utilisateurFactory.createFromDTO(dto);
@@ -62,11 +62,11 @@ class UtilisateurFactoryTest {
     }
 
     @Test
-    @DisplayName("createFromDTO - avec mot de passe, devrait être encodé")
+    @DisplayName("createFromDTO - avec mot de passe, devrait Ãªtre encodÃ©")
     void createFromDTO_avecMotDePasse_devraitEtreEncode() {
         UtilisateurDTO dto = new UtilisateurDTO(
             null, "test@test.com", "plainPassword", "Test", "User",
-            null, null, null, null, null, null, null, null
+            null, null, null, null, null, null, null, null, null, null, null
         );
 
         Utilisateur utilisateur = utilisateurFactory.createFromDTO(dto);
@@ -81,7 +81,7 @@ class UtilisateurFactoryTest {
     void createFromDTO_avecChampsOptionnelsNull_devraitFonctionner() {
         UtilisateurDTO dto = new UtilisateurDTO(
             null, "minimal@test.com", "password", "Nom", "Prenom",
-            null, null, null, null, null, null, null, null
+            null, null, null, null, null, null, null, null, null, null, null
         );
 
         Utilisateur utilisateur = utilisateurFactory.createFromDTO(dto);
@@ -93,7 +93,7 @@ class UtilisateurFactoryTest {
     }
 
     @Test
-    @DisplayName("updateFromDTO - devrait mettre à jour utilisateur existant")
+    @DisplayName("updateFromDTO - devrait mettre Ã  jour utilisateur existant")
     void updateFromDTO_devraitMettreAJourUtilisateurExistant() {
         Utilisateur existing = new Utilisateur();
         existing.setId(1L);
@@ -105,7 +105,7 @@ class UtilisateurFactoryTest {
         UtilisateurDTO dto = new UtilisateurDTO(
             null, "new@test.com", null, "NewNom", "NewPrenom",
             "0612345678", "Ma bio", "Nouvelle adresse",
-            true, Utilisateur.Role.ADMIN, null, null, null
+            true, Utilisateur.Role.ADMIN, null, null, null, null, null, null
         );
 
         Utilisateur updated = utilisateurFactory.updateFromDTO(existing, dto);
@@ -131,7 +131,7 @@ class UtilisateurFactoryTest {
 
         UtilisateurDTO dto = new UtilisateurDTO(
             null, "test@test.com", "newPassword", "Nom", "Prenom",
-            null, null, null, null, null, null, null, null
+            null, null, null, null, null, null, null, null, null, null, null
         );
 
         Utilisateur updated = utilisateurFactory.updateFromDTO(existing, dto);

@@ -35,11 +35,11 @@ class ActiviteServiceTest {
         activite.setId(1L);
         activite.setUtilisateurId(1L);
         activite.setType(Activite.TypeActivite.RECETTE_CREEE);
-        activite.setDescription("Créée une recette");
+        activite.setDescription("CrÃ©Ã©e une recette");
     }
 
     @Test
-    @DisplayName("logActivite - devrait enregistrer une activité")
+    @DisplayName("logActivite - devrait enregistrer une activitÃ©")
     void logActivite_devraitEnregistrerActivite() {
         // Given
         when(activiteRepository.save(any(Activite.class))).thenAnswer(invocation -> {
@@ -59,7 +59,7 @@ class ActiviteServiceTest {
     }
 
     @Test
-    @DisplayName("logActiviteWithDetails - devrait enregistrer une activité avec détails")
+    @DisplayName("logActiviteWithDetails - devrait enregistrer une activitÃ© avec dÃ©tails")
     void logActiviteWithDetails_devraitEnregistrerActiviteAvecDetails() {
         // Given
         when(activiteRepository.save(any(Activite.class))).thenAnswer(invocation -> {
@@ -81,7 +81,7 @@ class ActiviteServiceTest {
     }
 
     @Test
-    @DisplayName("getActivitesByUtilisateur - devrait retourner les activités d'un utilisateur")
+    @DisplayName("getActivitesByUtilisateur - devrait retourner les activitÃ©s d'un utilisateur")
     void getActivitesByUtilisateur_devraitRetournerActivites() {
         // Given
         List<Activite> activites = Arrays.asList(activite);
@@ -97,7 +97,7 @@ class ActiviteServiceTest {
     }
 
     @Test
-    @DisplayName("getLast10Activites - devrait retourner les 10 dernières activités")
+    @DisplayName("getLast10Activites - devrait retourner les 10 derniÃ¨res activitÃ©s")
     void getLast10Activites_devraitRetournerDernieresActivites() {
         // Given
         List<Activite> activites = Arrays.asList(activite);

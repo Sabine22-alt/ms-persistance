@@ -22,7 +22,7 @@ public class OpenAPIConfig {
     public OpenAPI customOpenAPI() {
         Server localServer = new Server();
         localServer.setUrl("http://localhost:" + serverPort);
-        localServer.setDescription("Serveur local de développement");
+        localServer.setDescription("Serveur local de dÃ©veloppement");
 
         License license = new License()
                 .name("MIT License")
@@ -31,8 +31,8 @@ public class OpenAPIConfig {
         Info info = new Info()
                 .title("SmartDish - API de Persistance")
                 .version("1.0.0")
-                .description("API REST pour la gestion de la persistance des données du projet SmartDish. " +
-                        "Cette API centralise l'accès aux données pour tous les microservices (Utilisateurs, Recettes, Feedbacks, Recommendations).")
+                .description("API REST pour la gestion de la persistance des donnÃ©es du projet SmartDish. " +
+                        "Cette API centralise l'accÃ¨s aux donnÃ©es pour tous les microservices (Utilisateurs, Recettes, Feedbacks, Recommendations).")
                 .license(license);
 
         return new OpenAPI()

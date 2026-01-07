@@ -33,9 +33,9 @@ public class PlanificationRepasDTO {
     @AllArgsConstructor
     public static class RepasPlannifieDTO {
         private Long id;
-        private Integer typeRepas; // 0=petit-déj, 1=déjeuner, 2=dîner
+        private Integer typeRepas; // 0=petit-dÃ©j, 1=dÃ©jeuner, 2=dÃ®ner
         private Long recetteId;
-        private String recetteTitre; // Titre de la recette si liée
+        private String recetteTitre; // Titre de la recette si liÃ©e
         private String noteLibre;
     }
 }

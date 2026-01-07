@@ -42,7 +42,7 @@ public class AlimentService {
     @Transactional
     public Aliment update(Long id, Aliment aliment) {
         Aliment existing = alimentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Aliment non trouvé avec l'ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Aliment non trouvÃ© avec l'ID: " + id));
 
         existing.setNom(aliment.getNom());
         existing.setCategorieAliment(aliment.getCategorieAliment());
@@ -58,7 +58,7 @@ public class AlimentService {
     @Transactional
     public void deleteById(Long id) {
         if (!alimentRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Aliment non trouvé avec l'ID: " + id);
+            throw new ResourceNotFoundException("Aliment non trouvÃ© avec l'ID: " + id);
         }
         alimentRepository.deleteById(id);
     }

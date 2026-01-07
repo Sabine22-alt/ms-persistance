@@ -15,7 +15,7 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     List<Feedback> findByRecette_Id(Long recetteId);
 
     /**
-     * Calcule la moyenne d'évaluation pour une recette spécifique
+     * Calcule la moyenne d'Ã©valuation pour une recette spÃ©cifique
      * Retourne Optional.empty() si aucun feedback n'existe
      */
     @Query("SELECT AVG(f.evaluation) FROM Feedback f WHERE f.recette.id = :recetteId")
@@ -28,7 +28,7 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     Long countByRecetteId(@Param("recetteId") Long recetteId);
 
     /**
-     * Vérifie si un feedback existe déjà pour un utilisateur et une recette
+     * VÃ©rifie si un feedback existe dÃ©jÃ  pour un utilisateur et une recette
      */
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Feedback f WHERE f.utilisateur.id = :utilisateurId AND f.recette.id = :recetteId")
     boolean existsByUtilisateurIdAndRecetteId(@Param("utilisateurId") Long utilisateurId, @Param("recetteId") Long recetteId);

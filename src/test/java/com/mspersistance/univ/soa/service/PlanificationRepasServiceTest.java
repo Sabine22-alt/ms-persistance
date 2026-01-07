@@ -56,7 +56,7 @@ class PlanificationRepasServiceTest {
     }
 
     @Test
-    @DisplayName("getOrCreatePlanification - devrait créer une nouvelle planification si elle n'existe pas")
+    @DisplayName("getOrCreatePlanification - devrait crÃ©er une nouvelle planification si elle n'existe pas")
     void getOrCreatePlanification_devraitCreerNouvellePlanification() {
         // Given
         when(planificationRepasRepository.findByUtilisateurAndWeek(1L, 1, 2026)).thenReturn(Optional.empty());

@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Endpoint pour monitorer le cache et le vider si nécessaire.
+ * Endpoint pour monitorer le cache et le vider si nÃ©cessaire.
  */
 @RestController
 @RequestMapping("/api/persistance/cache")
@@ -59,12 +59,12 @@ public class CacheController {
         );
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Tous les caches ont été vidés");
+        response.put("message", "Tous les caches ont Ã©tÃ© vidÃ©s");
         return ResponseEntity.ok(response);
     }
 
     /**
-     * DELETE /api/persistance/cache/{cacheName} - Vider un cache spécifique
+     * DELETE /api/persistance/cache/{cacheName} - Vider un cache spÃ©cifique
      */
     @DeleteMapping("/{cacheName}")
     public ResponseEntity<Map<String, String>> clearCache(@PathVariable String cacheName) {
@@ -72,7 +72,7 @@ public class CacheController {
         if (cache != null) {
             cache.clear();
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Cache '" + cacheName + "' vidé");
+            response.put("message", "Cache '" + cacheName + "' vidÃ©");
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.notFound().build();

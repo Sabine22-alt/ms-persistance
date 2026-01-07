@@ -38,7 +38,7 @@ class MinioServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait uploader un fichier avec succès")
+    @DisplayName("Devrait uploader un fichier avec succÃ¨s")
     void testUploadFile_Success() throws Exception {
         MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.getOriginalFilename()).thenReturn("test.jpg");
@@ -55,7 +55,7 @@ class MinioServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait lancer une exception lors de l'échec de l'upload")
+    @DisplayName("Devrait lancer une exception lors de l'Ã©chec de l'upload")
     void testUploadFile_Failure() throws Exception {
         MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.getInputStream()).thenThrow(new RuntimeException("Test exception"));
@@ -68,7 +68,7 @@ class MinioServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait télécharger un fichier avec succès")
+    @DisplayName("Devrait tÃ©lÃ©charger un fichier avec succÃ¨s")
     void testDownloadFile_Success() throws Exception {
         GetObjectResponse mockResponse = mock(GetObjectResponse.class);
         when(minioClient.getObject(any(GetObjectArgs.class))).thenReturn(mockResponse);
@@ -80,7 +80,7 @@ class MinioServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait supprimer un fichier avec succès")
+    @DisplayName("Devrait supprimer un fichier avec succÃ¨s")
     void testDeleteFile_Success() throws Exception {
         doNothing().when(minioClient).removeObject(any(RemoveObjectArgs.class));
 
@@ -92,7 +92,7 @@ class MinioServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait générer une URL présignée avec succès")
+    @DisplayName("Devrait gÃ©nÃ©rer une URL prÃ©signÃ©e avec succÃ¨s")
     void testGetPresignedUrl_Success() throws Exception {
         String expectedUrl = "http://localhost:9000/test-bucket/test-object.jpg?presigned=true";
         when(minioClient.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class)))
@@ -105,7 +105,7 @@ class MinioServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait générer un nom de fichier unique")
+    @DisplayName("Devrait gÃ©nÃ©rer un nom de fichier unique")
     void testGenerateUniqueFileName() {
         String originalFilename = "test-image.jpg";
 
@@ -117,7 +117,7 @@ class MinioServiceTest {
     }
 
     @Test
-    @DisplayName("Devrait vérifier qu'un fichier existe")
+    @DisplayName("Devrait vÃ©rifier qu'un fichier existe")
     void testFileExists_True() throws Exception {
         when(minioClient.statObject(any(StatObjectArgs.class)))
             .thenReturn(mock(StatObjectResponse.class));

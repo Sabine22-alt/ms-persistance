@@ -54,7 +54,7 @@ class RecetteControllerTest {
     void setUp() {
         recette = new Recette();
         recette.setId(1L);
-        recette.setTitre("Pâtes carbonara");
+        recette.setTitre("PÃ¢tes carbonara");
         recette.setTempsTotal(30);
         recette.setKcal(500);
         recette.setImageUrl("http://example.com/carbonara.jpg");
@@ -63,7 +63,7 @@ class RecetteControllerTest {
         recette.setEtapes(new ArrayList<>());
 
         recetteDTO = new RecetteDTO(
-            1L, "Pâtes carbonara", null, 30, 500,
+            1L, "PÃ¢tes carbonara", null, 30, 500,
             "http://example.com/carbonara.jpg", Recette.Difficulte.MOYEN,
             null, null, null, null, null, null, null,
             new ArrayList<>(), new ArrayList<>()
@@ -93,7 +93,7 @@ class RecetteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].titre").value("Pâtes carbonara"))
+                .andExpect(jsonPath("$[0].titre").value("PÃ¢tes carbonara"))
                 .andExpect(jsonPath("$[1].id").value(2))
                 .andExpect(jsonPath("$[1].titre").value("Salade"));
 
@@ -114,7 +114,7 @@ class RecetteControllerTest {
         mockMvc.perform(get("/api/persistance/recettes/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.titre").value("Pâtes carbonara"))
+                .andExpect(jsonPath("$.titre").value("PÃ¢tes carbonara"))
                 .andExpect(jsonPath("$.tempsTotal").value(30))
                 .andExpect(jsonPath("$.kcal").value(500))
                 .andExpect(jsonPath("$.difficulte").value("MOYEN"));
@@ -140,7 +140,7 @@ class RecetteControllerTest {
     // ==================== Tests pour POST /api/persistance/recettes ====================
 
     @Test
-    @DisplayName("POST /api/persistance/recettes - avec données valides, devrait créer la recette")
+    @DisplayName("POST /api/persistance/recettes - avec donnÃ©es valides, devrait crÃ©er la recette")
     void createRecette_avecDonneesValides_devraitCreerRecette() throws Exception {
         // Given
         RecetteDTO newDTO = new RecetteDTO(null, "Pizza", null, 45, 800, null, Recette.Difficulte.MOYEN, null, null, null, null, null, null, null, new ArrayList<>(), new ArrayList<>());
@@ -198,13 +198,13 @@ class RecetteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Le titre doit contenir au moins 3 caractères"));
+                .andExpect(jsonPath("$.error").value("Le titre doit contenir au moins 3 caractÃ¨res"));
 
         verify(recetteService, never()).saveFromDTO(any());
     }
 
     @Test
-    @DisplayName("POST /api/persistance/recettes - avec temps total négatif, devrait retourner 400")
+    @DisplayName("POST /api/persistance/recettes - avec temps total nÃ©gatif, devrait retourner 400")
     void createRecette_avecTempsNegatif_devraitRetourner400() throws Exception {
         // Given
         RecetteDTO dto = new RecetteDTO(null, "Test", null, -10, null, null, null, null, null, null, null, null, null, null, null, null);
@@ -214,13 +214,13 @@ class RecetteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Le temps total doit être supérieur à 0"));
+                .andExpect(jsonPath("$.error").value("Le temps total doit Ãªtre supÃ©rieur Ã  0"));
 
         verify(recetteService, never()).saveFromDTO(any());
     }
 
     @Test
-    @DisplayName("POST /api/persistance/recettes - avec kcal négatif, devrait retourner 400")
+    @DisplayName("POST /api/persistance/recettes - avec kcal nÃ©gatif, devrait retourner 400")
     void createRecette_avecKcalNegatif_devraitRetourner400() throws Exception {
         // Given
         RecetteDTO dto = new RecetteDTO(null, "Test", null, 30, -100, null, null, null, null, null, null, null, null, null, null, null);
@@ -230,13 +230,13 @@ class RecetteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Les calories ne peuvent pas être négatives"));
+                .andExpect(jsonPath("$.error").value("Les calories ne peuvent pas Ãªtre nÃ©gatives"));
 
         verify(recetteService, never()).saveFromDTO(any());
     }
 
     @Test
-    @DisplayName("POST /api/persistance/recettes - avec ingrédient sans alimentId ni alimentNom, devrait retourner 400")
+    @DisplayName("POST /api/persistance/recettes - avec ingrÃ©dient sans alimentId ni alimentNom, devrait retourner 400")
     void createRecette_avecIngredientSansAlimentIdNiNom_devraitRetourner400() throws Exception {
         // Given
         RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO(null, null, null, null, 100.0f, null, null);
@@ -248,13 +248,13 @@ class RecetteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("L'ID ou le nom de l'aliment est requis pour chaque ingrédient"));
+                .andExpect(jsonPath("$.error").value("L'ID ou le nom de l'aliment est requis pour chaque ingrÃ©dient"));
 
         verify(recetteService, never()).saveFromDTO(any());
     }
 
     @Test
-    @DisplayName("POST /api/persistance/recettes - avec ingrédient alimentNom uniquement, devrait réussir")
+    @DisplayName("POST /api/persistance/recettes - avec ingrÃ©dient alimentNom uniquement, devrait rÃ©ussir")
     void createRecette_avecIngredientAlimentNom_devraitReussir() throws Exception {
         // Given
         RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO(null, null, "Tomate", "Tomate", 200.0f, "GRAMME", null);
@@ -286,7 +286,7 @@ class RecetteControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/persistance/recettes - avec étape sans texte, devrait retourner 400")
+    @DisplayName("POST /api/persistance/recettes - avec Ã©tape sans texte, devrait retourner 400")
     void createRecette_avecEtapeSansTexte_devraitRetourner400() throws Exception {
         // Given
         RecetteDTO.EtapeDTO etapeDTO = new RecetteDTO.EtapeDTO(null, 1, null, null);
@@ -297,7 +297,7 @@ class RecetteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Le texte de chaque étape est obligatoire"));
+                .andExpect(jsonPath("$.error").value("Le texte de chaque Ã©tape est obligatoire"));
 
         verify(recetteService, never()).saveFromDTO(any());
     }
@@ -305,20 +305,20 @@ class RecetteControllerTest {
     // ==================== Tests pour PUT /api/persistance/recettes/{id} ====================
 
     @Test
-    @DisplayName("PUT /api/persistance/recettes/{id} - avec données valides, devrait mettre à jour")
+    @DisplayName("PUT /api/persistance/recettes/{id} - avec donnÃ©es valides, devrait mettre Ã  jour")
     void updateRecette_avecDonneesValides_devraitMettreAJour() throws Exception {
         // Given
-        RecetteDTO updateDTO = new RecetteDTO(null, "Pâtes bolognaise", null, 40, 600, null, Recette.Difficulte.FACILE, null, null, null, null, null, null, null, new ArrayList<>(), new ArrayList<>());
+        RecetteDTO updateDTO = new RecetteDTO(null, "PÃ¢tes bolognaise", null, 40, 600, null, Recette.Difficulte.FACILE, null, null, null, null, null, null, null, new ArrayList<>(), new ArrayList<>());
 
         Recette updatedRecette = new Recette();
         updatedRecette.setId(1L);
-        updatedRecette.setTitre("Pâtes bolognaise");
+        updatedRecette.setTitre("PÃ¢tes bolognaise");
         updatedRecette.setTempsTotal(40);
         updatedRecette.setKcal(600);
         updatedRecette.setIngredients(new ArrayList<>());
         updatedRecette.setEtapes(new ArrayList<>());
 
-        RecetteDTO updatedDTO = new RecetteDTO(1L, "Pâtes bolognaise", null, 40, 600, null, null, null, null, null, null, null, null, null, new ArrayList<>(), new ArrayList<>());
+        RecetteDTO updatedDTO = new RecetteDTO(1L, "PÃ¢tes bolognaise", null, 40, 600, null, null, null, null, null, null, null, null, null, new ArrayList<>(), new ArrayList<>());
 
         when(recetteService.findById(1L)).thenReturn(Optional.of(recette));
         when(recetteService.updateFromDTO(eq(1L), any(RecetteDTO.class))).thenReturn(updatedRecette);
@@ -330,7 +330,7 @@ class RecetteControllerTest {
                         .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.titre").value("Pâtes bolognaise"));
+                .andExpect(jsonPath("$.titre").value("PÃ¢tes bolognaise"));
 
         verify(recetteService, times(1)).updateFromDTO(eq(1L), any(RecetteDTO.class));
     }
@@ -348,7 +348,7 @@ class RecetteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("Recette non trouvée avec l'ID: 999"));
+                .andExpect(jsonPath("$.error").value("Recette non trouvÃ©e avec l'ID: 999"));
 
         verify(recetteService, never()).updateFromDTO(any(), any());
     }
@@ -378,7 +378,7 @@ class RecetteControllerTest {
         // When & Then
         mockMvc.perform(delete("/api/persistance/recettes/999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("Recette non trouvée avec l'ID: 999"));
+                .andExpect(jsonPath("$.error").value("Recette non trouvÃ©e avec l'ID: 999"));
 
         verify(recetteService, never()).deleteById(any());
     }

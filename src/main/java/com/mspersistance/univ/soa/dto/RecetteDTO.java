@@ -28,7 +28,7 @@ public record RecetteDTO(
     List<EtapeDTO> etapes
 ) {
     /**
-     * DTO Ingredient imbriqué en Record
+     * DTO Ingredient imbriquÃ© en Record
      */
     public record IngredientDTO(
         Long id,
@@ -41,7 +41,7 @@ public record RecetteDTO(
     ) {}
 
     /**
-     * DTO Etape imbriqué en Record
+     * DTO Etape imbriquÃ© en Record
      */
     public record EtapeDTO(
         Long id,

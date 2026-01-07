@@ -41,7 +41,7 @@ class RecetteFactoryTest {
     }
 
     @Test
-    @DisplayName("createFromDTO - avec ingrédient utilisant alimentId, devrait créer recette")
+    @DisplayName("createFromDTO - avec ingrÃ©dient utilisant alimentId, devrait crÃ©er recette")
     void createFromDTO_avecIngredientUtilisantAlimentId_devraitCreerRecette() {
         RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO(
             null, 1L, "Tomate", null, 200.0f, "GRAMME", true
@@ -66,7 +66,7 @@ class RecetteFactoryTest {
     }
 
     @Test
-    @DisplayName("createFromDTO - avec ingrédient utilisant alimentNom existant, devrait réutiliser aliment")
+    @DisplayName("createFromDTO - avec ingrÃ©dient utilisant alimentNom existant, devrait rÃ©utiliser aliment")
     void createFromDTO_avecIngredientUtilisantAlimentNomExistant_devraitReutiliserAliment() {
         RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO(
             null, null, "Tomate", "Tomate", 150.0f, null, true
@@ -90,7 +90,7 @@ class RecetteFactoryTest {
     }
 
     @Test
-    @DisplayName("createFromDTO - avec ingrédient utilisant alimentNom nouveau, devrait créer aliment")
+    @DisplayName("createFromDTO - avec ingrÃ©dient utilisant alimentNom nouveau, devrait crÃ©er aliment")
     void createFromDTO_avecIngredientUtilisantAlimentNomNouveau_devraitCreerAliment() {
         RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO(
             null, null, "Concombre", "Concombre", 100.0f, null, false
@@ -118,7 +118,7 @@ class RecetteFactoryTest {
     }
 
     @Test
-    @DisplayName("createFromDTO - avec étapes, devrait créer recette avec étapes")
+    @DisplayName("createFromDTO - avec Ã©tapes, devrait crÃ©er recette avec Ã©tapes")
     void createFromDTO_avecEtapes_devraitCreerRecetteAvecEtapes() {
         RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO(
             null, 1L, "Tomate", null, 200.0f, null, true
@@ -148,7 +148,7 @@ class RecetteFactoryTest {
     }
 
     @Test
-    @DisplayName("createFromDTO - sans ingrédients, devrait lancer exception")
+    @DisplayName("createFromDTO - sans ingrÃ©dients, devrait lancer exception")
     void createFromDTO_sansIngredients_devraitLancerException() {
         RecetteDTO dto = new RecetteDTO(
             null, "Test", null, 10, null, null, null, null, null,
@@ -160,11 +160,11 @@ class RecetteFactoryTest {
             () -> recetteFactory.createFromDTO(dto)
         );
 
-        assertEquals("Au moins un ingrédient est requis", exception.getMessage());
+        assertEquals("Au moins un ingrÃ©dient est requis", exception.getMessage());
     }
 
     @Test
-    @DisplayName("createFromDTO - avec ingrédient sans alimentId ni nomAliment, devrait lancer exception")
+    @DisplayName("createFromDTO - avec ingrÃ©dient sans alimentId ni nomAliment, devrait lancer exception")
     void createFromDTO_avecIngredientSansAlimentIdNiNomAliment_devraitLancerException() {
         RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO(
             null, null, null, null, 100.0f, null, null
@@ -184,7 +184,7 @@ class RecetteFactoryTest {
     }
 
     @Test
-    @DisplayName("updateFromDTO - devrait mettre à jour recette existante")
+    @DisplayName("updateFromDTO - devrait mettre Ã  jour recette existante")
     void updateFromDTO_devraitMettreAJourRecetteExistante() {
         Recette existing = new Recette();
         existing.setId(1L);

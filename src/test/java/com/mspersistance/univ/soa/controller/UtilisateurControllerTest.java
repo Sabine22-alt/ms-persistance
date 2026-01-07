@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,20 +53,31 @@ class UtilisateurControllerTest {
 
     @BeforeEach
     void setUp() {
-        utilisateur = new Utilisateur();
-        utilisateur.setId(1L);
-        utilisateur.setEmail("john@test.com");
-        utilisateur.setNom("Doe");
-        utilisateur.setPrenom("John");
-        utilisateur.setActif(true);
-        utilisateur.setRole(Utilisateur.Role.USER);
-        utilisateur.setAlimentsExclus(new HashSet<>());
+        utilisateur = Utilisateur.builder()
+                .id(1L)
+                .email("john@test.com")
+                .nom("Doe")
+                .prenom("John")
+                .actif(true)
+                .role(Utilisateur.Role.USER)
+                .regimesAlimentaires(new HashSet<>())
+                .allergenes(new HashSet<>())
+                .typesCuisinePreferences(new HashSet<>())
+                .alimentsExclus(new HashSet<>())
+                .build();
 
-        utilisateurDTO = new UtilisateurDTO(
-            1L, "john@test.com", null, "Doe", "John",
-            null, null, null, true, Utilisateur.Role.USER,
-            new HashSet<>(), null, null
-        );
+        utilisateurDTO = UtilisateurDTO.builder()
+                .id(1L)
+                .email("john@test.com")
+                .nom("Doe")
+                .prenom("John")
+                .actif(true)
+                .role(Utilisateur.Role.USER)
+                .regimesIds(new HashSet<>())
+                .allergenesIds(new HashSet<>())
+                .typesCuisinePreferesIds(new HashSet<>())
+                .alimentsExclusIds(new HashSet<>())
+                .build();
     }
 
     // ==================== Tests pour GET /api/persistance/utilisateurs ====================
@@ -74,12 +86,17 @@ class UtilisateurControllerTest {
     @DisplayName("GET /api/persistance/utilisateurs - devrait retourner tous les utilisateurs")
     void getAllUtilisateurs_devraitRetournerTousLesUtilisateurs() throws Exception {
         // Given
-        Utilisateur utilisateur2 = new Utilisateur();
-        utilisateur2.setId(2L);
-        utilisateur2.setEmail("jane@test.com");
-        utilisateur2.setNom("Smith");
+        Utilisateur utilisateur2 = Utilisateur.builder()
+                .id(2L)
+                .email("jane@test.com")
+                .nom("Smith")
+                .build();
 
-        UtilisateurDTO dto2 = new UtilisateurDTO(2L, "jane@test.com", null, "Smith", null, null, null, null, null, null, null, null, null);
+        UtilisateurDTO dto2 = UtilisateurDTO.builder()
+                .id(2L)
+                .email("jane@test.com")
+                .nom("Smith")
+                .build();
         when(utilisateurService.findAll()).thenReturn(Arrays.asList(utilisateur, utilisateur2));
         when(utilisateurMapper.toDTO(utilisateur)).thenReturn(utilisateurDTO);
         when(utilisateurMapper.toDTO(utilisateur2)).thenReturn(dto2);
@@ -169,14 +186,27 @@ class UtilisateurControllerTest {
     @DisplayName("POST /api/persistance/utilisateurs - avec données valides, devrait créer l'utilisateur")
     void createUtilisateur_avecDonneesValides_devraitCreerUtilisateur() throws Exception {
         // Given
-        UtilisateurDTO newDTO = new UtilisateurDTO(null, "new@test.com", "password123", "New", "User", null, null, null, null, null, null, null, null);
-        Utilisateur savedUtilisateur = new Utilisateur();
-        savedUtilisateur.setId(3L);
-        savedUtilisateur.setEmail("new@test.com");
-        savedUtilisateur.setNom("New");
-        savedUtilisateur.setPrenom("User");
+        UtilisateurDTO newDTO = UtilisateurDTO.builder()
+                .email("new@test.com")
+                .motDePasse("password123")
+                .nom("New")
+                .prenom("User")
+                .build();
 
-        UtilisateurDTO savedDTO = new UtilisateurDTO(3L, "new@test.com", null, "New", "User", null, null, null, null, null, null, null, null);
+        Utilisateur savedUtilisateur = Utilisateur.builder()
+                .id(3L)
+                .email("new@test.com")
+                .nom("New")
+                .prenom("User")
+                .build();
+
+        UtilisateurDTO savedDTO = UtilisateurDTO.builder()
+                .id(3L)
+                .email("new@test.com")
+                .nom("New")
+                .prenom("User")
+                .build();
+
         when(utilisateurService.findByEmail("new@test.com")).thenReturn(Optional.empty());
         when(utilisateurService.saveFromDTO(any(UtilisateurDTO.class))).thenReturn(savedUtilisateur);
         when(utilisateurMapper.toDTO(savedUtilisateur)).thenReturn(savedDTO);
@@ -193,10 +223,62 @@ class UtilisateurControllerTest {
     }
 
     @Test
+    @DisplayName("POST /api/persistance/utilisateurs - avec préférences alimentaires, devrait créer l'utilisateur")
+    void createUtilisateur_avecPreferencesAlimentaires_devraitCreerUtilisateur() throws Exception {
+        // Given
+        UtilisateurDTO newDTO = UtilisateurDTO.builder()
+                .email("new@test.com")
+                .motDePasse("password123")
+                .nom("New")
+                .prenom("User")
+                .regimesIds(Set.of(1L))
+                .allergenesIds(Set.of(8L))
+                .typesCuisinePreferesIds(Set.of(2L, 5L))
+                .build();
+
+        Utilisateur savedUtilisateur = Utilisateur.builder()
+                .id(3L)
+                .email("new@test.com")
+                .nom("New")
+                .prenom("User")
+                .build();
+
+        UtilisateurDTO savedDTO = UtilisateurDTO.builder()
+                .id(3L)
+                .email("new@test.com")
+                .nom("New")
+                .prenom("User")
+                .regimesIds(Set.of(1L))
+                .allergenesIds(Set.of(8L))
+                .typesCuisinePreferesIds(Set.of(2L, 5L))
+                .build();
+
+        when(utilisateurService.findByEmail("new@test.com")).thenReturn(Optional.empty());
+        when(utilisateurService.saveFromDTO(any(UtilisateurDTO.class))).thenReturn(savedUtilisateur);
+        when(utilisateurMapper.toDTO(savedUtilisateur)).thenReturn(savedDTO);
+
+        // When & Then
+        mockMvc.perform(post("/api/persistance/utilisateurs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(3))
+                .andExpect(jsonPath("$.email").value("new@test.com"))
+                .andExpect(jsonPath("$.regimesIds[0]").value(1))
+                .andExpect(jsonPath("$.allergenesIds[0]").value(8));
+
+        verify(utilisateurService, times(1)).saveFromDTO(any(UtilisateurDTO.class));
+    }
+
+    @Test
     @DisplayName("POST /api/persistance/utilisateurs - sans email, devrait retourner 400")
     void createUtilisateur_sansEmail_devraitRetourner400() throws Exception {
         // Given
-        UtilisateurDTO dto = new UtilisateurDTO(null, null, "password123", "Test", "User", null, null, null, null, null, null, null, null);
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .motDePasse("password123")
+                .nom("Test")
+                .prenom("User")
+                .build();
         // When & Then
         mockMvc.perform(post("/api/persistance/utilisateurs")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -211,7 +293,12 @@ class UtilisateurControllerTest {
     @DisplayName("POST /api/persistance/utilisateurs - avec email invalide, devrait retourner 400")
     void createUtilisateur_avecEmailInvalide_devraitRetourner400() throws Exception {
         // Given
-        UtilisateurDTO dto = new UtilisateurDTO(null, "email-invalide", "password123", "Test", "User", null, null, null, null, null, null, null, null);
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("email-invalide")
+                .motDePasse("password123")
+                .nom("Test")
+                .prenom("User")
+                .build();
         // When & Then
         mockMvc.perform(post("/api/persistance/utilisateurs")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -226,7 +313,12 @@ class UtilisateurControllerTest {
     @DisplayName("POST /api/persistance/utilisateurs - avec email existant, devrait retourner 409")
     void createUtilisateur_avecEmailExistant_devraitRetourner409() throws Exception {
         // Given
-        UtilisateurDTO dto = new UtilisateurDTO(null, "john@test.com", "password123", "Test", "User", null, null, null, null, null, null, null, null);
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("john@test.com")
+                .motDePasse("password123")
+                .nom("Test")
+                .prenom("User")
+                .build();
         when(utilisateurService.findByEmail("john@test.com")).thenReturn(Optional.of(utilisateur));
 
         // When & Then
@@ -243,7 +335,11 @@ class UtilisateurControllerTest {
     @DisplayName("POST /api/persistance/utilisateurs - sans mot de passe, devrait retourner 400")
     void createUtilisateur_sansMotDePasse_devraitRetourner400() throws Exception {
         // Given
-        UtilisateurDTO dto = new UtilisateurDTO(null, "test@test.com", null, "Test", "User", null, null, null, null, null, null, null, null);
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("test@test.com")
+                .nom("Test")
+                .prenom("User")
+                .build();
         when(utilisateurService.findByEmail("test@test.com")).thenReturn(Optional.empty());
 
         // When & Then
@@ -260,7 +356,12 @@ class UtilisateurControllerTest {
     @DisplayName("POST /api/persistance/utilisateurs - avec mot de passe trop court, devrait retourner 400")
     void createUtilisateur_avecMotDePasseTropCourt_devraitRetourner400() throws Exception {
         // Given
-        UtilisateurDTO dto = new UtilisateurDTO(null, "test@test.com", "12345", "Test", "User", null, null, null, null, null, null, null, null);
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("test@test.com")
+                .motDePasse("12345")
+                .nom("Test")
+                .prenom("User")
+                .build();
         when(utilisateurService.findByEmail("test@test.com")).thenReturn(Optional.empty());
 
         // When & Then
@@ -277,7 +378,11 @@ class UtilisateurControllerTest {
     @DisplayName("POST /api/persistance/utilisateurs - sans nom, devrait retourner 400")
     void createUtilisateur_sansNom_devraitRetourner400() throws Exception {
         // Given
-        UtilisateurDTO dto = new UtilisateurDTO(null, "test@test.com", "password123", null, "User", null, null, null, null, null, null, null, null);
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("test@test.com")
+                .motDePasse("password123")
+                .prenom("User")
+                .build();
         when(utilisateurService.findByEmail("test@test.com")).thenReturn(Optional.empty());
 
         // When & Then
@@ -294,7 +399,11 @@ class UtilisateurControllerTest {
     @DisplayName("POST /api/persistance/utilisateurs - sans prénom, devrait retourner 400")
     void createUtilisateur_sansPrenom_devraitRetourner400() throws Exception {
         // Given
-        UtilisateurDTO dto = new UtilisateurDTO(null, "test@test.com", "password123", "Test", null, null, null, null, null, null, null, null, null);
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("test@test.com")
+                .motDePasse("password123")
+                .nom("Test")
+                .build();
         when(utilisateurService.findByEmail("test@test.com")).thenReturn(Optional.empty());
 
         // When & Then
@@ -313,14 +422,26 @@ class UtilisateurControllerTest {
     @DisplayName("PUT /api/persistance/utilisateurs/{id} - avec données valides, devrait mettre à jour")
     void updateUtilisateur_avecDonneesValides_devraitMettreAJour() throws Exception {
         // Given
-        UtilisateurDTO updateDTO = new UtilisateurDTO(null, "john.updated@test.com", null, "Doe Updated", "John Updated", null, null, null, null, null, null, null, null);
-        Utilisateur updatedUtilisateur = new Utilisateur();
-        updatedUtilisateur.setId(1L);
-        updatedUtilisateur.setEmail("john.updated@test.com");
-        updatedUtilisateur.setNom("Doe Updated");
-        updatedUtilisateur.setPrenom("John Updated");
+        UtilisateurDTO updateDTO = UtilisateurDTO.builder()
+                .email("john.updated@test.com")
+                .nom("Doe Updated")
+                .prenom("John Updated")
+                .build();
 
-        UtilisateurDTO updatedDTO = new UtilisateurDTO(1L, "john.updated@test.com", null, "Doe Updated", "John Updated", null, null, null, null, null, null, null, null);
+        Utilisateur updatedUtilisateur = Utilisateur.builder()
+                .id(1L)
+                .email("john.updated@test.com")
+                .nom("Doe Updated")
+                .prenom("John Updated")
+                .build();
+
+        UtilisateurDTO updatedDTO = UtilisateurDTO.builder()
+                .id(1L)
+                .email("john.updated@test.com")
+                .nom("Doe Updated")
+                .prenom("John Updated")
+                .build();
+
         when(utilisateurService.findById(1L)).thenReturn(Optional.of(utilisateur));
         when(utilisateurService.findByEmail("john.updated@test.com")).thenReturn(Optional.empty());
         when(utilisateurService.updateFromDTO(eq(1L), any(UtilisateurDTO.class))).thenReturn(updatedUtilisateur);
@@ -338,10 +459,55 @@ class UtilisateurControllerTest {
     }
 
     @Test
+    @DisplayName("PUT /api/persistance/utilisateurs/{id} - avec préférences alimentaires, devrait mettre à jour")
+    void updateUtilisateur_avecPreferencesAlimentaires_devraitMettreAJour() throws Exception {
+        // Given
+        UtilisateurDTO updateDTO = UtilisateurDTO.builder()
+                .email("john@test.com")
+                .nom("Doe")
+                .prenom("John")
+                .regimesIds(Set.of(1L, 2L))
+                .allergenesIds(Set.of(7L, 8L))
+                .typesCuisinePreferesIds(Set.of(2L, 3L, 5L))
+                .build();
+
+        Utilisateur updatedUtilisateur = Utilisateur.builder()
+                .id(1L)
+                .email("john@test.com")
+                .build();
+
+        UtilisateurDTO updatedDTO = UtilisateurDTO.builder()
+                .id(1L)
+                .email("john@test.com")
+                .regimesIds(Set.of(1L, 2L))
+                .allergenesIds(Set.of(7L, 8L))
+                .typesCuisinePreferesIds(Set.of(2L, 3L, 5L))
+                .build();
+
+        when(utilisateurService.findById(1L)).thenReturn(Optional.of(utilisateur));
+        when(utilisateurService.findByEmail("john@test.com")).thenReturn(Optional.of(utilisateur));
+        when(utilisateurService.updateFromDTO(eq(1L), any(UtilisateurDTO.class))).thenReturn(updatedUtilisateur);
+        when(utilisateurMapper.toDTO(updatedUtilisateur)).thenReturn(updatedDTO);
+
+        // When & Then
+        mockMvc.perform(put("/api/persistance/utilisateurs/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+
+        verify(utilisateurService, times(1)).updateFromDTO(eq(1L), any(UtilisateurDTO.class));
+    }
+
+    @Test
     @DisplayName("PUT /api/persistance/utilisateurs/{id} - avec ID inexistant, devrait retourner 404")
     void updateUtilisateur_avecIdInexistant_devraitRetourner404() throws Exception {
         // Given
-        UtilisateurDTO dto = new UtilisateurDTO(null, "test@test.com", null, "Test", "User", null, null, null, null, null, null, null, null);
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("test@test.com")
+                .nom("Test")
+                .prenom("User")
+                .build();
         when(utilisateurService.findById(999L)).thenReturn(Optional.empty());
 
         // When & Then
@@ -360,13 +526,13 @@ class UtilisateurControllerTest {
     void deleteUtilisateur_avecIdExistant_devraitSupprimer() throws Exception {
         // Given
         when(utilisateurService.findById(1L)).thenReturn(Optional.of(utilisateur));
-        doNothing().when(utilisateurService).deleteById(1L);
+        doNothing().when(utilisateurService).delete(1L);
 
         // When & Then
         mockMvc.perform(delete("/api/persistance/utilisateurs/1"))
                 .andExpect(status().isNoContent());
 
-        verify(utilisateurService, times(1)).deleteById(1L);
+        verify(utilisateurService, times(1)).delete(1L);
     }
 
     @Test
@@ -380,7 +546,6 @@ class UtilisateurControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Utilisateur non trouvé avec l'ID: 999"));
 
-        verify(utilisateurService, never()).deleteById(any());
+        verify(utilisateurService, never()).delete(any());
     }
 }
-

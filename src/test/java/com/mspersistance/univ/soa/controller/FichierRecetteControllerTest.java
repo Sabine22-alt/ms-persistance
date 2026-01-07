@@ -55,7 +55,7 @@ class FichierRecetteControllerTest {
     }
 
     @Test
-    @DisplayName("Devrait uploader une image avec succès")
+    @DisplayName("Devrait uploader une image avec succÃ¨s")
     void testUploadImage_Success() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
             "file",
@@ -94,7 +94,7 @@ class FichierRecetteControllerTest {
     }
 
     @Test
-    @DisplayName("Devrait uploader un document avec succès")
+    @DisplayName("Devrait uploader un document avec succÃ¨s")
     void testUploadDocument_Success() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
             "file",
@@ -117,7 +117,7 @@ class FichierRecetteControllerTest {
     }
 
     @Test
-    @DisplayName("Devrait récupérer tous les fichiers d'une recette")
+    @DisplayName("Devrait rÃ©cupÃ©rer tous les fichiers d'une recette")
     void testGetAllFichiers() throws Exception {
         List<FichierRecetteDTO> fichiers = Arrays.asList(fichierDTO);
         when(fichierRecetteService.getFichiersByRecette(1L)).thenReturn(fichiers);
@@ -131,7 +131,7 @@ class FichierRecetteControllerTest {
     }
 
     @Test
-    @DisplayName("Devrait récupérer uniquement les images d'une recette")
+    @DisplayName("Devrait rÃ©cupÃ©rer uniquement les images d'une recette")
     void testGetImages() throws Exception {
         List<FichierRecetteDTO> images = Arrays.asList(fichierDTO);
         when(fichierRecetteService.getImagesByRecette(1L)).thenReturn(images);
@@ -145,7 +145,7 @@ class FichierRecetteControllerTest {
     }
 
     @Test
-    @DisplayName("Devrait récupérer uniquement les documents d'une recette")
+    @DisplayName("Devrait rÃ©cupÃ©rer uniquement les documents d'une recette")
     void testGetDocuments() throws Exception {
         fichierDTO.setType(FichierRecette.TypeFichier.DOCUMENT);
         List<FichierRecetteDTO> documents = Arrays.asList(fichierDTO);
@@ -160,7 +160,7 @@ class FichierRecetteControllerTest {
     }
 
     @Test
-    @DisplayName("Devrait télécharger un fichier")
+    @DisplayName("Devrait tÃ©lÃ©charger un fichier")
     void testDownloadFichier() throws Exception {
         ByteArrayInputStream inputStream = new ByteArrayInputStream("test content".getBytes());
 
@@ -175,7 +175,7 @@ class FichierRecetteControllerTest {
     }
 
     @Test
-    @DisplayName("Devrait récupérer les métadonnées d'un fichier")
+    @DisplayName("Devrait rÃ©cupÃ©rer les mÃ©tadonnÃ©es d'un fichier")
     void testGetFichierMetadata() throws Exception {
         when(fichierRecetteService.getFichierById(1L)).thenReturn(fichierDTO);
 
@@ -210,7 +210,7 @@ class FichierRecetteControllerTest {
     }
 
     @Test
-    @DisplayName("Devrait gérer les erreurs lors de l'upload")
+    @DisplayName("Devrait gÃ©rer les erreurs lors de l'upload")
     void testUploadImage_WithError() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
             "file",
@@ -220,7 +220,7 @@ class FichierRecetteControllerTest {
         );
 
         when(fichierRecetteService.uploadImage(eq(1L), any()))
-            .thenThrow(new IllegalArgumentException("Type de fichier non autorisé"));
+            .thenThrow(new IllegalArgumentException("Type de fichier non autorisÃ©"));
 
         mockMvc.perform(multipart("/api/persistance/recettes/1/fichiers/images")
                 .file(file))
@@ -228,7 +228,7 @@ class FichierRecetteControllerTest {
     }
 
     @Test
-    @DisplayName("Devrait gérer les erreurs lors du téléchargement")
+    @DisplayName("Devrait gÃ©rer les erreurs lors du tÃ©lÃ©chargement")
     void testDownloadFichier_WithError() throws Exception {
         when(fichierRecetteService.getFichierById(1L))
             .thenThrow(new RuntimeException("Erreur interne"));

@@ -40,7 +40,7 @@ public class PasswordResetToken {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (expiryDate == null) {
-            // Token valide 24 heures par défaut
+            // Token valide 24 heures par dÃ©faut
             expiryDate = LocalDateTime.now().plusHours(24);
         }
     }

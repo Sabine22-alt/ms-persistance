@@ -47,7 +47,7 @@ class FeedbackFactoryTest {
     }
 
     @Test
-    @DisplayName("createFromDTO - avec DTO valide, devrait créer feedback")
+    @DisplayName("createFromDTO - avec DTO valide, devrait crÃ©er feedback")
     void createFromDTO_avecDTOValide_devraitCreerFeedback() {
         FeedbackDTO dto = new FeedbackDTO(null, 1L, 1L, 5, "Excellent!", null, null);
 
@@ -103,7 +103,7 @@ class FeedbackFactoryTest {
     }
 
     @Test
-    @DisplayName("updateFromDTO - devrait mettre à jour feedback existant")
+    @DisplayName("updateFromDTO - devrait mettre Ã  jour feedback existant")
     void updateFromDTO_devraitMettreAJourFeedbackExistant() {
         Feedback existing = new Feedback();
         existing.setId(1L);

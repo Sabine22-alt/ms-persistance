@@ -147,11 +147,11 @@ class RecetteServiceTest {
     // ==================== Tests pour save() ====================
 
     @Test
-    @DisplayName("save - avec recette valide, devrait créer la recette")
+    @DisplayName("save - avec recette valide, devrait crÃ©er la recette")
     void save_avecRecetteValide_devraitCreerRecette() {
         // Given
         Recette nouvelleRecette = new Recette();
-        nouvelleRecette.setTitre("Soupe de légumes");
+        nouvelleRecette.setTitre("Soupe de lÃ©gumes");
         nouvelleRecette.setTempsTotal(30);
         nouvelleRecette.setKcal(200);
         nouvelleRecette.setDifficulte(Recette.Difficulte.FACILE);
@@ -170,7 +170,7 @@ class RecetteServiceTest {
 
         Recette recetteSauvegardee = new Recette();
         recetteSauvegardee.setId(2L);
-        recetteSauvegardee.setTitre("Soupe de légumes");
+        recetteSauvegardee.setTitre("Soupe de lÃ©gumes");
         recetteSauvegardee.setIngredients(new ArrayList<>());
         recetteSauvegardee.setEtapes(new ArrayList<>());
 
@@ -183,7 +183,7 @@ class RecetteServiceTest {
         // Then
         assertNotNull(result);
         assertNotNull(result.getId());
-        assertEquals("Soupe de légumes", result.getTitre());
+        assertEquals("Soupe de lÃ©gumes", result.getTitre());
         verify(alimentRepository, times(1)).findById(1L);
         verify(recetteRepository, times(1)).save(any(Recette.class));
     }
@@ -210,13 +210,13 @@ class RecetteServiceTest {
                 () -> recetteService.save(nouvelleRecette)
         );
 
-        assertEquals("Aliment non trouvé avec l'ID: 999", exception.getMessage());
+        assertEquals("Aliment non trouvÃ© avec l'ID: 999", exception.getMessage());
         verify(alimentRepository, times(1)).findById(999L);
         verify(recetteRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("save - devrait mettre l'ID de la recette à null")
+    @DisplayName("save - devrait mettre l'ID de la recette Ã  null")
     void save_devraitMettreIdRecetteANull() {
         // Given
         Recette recetteAvecId = new Recette();
@@ -238,11 +238,11 @@ class RecetteServiceTest {
     // ==================== Tests pour update() ====================
 
     @Test
-    @DisplayName("update - avec ID existant, devrait mettre à jour la recette")
+    @DisplayName("update - avec ID existant, devrait mettre Ã  jour la recette")
     void update_avecIdExistant_devraitMettreAJourRecette() {
         // Given
         Recette recetteMiseAJour = new Recette();
-        recetteMiseAJour.setTitre("Salade améliorée");
+        recetteMiseAJour.setTitre("Salade amÃ©liorÃ©e");
         recetteMiseAJour.setTempsTotal(20);
         recetteMiseAJour.setKcal(180);
         recetteMiseAJour.setImageUrl("http://example.com/new.jpg");
@@ -258,7 +258,7 @@ class RecetteServiceTest {
 
         // Then
         assertNotNull(result);
-        assertEquals("Salade améliorée", result.getTitre());
+        assertEquals("Salade amÃ©liorÃ©e", result.getTitre());
         assertEquals(20, result.getTempsTotal());
         assertEquals(180, result.getKcal());
         verify(recetteRepository, times(1)).findById(1L);
@@ -280,13 +280,13 @@ class RecetteServiceTest {
                 () -> recetteService.update(999L, recetteMiseAJour)
         );
 
-        assertEquals("Recette non trouvée avec l'ID: 999", exception.getMessage());
+        assertEquals("Recette non trouvÃ©e avec l'ID: 999", exception.getMessage());
         verify(recetteRepository, times(1)).findById(999L);
         verify(recetteRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("update - devrait remplacer les ingrédients existants")
+    @DisplayName("update - devrait remplacer les ingrÃ©dients existants")
     void update_devraitRemplacerIngredientsExistants() {
         // Given
         Recette recetteMiseAJour = new Recette();
@@ -315,7 +315,7 @@ class RecetteServiceTest {
     // ==================== Tests pour saveFromDTO() ====================
 
     @Test
-    @DisplayName("saveFromDTO - avec ingrédient utilisant alimentId, devrait créer la recette")
+    @DisplayName("saveFromDTO - avec ingrÃ©dient utilisant alimentId, devrait crÃ©er la recette")
     void saveFromDTO_avecIngredientUtilisantAlimentId_devraitCreerRecette() {
         // Given - Utiliser les constructeurs Records
         RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO(
@@ -382,7 +382,7 @@ class RecetteServiceTest {
     }
 
     @Test
-    @DisplayName("saveFromDTO - avec ingrédient utilisant nomAliment, devrait créer la recette")
+    @DisplayName("saveFromDTO - avec ingrÃ©dient utilisant nomAliment, devrait crÃ©er la recette")
     void saveFromDTO_avecIngredientUtilisantNomAliment_devraitCreerRecette() {
         // Given - Utiliser les constructeurs Records
         RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO(
@@ -462,7 +462,7 @@ class RecetteServiceTest {
     }
 
     @Test
-    @DisplayName("saveFromDTO - avec alimentNom existant, devrait réutiliser l'aliment")
+    @DisplayName("saveFromDTO - avec alimentNom existant, devrait rÃ©utiliser l'aliment")
     void saveFromDTO_avecAlimentNomExistant_devraitReutiliserAliment() {
         RecetteDTO.IngredientDTO ingredientDTO = new RecetteDTO.IngredientDTO(
             null, null, "Tomate", "Tomate", 100.0f, null, true
@@ -534,13 +534,13 @@ class RecetteServiceTest {
                 () -> recetteService.deleteById(999L)
         );
 
-        assertEquals("Recette non trouvée avec l'ID: 999", exception.getMessage());
+        assertEquals("Recette non trouvÃ©e avec l'ID: 999", exception.getMessage());
         verify(recetteRepository, times(1)).existsById(999L);
         verify(recetteRepository, never()).deleteById(any());
     }
 
     @Test
-    @DisplayName("saveFromDTO - devrait logger l'activité")
+    @DisplayName("saveFromDTO - devrait logger l'activitÃ©")
     void saveFromDTO_devraitLoggerActivite() {
         RecetteDTO.IngredientDTO ing = new RecetteDTO.IngredientDTO(
             null, null, "Tomate", "Tomate", 100f, null, true

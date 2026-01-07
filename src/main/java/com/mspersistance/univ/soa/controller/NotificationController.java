@@ -28,7 +28,7 @@ public class NotificationController {
     }
 
     /**
-     * GET /api/persistance/notifications/utilisateur/{utilisateurId} - Récupérer toutes les notifications d'un utilisateur
+     * GET /api/persistance/notifications/utilisateur/{utilisateurId} - RÃ©cupÃ©rer toutes les notifications d'un utilisateur
      */
     @GetMapping("/utilisateur/{utilisateurId}")
     public ResponseEntity<List<NotificationDTO>> getNotificationsByUtilisateur(@PathVariable Long utilisateurId) {
@@ -39,7 +39,7 @@ public class NotificationController {
     }
 
     /**
-     * GET /api/persistance/notifications/utilisateur/{utilisateurId}/non-lues - Récupérer les notifications non lues
+     * GET /api/persistance/notifications/utilisateur/{utilisateurId}/non-lues - RÃ©cupÃ©rer les notifications non lues
      */
     @GetMapping("/utilisateur/{utilisateurId}/non-lues")
     public ResponseEntity<List<NotificationDTO>> getNotificationsNonLues(@PathVariable Long utilisateurId) {
@@ -76,7 +76,7 @@ public class NotificationController {
     public ResponseEntity<Map<String, String>> marquerToutesCommeLues(@PathVariable Long utilisateurId) {
         recetteService.marquerToutesNotificationsCommeLues(utilisateurId);
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Toutes les notifications ont été marquées comme lues");
+        response.put("message", "Toutes les notifications ont Ã©tÃ© marquÃ©es comme lues");
         return ResponseEntity.ok(response);
     }
 
@@ -87,7 +87,7 @@ public class NotificationController {
     public ResponseEntity<Map<String, String>> deleteNotification(@PathVariable Long id) {
         recetteService.deleteNotification(id);
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Notification supprimée avec succès");
+        response.put("message", "Notification supprimÃ©e avec succÃ¨s");
         return ResponseEntity.ok(response);
     }
 }

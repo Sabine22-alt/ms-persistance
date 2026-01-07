@@ -30,7 +30,7 @@ public class PlanificationRepasService {
     }
 
     /**
-     * Récupère ou crée la planification pour une semaine donnée
+     * RÃ©cupÃ¨re ou crÃ©e la planification pour une semaine donnÃ©e
      */
     @Transactional
     public PlanificationRepas getOrCreatePlanification(Long utilisateurId, Integer semaine, Integer annee) {
@@ -41,13 +41,13 @@ public class PlanificationRepasService {
             return existing.get();
         }
 
-        // Créer une nouvelle planification avec tous les jours de la semaine
+        // CrÃ©er une nouvelle planification avec tous les jours de la semaine
         PlanificationRepas planification = new PlanificationRepas();
         planification.setUtilisateurId(utilisateurId);
         planification.setSemaine(semaine);
         planification.setAnnee(annee);
 
-        // Initialiser les 7 jours (lundi à dimanche)
+        // Initialiser les 7 jours (lundi Ã  dimanche)
         for (int jour = 0; jour < 7; jour++) {
             PlanificationJour pj = new PlanificationJour();
             pj.setJour(jour);
@@ -59,7 +59,7 @@ public class PlanificationRepasService {
     }
 
     /**
-     * Récupère la planification pour une semaine
+     * RÃ©cupÃ¨re la planification pour une semaine
      */
     @Transactional(readOnly = true)
     public Optional<PlanificationRepas> getPlanification(Long utilisateurId, Integer semaine, Integer annee) {
@@ -77,16 +77,16 @@ public class PlanificationRepasService {
         PlanificationJour pj = planification.getJours().stream()
             .filter(j -> j.getJour().equals(jour))
             .findFirst()
-            .orElseThrow(() -> new ResourceNotFoundException("Jour non trouvé"));
+            .orElseThrow(() -> new ResourceNotFoundException("Jour non trouvÃ©"));
 
-        // Vérifier si le repas existe déjà (modification) ou non (ajout)
+        // VÃ©rifier si le repas existe dÃ©jÃ  (modification) ou non (ajout)
         boolean isModification = pj.getRepas().stream()
             .anyMatch(r -> r.getTypeRepas().getValue() == typeRepas);
 
-        // Chercher et supprimer si existe déjà ce type de repas
+        // Chercher et supprimer si existe dÃ©jÃ  ce type de repas
         pj.getRepas().removeIf(r -> r.getTypeRepas().getValue() == typeRepas);
 
-        // Créer le nouveau repas
+        // CrÃ©er le nouveau repas
         RepasPlannifie repas = new RepasPlannifie();
         repas.setTypeRepas(RepasPlannifie.TypeRepas.values()[typeRepas]);
         repas.setRecetteId(recetteId);
@@ -97,11 +97,11 @@ public class PlanificationRepasService {
 
         PlanificationRepas saved = planificationRepasRepository.save(planification);
 
-        // Enregistrer l'activité
+        // Enregistrer l'activitÃ©
         String[] joursNoms = {"Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"};
         String jourNom = joursNoms[jour];
         String typeRepasNom = RepasPlannifie.TypeRepas.values()[typeRepas].getLabel();
-        String description = String.format("Repas planifié : %s - %s (Semaine %d/%d)",
+        String description = String.format("Repas planifiÃ© : %s - %s (Semaine %d/%d)",
             jourNom, typeRepasNom, semaine, annee);
 
         activiteService.logActivite(
@@ -114,29 +114,29 @@ public class PlanificationRepasService {
     }
 
     /**
-     * Supprimer un repas planifié
+     * Supprimer un repas planifiÃ©
      */
     @Transactional
     public PlanificationRepas deleteRepas(Long utilisateurId, Integer semaine, Integer annee,
                                           Integer jour, Integer typeRepas) {
         PlanificationRepas planification = planificationRepasRepository
             .findByUtilisateurAndWeek(utilisateurId, semaine, annee)
-            .orElseThrow(() -> new ResourceNotFoundException("Planification non trouvée"));
+            .orElseThrow(() -> new ResourceNotFoundException("Planification non trouvÃ©e"));
 
         PlanificationJour pj = planification.getJours().stream()
             .filter(j -> j.getJour().equals(jour))
             .findFirst()
-            .orElseThrow(() -> new ResourceNotFoundException("Jour non trouvé"));
+            .orElseThrow(() -> new ResourceNotFoundException("Jour non trouvÃ©"));
 
         pj.getRepas().removeIf(r -> r.getTypeRepas().getValue() == typeRepas);
 
         PlanificationRepas saved = planificationRepasRepository.save(planification);
 
-        // Enregistrer l'activité
+        // Enregistrer l'activitÃ©
         String[] joursNoms = {"Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"};
         String jourNom = joursNoms[jour];
         String typeRepasNom = RepasPlannifie.TypeRepas.values()[typeRepas].getLabel();
-        String description = String.format("Repas supprimé : %s - %s (Semaine %d/%d)",
+        String description = String.format("Repas supprimÃ© : %s - %s (Semaine %d/%d)",
             jourNom, typeRepasNom, semaine, annee);
 
         activiteService.logActivite(
@@ -149,7 +149,7 @@ public class PlanificationRepasService {
     }
 
     /**
-     * Récupère l'historique des planifications d'un utilisateur
+     * RÃ©cupÃ¨re l'historique des planifications d'un utilisateur
      */
     @Transactional(readOnly = true)
     public List<PlanificationRepas> getPlanificationsHistory(Long utilisateurId) {

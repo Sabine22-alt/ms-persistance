@@ -22,25 +22,25 @@ public class RecetteMapper {
     }
 
     /**
-     * Convertit une entité Recette en DTO Record (VERSION OPTIMISÉE)
-     * N'accède aux collections lazy QUE si déjà initialisées (évite N+1)
+     * Convertit une entitÃ© Recette en DTO Record (VERSION OPTIMISÃ‰E)
+     * N'accÃ¨de aux collections lazy QUE si dÃ©jÃ  initialisÃ©es (Ã©vite N+1)
      */
     public RecetteDTO toDTO(Recette recette) {
         if (recette == null) {
             return null;
         }
 
-        // Gérer l'URL de l'image (MinIO presigned URL)
+        // GÃ©rer l'URL de l'image (MinIO presigned URL)
         String imageUrl = resolveImageUrl(recette.getImageUrl());
 
-        // Convertir les ingrédients SEULEMENT si la collection est initialisée ET non-null
+        // Convertir les ingrÃ©dients SEULEMENT si la collection est initialisÃ©e ET non-null
         var ingredients = (recette.getIngredients() != null && isCollectionInitialized(recette.getIngredients()))
                 ? recette.getIngredients().stream()
                         .map(this::ingredientToDTO)
                         .toList()
                 : null;
 
-        // Convertir les étapes SEULEMENT si la collection est initialisée ET non-null
+        // Convertir les Ã©tapes SEULEMENT si la collection est initialisÃ©e ET non-null
         var etapes = (recette.getEtapes() != null && isCollectionInitialized(recette.getEtapes()))
                 ? recette.getEtapes().stream()
                         .map(this::etapeToDTO)
@@ -69,7 +69,7 @@ public class RecetteMapper {
     }
 
     /**
-     * Version légère pour listes (pas de collections)
+     * Version lÃ©gÃ¨re pour listes (pas de collections)
      */
     public RecetteDTO toDTOLight(Recette recette) {
         if (recette == null) {
@@ -99,7 +99,7 @@ public class RecetteMapper {
     }
 
     /**
-     * Vérifie si une collection Hibernate est déjà initialisée (évite le lazy loading)
+     * VÃ©rifie si une collection Hibernate est dÃ©jÃ  initialisÃ©e (Ã©vite le lazy loading)
      */
     private boolean isCollectionInitialized(Object collection) {
         return org.hibernate.Hibernate.isInitialized(collection);
@@ -139,7 +139,7 @@ public class RecetteMapper {
     }
 
     /**
-     * Résout l'URL de l'image (génère une presigned URL pour MinIO)
+     * RÃ©sout l'URL de l'image (gÃ©nÃ¨re une presigned URL pour MinIO)
      */
     private String resolveImageUrl(String imageUrl) {
         if (imageUrl == null || imageUrl.isEmpty()) {
@@ -158,7 +158,7 @@ public class RecetteMapper {
     }
 
     /**
-     * Convertit un DTO Record en entité Recette (partiel)
+     * Convertit un DTO Record en entitÃ© Recette (partiel)
      */
     public Recette toEntity(RecetteDTO dto) {
         if (dto == null) {

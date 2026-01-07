@@ -11,12 +11,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Factory pour créer des entités Utilisateur.
+ * Factory pour crÃ©er des entitÃ©s Utilisateur.
  * Design Pattern: Factory Method
  *
  * Avantages:
- * - Centralisation de la logique de création
- * - Réduction de la duplication de code
+ * - Centralisation de la logique de crÃ©ation
+ * - RÃ©duction de la duplication de code
  * - Facilite les tests unitaires
  * - Code plus maintenable et lisible
  */
@@ -32,7 +32,7 @@ public class UtilisateurFactory {
     }
 
     /**
-     * Crée un nouvel utilisateur à partir d'un DTO Record.
+     * CrÃ©e un nouvel utilisateur Ã  partir d'un DTO Record.
      * Pattern: Factory Method + Builder
      *
      * Note: Avec Records, on utilise les accesseurs directs (email() au lieu de getEmail())
@@ -45,7 +45,7 @@ public class UtilisateurFactory {
                 .motDePasse(encodePasswordIfPresent(dto.motDePasse()))
                 .nom(dto.nom())
                 .prenom(dto.prenom())
-                // Champs optionnels uniquement si fournis (sinon laissés à null)
+                // Champs optionnels uniquement si fournis (sinon laissÃ©s Ã  null)
                 .telephone(dto.telephone())
                 .bio(dto.bio())
                 .adresse(dto.adresse())
@@ -56,7 +56,7 @@ public class UtilisateurFactory {
     }
 
     /**
-     * Met à jour un utilisateur existant avec les données du DTO Record.
+     * Met Ã  jour un utilisateur existant avec les donnÃ©es du DTO Record.
      * Pattern: Builder + Fluent Interface
      */
     public Utilisateur updateFromDTO(Utilisateur existing, UtilisateurDTO dto) {
@@ -72,7 +72,7 @@ public class UtilisateurFactory {
         if (dto.actif() != null) existing.setActif(dto.actif());
         if (dto.role() != null) existing.setRole(dto.role());
 
-        // Mise à jour des aliments exclus
+        // Mise Ã  jour des aliments exclus
         if (dto.alimentsExclusIds() != null) {
             existing.getAlimentsExclus().clear();
             existing.getAlimentsExclus().addAll(buildAlimentsExclus(dto.alimentsExclusIds()));
@@ -82,7 +82,7 @@ public class UtilisateurFactory {
     }
 
     /**
-     * Encode le mot de passe si présent.
+     * Encode le mot de passe si prÃ©sent.
      */
     private String encodePasswordIfPresent(String password) {
         return (password != null && !password.isEmpty())
@@ -91,7 +91,7 @@ public class UtilisateurFactory {
     }
 
     /**
-     * Construit le set d'aliments exclus à partir des IDs.
+     * Construit le set d'aliments exclus Ã  partir des IDs.
      */
     private Set<Aliment> buildAlimentsExclus(Set<Long> alimentIds) {
         if (alimentIds == null || alimentIds.isEmpty()) {
@@ -106,7 +106,7 @@ public class UtilisateurFactory {
     }
 
     /**
-     * Crée un utilisateur simple (pour les tests).
+     * CrÃ©e un utilisateur simple (pour les tests).
      */
     public Utilisateur createSimple(String email, String password, String nom, String prenom) {
         return Utilisateur.builder()

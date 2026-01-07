@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class NotificationMapper {
 
     /**
-     * Convertit une entité Notification en DTO Record
+     * Convertit une entitÃ© Notification en DTO Record
      */
     public NotificationDTO toDTO(Notification notification) {
         if (notification == null) {
@@ -31,7 +31,7 @@ public class NotificationMapper {
     }
 
     /**
-     * Convertit un DTO Record en entité Notification
+     * Convertit un DTO Record en entitÃ© Notification
      */
     public Notification toEntity(NotificationDTO dto) {
         if (dto == null) {

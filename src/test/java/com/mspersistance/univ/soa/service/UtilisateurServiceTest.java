@@ -1,10 +1,15 @@
 package com.mspersistance.univ.soa.service;
 
-import com.mspersistance.univ.soa.exception.ResourceNotFoundException;
-import com.mspersistance.univ.soa.model.Aliment;
-import com.mspersistance.univ.soa.model.Utilisateur;
-import com.mspersistance.univ.soa.repository.AlimentRepository;
-import com.mspersistance.univ.soa.repository.UtilisateurRepository;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,11 +19,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import com.mspersistance.univ.soa.dto.UtilisateurDTO;
+import com.mspersistance.univ.soa.exception.ResourceNotFoundException;
+import com.mspersistance.univ.soa.factory.UtilisateurFactory;
+import com.mspersistance.univ.soa.model.Utilisateur;
+import com.mspersistance.univ.soa.repository.AlimentRepository;
+import com.mspersistance.univ.soa.repository.AllergeneRepository;
+import com.mspersistance.univ.soa.repository.PasswordResetTokenRepository;
+import com.mspersistance.univ.soa.repository.RegimeAlimentaireRepository;
+import com.mspersistance.univ.soa.repository.TypeCuisineRepository;
+import com.mspersistance.univ.soa.repository.UtilisateurRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests unitaires pour UtilisateurService")
@@ -33,28 +43,41 @@ class UtilisateurServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Mock
+    private RegimeAlimentaireRepository regimeAlimentaireRepository;
+
+    @Mock
+    private AllergeneRepository allergeneRepository;
+
+    @Mock
+    private TypeCuisineRepository typeCuisineRepository;
+
+    @Mock
+    private UtilisateurFactory utilisateurFactory;
+
     @InjectMocks
     private UtilisateurService utilisateurService;
 
     private Utilisateur utilisateur;
-    private Aliment aliment;
 
     @BeforeEach
     void setUp() {
-        aliment = new Aliment();
-        aliment.setId(1L);
-        aliment.setNom("Pâtes");
-        aliment.setCategorieAliment(Aliment.CategorieAliment.GLUTEN);
-
-        utilisateur = new Utilisateur();
-        utilisateur.setId(1L);
-        utilisateur.setEmail("john@test.com");
-        utilisateur.setNom("Doe");
-        utilisateur.setPrenom("John");
-        utilisateur.setMotDePasse("hashedPassword123");
-        utilisateur.setActif(true);
-        utilisateur.setRole(Utilisateur.Role.USER);
-        utilisateur.setAlimentsExclus(new HashSet<>());
+        utilisateur = Utilisateur.builder()
+                .id(1L)
+                .email("john@test.com")
+                .nom("Doe")
+                .prenom("John")
+                .motDePasse("hashedPassword123")
+                .actif(true)
+                .role(Utilisateur.Role.USER)
+                .regimesAlimentaires(new HashSet<>())
+                .allergenes(new HashSet<>())
+                .typesCuisinePreferences(new HashSet<>())
+                .alimentsExclus(new HashSet<>())
+                .build();
     }
 
     // ==================== Tests pour findAll() ====================
@@ -134,7 +157,7 @@ class UtilisateurServiceTest {
     // ==================== Tests pour save() ====================
 
     @Test
-    @DisplayName("save - avec utilisateur valide, devrait hasher le mot de passe et créer l'utilisateur")
+    @DisplayName("save - avec utilisateur valide, devrait hasher le mot de passe et crÃ©er l'utilisateur")
     void save_avecUtilisateurValide_devraitHasherMotDePasseEtCreerUtilisateur() {
         // Given
         Utilisateur nouvelUtilisateur = new Utilisateur();
@@ -167,7 +190,7 @@ class UtilisateurServiceTest {
     }
 
     @Test
-    @DisplayName("save - devrait définir les valeurs par défaut si nulles")
+    @DisplayName("save - devrait dÃ©finir les valeurs par dÃ©faut si nulles")
     void save_devraitDefinirValeursParDefautSiNulles() {
         // Given
         Utilisateur nouvelUtilisateur = new Utilisateur();
@@ -186,7 +209,7 @@ class UtilisateurServiceTest {
     }
 
     @Test
-    @DisplayName("save - devrait mettre l'ID à null")
+    @DisplayName("save - devrait mettre l'ID Ã  null")
     void save_devraitMettreIdANull() {
         // Given
         Utilisateur utilisateurAvecId = new Utilisateur();
@@ -203,90 +226,17 @@ class UtilisateurServiceTest {
         verify(utilisateurRepository, times(1)).save(any(Utilisateur.class));
     }
 
-    // ==================== Tests pour update() ====================
+    // ==================== Tests pour delete() ====================
 
     @Test
-    @DisplayName("update - avec ID existant, devrait mettre à jour l'utilisateur")
-    void update_avecIdExistant_devraitMettreAJourUtilisateur() {
-        // Given
-        Utilisateur utilisateurMisAJour = new Utilisateur();
-        utilisateurMisAJour.setEmail("updated@test.com");
-        utilisateurMisAJour.setNom("UpdatedNom");
-        utilisateurMisAJour.setPrenom("UpdatedPrenom");
-        utilisateurMisAJour.setActif(false);
-        utilisateurMisAJour.setRole(Utilisateur.Role.ADMIN);
-
-        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(utilisateur));
-        when(utilisateurRepository.save(any(Utilisateur.class))).thenReturn(utilisateur);
-
-        // When
-        Utilisateur result = utilisateurService.update(1L, utilisateurMisAJour);
-
-        // Then
-        assertNotNull(result);
-        assertEquals("updated@test.com", result.getEmail());
-        assertEquals("UpdatedNom", result.getNom());
-        assertEquals("UpdatedPrenom", result.getPrenom());
-        assertFalse(result.getActif());
-        assertEquals(Utilisateur.Role.ADMIN, result.getRole());
-        verify(utilisateurRepository, times(1)).findById(1L);
-        verify(utilisateurRepository, times(1)).save(utilisateur);
-    }
-
-    @Test
-    @DisplayName("update - devrait hasher le nouveau mot de passe s'il est fourni")
-    void update_devraitHasherNouveauMotDePasseSiFourni() {
-        // Given
-        Utilisateur utilisateurMisAJour = new Utilisateur();
-        utilisateurMisAJour.setEmail("john@test.com");
-        utilisateurMisAJour.setNom("Doe");
-        utilisateurMisAJour.setPrenom("John");
-        utilisateurMisAJour.setMotDePasse("newPlainPassword");
-
-        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(utilisateur));
-        when(passwordEncoder.encode("newPlainPassword")).thenReturn("newHashedPassword");
-        when(utilisateurRepository.save(any(Utilisateur.class))).thenReturn(utilisateur);
-
-        // When
-        Utilisateur result = utilisateurService.update(1L, utilisateurMisAJour);
-
-        // Then
-        assertEquals("newHashedPassword", result.getMotDePasse());
-        verify(passwordEncoder, times(1)).encode("newPlainPassword");
-        verify(utilisateurRepository, times(1)).save(utilisateur);
-    }
-
-    @Test
-    @DisplayName("update - avec ID inexistant, devrait lancer ResourceNotFoundException")
-    void update_avecIdInexistant_devraitLancerException() {
-        // Given
-        Utilisateur utilisateurMisAJour = new Utilisateur();
-        utilisateurMisAJour.setEmail("test@test.com");
-
-        when(utilisateurRepository.findById(999L)).thenReturn(Optional.empty());
-
-        // When & Then
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> utilisateurService.update(999L, utilisateurMisAJour)
-        );
-
-        assertEquals("Utilisateur non trouvé avec l'ID: 999", exception.getMessage());
-        verify(utilisateurRepository, times(1)).findById(999L);
-        verify(utilisateurRepository, never()).save(any());
-    }
-
-    // ==================== Tests pour deleteById() ====================
-
-    @Test
-    @DisplayName("deleteById - avec ID existant, devrait supprimer l'utilisateur")
-    void deleteById_avecIdExistant_devraitSupprimerUtilisateur() {
+    @DisplayName("delete - avec ID existant, devrait supprimer l'utilisateur")
+    void delete_avecIdExistant_devraitSupprimerUtilisateur() {
         // Given
         when(utilisateurRepository.existsById(1L)).thenReturn(true);
         doNothing().when(utilisateurRepository).deleteById(1L);
 
         // When
-        assertDoesNotThrow(() -> utilisateurService.deleteById(1L));
+        assertDoesNotThrow(() -> utilisateurService.delete(1L));
 
         // Then
         verify(utilisateurRepository, times(1)).existsById(1L);
@@ -294,15 +244,15 @@ class UtilisateurServiceTest {
     }
 
     @Test
-    @DisplayName("deleteById - avec ID inexistant, devrait lancer ResourceNotFoundException")
-    void deleteById_avecIdInexistant_devraitLancerException() {
+    @DisplayName("delete - avec ID inexistant, devrait lancer ResourceNotFoundException")
+    void delete_avecIdInexistant_devraitLancerException() {
         // Given
         when(utilisateurRepository.existsById(999L)).thenReturn(false);
 
         // When & Then
         ResourceNotFoundException exception = assertThrows(
                 ResourceNotFoundException.class,
-                () -> utilisateurService.deleteById(999L)
+                () -> utilisateurService.delete(999L)
         );
 
         assertEquals("Utilisateur non trouvé avec l'ID: 999", exception.getMessage());
@@ -310,94 +260,219 @@ class UtilisateurServiceTest {
         verify(utilisateurRepository, never()).deleteById(any());
     }
 
-    // ==================== Tests pour addAlimentExclu() ====================
+    // ==================== Tests pour saveFromDTO() ====================
 
     @Test
-    @DisplayName("addAlimentExclu - devrait ajouter un aliment exclu à l'utilisateur")
-    void addAlimentExclu_devraitAjouterAlimentExclu() {
+    @DisplayName("saveFromDTO - avec préférences alimentaires, devrait créer l'utilisateur")
+    void saveFromDTO_avecPreferencesAlimentaires_devraitCreerUtilisateur() {
         // Given
-        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(utilisateur));
-        when(alimentRepository.findById(1L)).thenReturn(Optional.of(aliment));
-        when(utilisateurRepository.save(any(Utilisateur.class))).thenReturn(utilisateur);
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("new@test.com")
+                .nom("New")
+                .prenom("User")
+                .motDePasse("plainPassword")
+                .regimesIds(Set.of(1L))
+                .allergenesIds(Set.of(8L))
+                .typesCuisinePreferesIds(Set.of(2L))
+                .build();
+
+        Utilisateur utilisateurCree = new Utilisateur();
+        utilisateurCree.setEmail("new@test.com");
+        utilisateurCree.setNom("New");
+        utilisateurCree.setPrenom("User");
+
+        Utilisateur utilisateurSauvegarde = new Utilisateur();
+        utilisateurSauvegarde.setId(2L);
+        utilisateurSauvegarde.setEmail("new@test.com");
+
+        when(regimeAlimentaireRepository.existsById(1L)).thenReturn(true);
+        when(allergeneRepository.existsById(8L)).thenReturn(true);
+        when(typeCuisineRepository.existsById(2L)).thenReturn(true);
+        when(utilisateurFactory.createFromDTO(dto)).thenReturn(utilisateurCree);
+        when(utilisateurRepository.save(any(Utilisateur.class))).thenReturn(utilisateurSauvegarde);
 
         // When
-        utilisateurService.addAlimentExclu(1L, 1L);
+        Utilisateur result = utilisateurService.saveFromDTO(dto);
 
         // Then
-        assertTrue(utilisateur.getAlimentsExclus().contains(aliment));
-        verify(utilisateurRepository, times(1)).findById(1L);
-        verify(alimentRepository, times(1)).findById(1L);
-        verify(utilisateurRepository, times(1)).save(utilisateur);
+        assertNotNull(result);
+        assertEquals(2L, result.getId());
+        verify(regimeAlimentaireRepository, times(1)).existsById(1L);
+        verify(allergeneRepository, times(1)).existsById(8L);
+        verify(typeCuisineRepository, times(1)).existsById(2L);
+        verify(utilisateurFactory, times(1)).createFromDTO(dto);
+        verify(utilisateurRepository, times(1)).save(any(Utilisateur.class));
     }
 
     @Test
-    @DisplayName("addAlimentExclu - avec utilisateur inexistant, devrait lancer ResourceNotFoundException")
-    void addAlimentExclu_avecUtilisateurInexistant_devraitLancerException() {
+    @DisplayName("saveFromDTO - avec régime inexistant, devrait lancer ResourceNotFoundException")
+    void saveFromDTO_avecRegimeInexistant_devraitLancerException() {
         // Given
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("new@test.com")
+                .nom("New")
+                .prenom("User")
+                .motDePasse("plainPassword")
+                .regimesIds(Set.of(999L))
+                .build();
+
+        when(regimeAlimentaireRepository.existsById(999L)).thenReturn(false);
+
+        // When & Then
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> utilisateurService.saveFromDTO(dto)
+        );
+
+        assertEquals("Régime alimentaire non trouvé avec l'ID: 999", exception.getMessage());
+        verify(regimeAlimentaireRepository, times(1)).existsById(999L);
+        verify(utilisateurFactory, never()).createFromDTO(any());
+        verify(utilisateurRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("saveFromDTO - avec allergène inexistant, devrait lancer ResourceNotFoundException")
+    void saveFromDTO_avecAllergeneInexistant_devraitLancerException() {
+        // Given
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("new@test.com")
+                .nom("New")
+                .prenom("User")
+                .motDePasse("plainPassword")
+                .allergenesIds(Set.of(999L))
+                .build();
+
+        when(allergeneRepository.existsById(999L)).thenReturn(false);
+
+        // When & Then
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> utilisateurService.saveFromDTO(dto)
+        );
+
+        assertEquals("Allergène non trouvé avec l'ID: 999", exception.getMessage());
+        verify(allergeneRepository, times(1)).existsById(999L);
+        verify(utilisateurFactory, never()).createFromDTO(any());
+        verify(utilisateurRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("saveFromDTO - avec type de cuisine inexistant, devrait lancer ResourceNotFoundException")
+    void saveFromDTO_avecTypeCuisineInexistant_devraitLancerException() {
+        // Given
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("new@test.com")
+                .nom("New")
+                .prenom("User")
+                .motDePasse("plainPassword")
+                .typesCuisinePreferesIds(Set.of(999L))
+                .build();
+
+        when(typeCuisineRepository.existsById(999L)).thenReturn(false);
+
+        // When & Then
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> utilisateurService.saveFromDTO(dto)
+        );
+
+        assertEquals("Type de cuisine non trouvé avec l'ID: 999", exception.getMessage());
+        verify(typeCuisineRepository, times(1)).existsById(999L);
+        verify(utilisateurFactory, never()).createFromDTO(any());
+        verify(utilisateurRepository, never()).save(any());
+    }
+
+    // ==================== Tests pour updateFromDTO() ====================
+
+    @Test
+    @DisplayName("updateFromDTO - avec préférences alimentaires, devrait mettre à jour l'utilisateur")
+    void updateFromDTO_avecPreferencesAlimentaires_devraitMettreAJourUtilisateur() {
+        // Given
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("john@test.com")
+                .nom("Doe Updated")
+                .prenom("John Updated")
+                .regimesIds(Set.of(1L))
+                .allergenesIds(Set.of(8L))
+                .typesCuisinePreferesIds(Set.of(2L))
+                .build();
+
+        Utilisateur utilisateurMisAJour = new Utilisateur();
+        utilisateurMisAJour.setId(1L);
+        utilisateurMisAJour.setEmail("john@test.com");
+        utilisateurMisAJour.setNom("Doe Updated");
+        utilisateurMisAJour.setPrenom("John Updated");
+
+        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(utilisateur));
+        when(utilisateurFactory.updateFromDTO(utilisateur, dto)).thenReturn(utilisateurMisAJour);
+        when(utilisateurRepository.save(any(Utilisateur.class))).thenReturn(utilisateurMisAJour);
+
+        // When
+        Utilisateur result = utilisateurService.updateFromDTO(1L, dto);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("Doe Updated", result.getNom());
+        assertEquals("John Updated", result.getPrenom());
+        verify(utilisateurRepository, times(1)).findById(1L);
+        verify(utilisateurFactory, times(1)).updateFromDTO(utilisateur, dto);
+        verify(utilisateurRepository, times(1)).save(any(Utilisateur.class));
+    }
+
+    @Test
+    @DisplayName("updateFromDTO - avec préférences vides, devrait vider les collections")
+    void updateFromDTO_avecPreferencesVides_devraitViderCollections() {
+        // Given
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("john@test.com")
+                .nom("Doe")
+                .prenom("John")
+                .regimesIds(Set.of())
+                .allergenesIds(Set.of())
+                .typesCuisinePreferesIds(Set.of())
+                .build();
+
+        Utilisateur utilisateurMisAJour = new Utilisateur();
+        utilisateurMisAJour.setId(1L);
+        utilisateurMisAJour.setEmail("john@test.com");
+        utilisateurMisAJour.setRegimesAlimentaires(new HashSet<>());
+        utilisateurMisAJour.setAllergenes(new HashSet<>());
+        utilisateurMisAJour.setTypesCuisinePreferences(new HashSet<>());
+
+        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(utilisateur));
+        when(utilisateurFactory.updateFromDTO(utilisateur, dto)).thenReturn(utilisateurMisAJour);
+        when(utilisateurRepository.save(any(Utilisateur.class))).thenReturn(utilisateurMisAJour);
+
+        // When
+        Utilisateur result = utilisateurService.updateFromDTO(1L, dto);
+
+        // Then
+        assertNotNull(result);
+        assertTrue(result.getRegimesAlimentaires().isEmpty());
+        assertTrue(result.getAllergenes().isEmpty());
+        assertTrue(result.getTypesCuisinePreferences().isEmpty());
+        verify(utilisateurFactory, times(1)).updateFromDTO(utilisateur, dto);
+        verify(utilisateurRepository, times(1)).save(any(Utilisateur.class));
+    }
+
+    @Test
+    @DisplayName("updateFromDTO - avec ID inexistant, devrait lancer ResourceNotFoundException")
+    void updateFromDTO_avecIdInexistant_devraitLancerException() {
+        // Given
+        UtilisateurDTO dto = UtilisateurDTO.builder()
+                .email("test@test.com")
+                .build();
+
         when(utilisateurRepository.findById(999L)).thenReturn(Optional.empty());
 
         // When & Then
         ResourceNotFoundException exception = assertThrows(
                 ResourceNotFoundException.class,
-                () -> utilisateurService.addAlimentExclu(999L, 1L)
+                () -> utilisateurService.updateFromDTO(999L, dto)
         );
 
-        assertEquals("Utilisateur non trouvé", exception.getMessage());
+        assertEquals("Utilisateur non trouvé avec l'ID: 999", exception.getMessage());
         verify(utilisateurRepository, times(1)).findById(999L);
-        verify(alimentRepository, never()).findById(any());
-    }
-
-    @Test
-    @DisplayName("addAlimentExclu - avec aliment inexistant, devrait lancer ResourceNotFoundException")
-    void addAlimentExclu_avecAlimentInexistant_devraitLancerException() {
-        // Given
-        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(utilisateur));
-        when(alimentRepository.findById(999L)).thenReturn(Optional.empty());
-
-        // When & Then
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> utilisateurService.addAlimentExclu(1L, 999L)
-        );
-
-        assertEquals("Aliment non trouvé", exception.getMessage());
-        verify(utilisateurRepository, times(1)).findById(1L);
-        verify(alimentRepository, times(1)).findById(999L);
-    }
-
-    // ==================== Tests pour removeAlimentExclu() ====================
-
-    @Test
-    @DisplayName("removeAlimentExclu - devrait retirer un aliment exclu de l'utilisateur")
-    void removeAlimentExclu_devraitRetirerAlimentExclu() {
-        // Given
-        utilisateur.getAlimentsExclus().add(aliment);
-
-        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(utilisateur));
-        when(utilisateurRepository.save(any(Utilisateur.class))).thenReturn(utilisateur);
-
-        // When
-        utilisateurService.removeAlimentExclu(1L, 1L);
-
-        // Then
-        assertFalse(utilisateur.getAlimentsExclus().contains(aliment));
-        verify(utilisateurRepository, times(1)).findById(1L);
-        verify(utilisateurRepository, times(1)).save(utilisateur);
-    }
-
-    @Test
-    @DisplayName("removeAlimentExclu - avec utilisateur inexistant, devrait lancer ResourceNotFoundException")
-    void removeAlimentExclu_avecUtilisateurInexistant_devraitLancerException() {
-        // Given
-        when(utilisateurRepository.findById(999L)).thenReturn(Optional.empty());
-
-        // When & Then
-        ResourceNotFoundException exception = assertThrows(
-                ResourceNotFoundException.class,
-                () -> utilisateurService.removeAlimentExclu(999L, 1L)
-        );
-
-        assertEquals("Utilisateur non trouvé", exception.getMessage());
-        verify(utilisateurRepository, times(1)).findById(999L);
+        verify(utilisateurRepository, never()).save(any());
     }
 }

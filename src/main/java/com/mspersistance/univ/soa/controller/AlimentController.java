@@ -30,7 +30,7 @@ public class AlimentController {
     }
 
     /**
-     * GET /api/persistance/aliments - Récupérer tous les aliments
+     * GET /api/persistance/aliments - RÃ©cupÃ©rer tous les aliments
      */
     @GetMapping
     public ResponseEntity<List<AlimentDTO>> getAllAliments() {
@@ -41,7 +41,7 @@ public class AlimentController {
     }
 
     /**
-     * GET /api/persistance/aliments/{id} - Récupérer un aliment par ID
+     * GET /api/persistance/aliments/{id} - RÃ©cupÃ©rer un aliment par ID
      */
     @GetMapping("/{id}")
     public ResponseEntity<AlimentDTO> getAlimentById(@PathVariable Long id) {
@@ -52,7 +52,7 @@ public class AlimentController {
     }
 
     /**
-     * POST /api/persistance/aliments - Créer un nouvel aliment
+     * POST /api/persistance/aliments - CrÃ©er un nouvel aliment
      */
     @PostMapping
     public ResponseEntity<?> createAliment(@RequestBody AlimentDTO dto) {
@@ -65,32 +65,32 @@ public class AlimentController {
         // Validation : longueur du nom
         if (dto.nom().trim().length() < 2) {
             return ResponseEntity.badRequest()
-                    .body(createErrorResponse("Le nom doit contenir au moins 2 caractères"));
+                    .body(createErrorResponse("Le nom doit contenir au moins 2 caractÃ¨res"));
         }
 
         if (dto.nom().length() > 100) {
             return ResponseEntity.badRequest()
-                    .body(createErrorResponse("Le nom ne peut pas dépasser 100 caractères"));
+                    .body(createErrorResponse("Le nom ne peut pas dÃ©passer 100 caractÃ¨res"));
         }
 
         // Validation : nom unique
         if (alimentService.findByNom(dto.nom().trim()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(createErrorResponse("Un aliment avec ce nom existe déjà"));
+                    .body(createErrorResponse("Un aliment avec ce nom existe dÃ©jÃ "));
         }
 
-        // Validation : catégorie requise
+        // Validation : catÃ©gorie requise
         if (dto.categorieAliment() == null) {
             return ResponseEntity.badRequest()
-                    .body(createErrorResponse("La catégorie est obligatoire"));
+                    .body(createErrorResponse("La catÃ©gorie est obligatoire"));
         }
 
-        // Validation : catégorie valide
+        // Validation : catÃ©gorie valide
         try {
             Aliment.CategorieAliment.valueOf(dto.categorieAliment().name());
         } catch (Exception e) {
             return ResponseEntity.badRequest()
-                    .body(createErrorResponse("Catégorie invalide. Valeurs acceptées: " +
+                    .body(createErrorResponse("CatÃ©gorie invalide. Valeurs acceptÃ©es: " +
                             "FRUIT, LEGUME, VIANDE, POISSON, CEREALE, LAITIER, EPICE, GLUTEN, AUTRE"));
         }
 
@@ -101,22 +101,22 @@ public class AlimentController {
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("Erreur lors de la création: " + e.getMessage()));
+                    .body(createErrorResponse("Erreur lors de la crÃ©ation: " + e.getMessage()));
         }
     }
 
     /**
-     * PUT /api/persistance/aliments/{id} - Mettre à jour un aliment
+     * PUT /api/persistance/aliments/{id} - Mettre Ã  jour un aliment
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateAliment(
             @PathVariable Long id,
             @RequestBody AlimentDTO dto) {
 
-        // Vérifier que l'aliment existe
+        // VÃ©rifier que l'aliment existe
         if (alimentService.findById(id).isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(createErrorResponse("Aliment non trouvé avec l'ID: " + id));
+                    .body(createErrorResponse("Aliment non trouvÃ© avec l'ID: " + id));
         }
 
         // Validation : nom requis
@@ -128,25 +128,25 @@ public class AlimentController {
         // Validation : longueur du nom
         if (dto.nom().trim().length() < 2) {
             return ResponseEntity.badRequest()
-                    .body(createErrorResponse("Le nom doit contenir au moins 2 caractères"));
+                    .body(createErrorResponse("Le nom doit contenir au moins 2 caractÃ¨res"));
         }
 
         if (dto.nom().length() > 100) {
             return ResponseEntity.badRequest()
-                    .body(createErrorResponse("Le nom ne peut pas dépasser 100 caractères"));
+                    .body(createErrorResponse("Le nom ne peut pas dÃ©passer 100 caractÃ¨res"));
         }
 
         // Validation : nom unique (sauf pour l'aliment actuel)
         alimentService.findByNom(dto.nom().trim()).ifPresent(existingAliment -> {
             if (!existingAliment.getId().equals(id)) {
-                throw new IllegalStateException("Un autre aliment utilise déjà ce nom");
+                throw new IllegalStateException("Un autre aliment utilise dÃ©jÃ  ce nom");
             }
         });
 
-        // Validation : catégorie requise
+        // Validation : catÃ©gorie requise
         if (dto.categorieAliment() == null) {
             return ResponseEntity.badRequest()
-                    .body(createErrorResponse("La catégorie est obligatoire"));
+                    .body(createErrorResponse("La catÃ©gorie est obligatoire"));
         }
 
         try {
@@ -155,12 +155,12 @@ public class AlimentController {
             AlimentDTO responseDto = alimentMapper.toDTO(updated);
             return ResponseEntity.ok(responseDto);
         } catch (IllegalArgumentException | IllegalStateException e) {
-            // Gérer à la fois IllegalArgumentException et IllegalStateException comme CONFLICT (409)
+            // GÃ©rer Ã  la fois IllegalArgumentException et IllegalStateException comme CONFLICT (409)
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("Erreur lors de la mise à jour: " + e.getMessage()));
+                    .body(createErrorResponse("Erreur lors de la mise Ã  jour: " + e.getMessage()));
         }
     }
 
@@ -170,10 +170,10 @@ public class AlimentController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAliment(@PathVariable Long id) {
-        // Vérifier que l'aliment existe
+        // VÃ©rifier que l'aliment existe
         if (alimentService.findById(id).isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(createErrorResponse("Aliment non trouvé avec l'ID: " + id));
+                    .body(createErrorResponse("Aliment non trouvÃ© avec l'ID: " + id));
         }
 
         try {
@@ -185,7 +185,7 @@ public class AlimentController {
         }
     }
 
-    // Méthode utilitaire
+    // MÃ©thode utilitaire
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> error = new HashMap<>();
         error.put("error", message);

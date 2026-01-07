@@ -25,7 +25,7 @@ class FeedbackMapperTest {
     // ==================== Tests pour toDTO() ====================
 
     @Test
-    @DisplayName("toDTO - avec entité complète, devrait convertir en DTO")
+    @DisplayName("toDTO - avec entitÃ© complÃ¨te, devrait convertir en DTO")
     void toDTO_avecEntiteComplete_devraitConvertirEnDTO() {
         // Given
         Utilisateur utilisateur = new Utilisateur();
@@ -60,7 +60,7 @@ class FeedbackMapperTest {
     }
 
     @Test
-    @DisplayName("toDTO - avec entité null, devrait retourner null")
+    @DisplayName("toDTO - avec entitÃ© null, devrait retourner null")
     void toDTO_avecEntiteNull_devraitRetournerNull() {
         // When
         FeedbackDTO dto = feedbackMapper.toDTO(null);
@@ -70,7 +70,7 @@ class FeedbackMapperTest {
     }
 
     @Test
-    @DisplayName("toDTO - sans utilisateur, utilisateurId devrait être null")
+    @DisplayName("toDTO - sans utilisateur, utilisateurId devrait Ãªtre null")
     void toDTO_sansUtilisateur_utilisateurIdDevraitEtreNull() {
         // Given
         Feedback feedback = new Feedback();
@@ -86,7 +86,7 @@ class FeedbackMapperTest {
     }
 
     @Test
-    @DisplayName("toDTO - sans recette, recetteId devrait être null")
+    @DisplayName("toDTO - sans recette, recetteId devrait Ãªtre null")
     void toDTO_sansRecette_recetteIdDevraitEtreNull() {
         // Given
         Feedback feedback = new Feedback();
@@ -104,7 +104,7 @@ class FeedbackMapperTest {
     // ==================== Tests pour toEntity() ====================
 
     @Test
-    @DisplayName("toEntity - avec DTO valide, devrait convertir en entité")
+    @DisplayName("toEntity - avec DTO valide, devrait convertir en entitÃ©")
     void toEntity_avecDTOValide_devraitConvertirEnEntite() {
         LocalDateTime now = LocalDateTime.now();
 
@@ -146,7 +146,7 @@ class FeedbackMapperTest {
     // ==================== Tests de conversion bidirectionnelle ====================
 
     @Test
-    @DisplayName("conversion bidirectionnelle - devrait préserver les données principales")
+    @DisplayName("conversion bidirectionnelle - devrait prÃ©server les donnÃ©es principales")
     void conversionBidirectionnelle_devraitPreserverLesDonneesPrincipales() {
         // Given
         LocalDateTime now = LocalDateTime.now();
@@ -154,7 +154,7 @@ class FeedbackMapperTest {
         Feedback original = new Feedback();
         original.setId(15L);
         original.setEvaluation(4);
-        original.setCommentaire("Très bon");
+        original.setCommentaire("TrÃ¨s bon");
         original.setDateFeedback(now);
         original.setDateModification(now);
 

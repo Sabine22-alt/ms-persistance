@@ -30,11 +30,11 @@ public class MinioService {
     private String minioPublicUrl;
 
     /**
-     * Génère l'URL publique d'un objet MinIO
+     * GÃ©nÃ¨re l'URL publique d'un objet MinIO
      * Format: http://localhost:9002/bucket-name/object-path
      * @param bucketName le nom du bucket
      * @param objectPath le chemin de l'objet dans le bucket
-     * @return l'URL publique complète
+     * @return l'URL publique complÃ¨te
      */
     public String getPublicUrl(String bucketName, String objectPath) {
         return String.format("%s/%s/%s", minioPublicUrl, bucketName, objectPath);
@@ -68,7 +68,7 @@ public class MinioService {
                     .build()
             );
         } catch (Exception e) {
-            throw new RuntimeException("Erreur lors du téléchargement du fichier: " + e.getMessage(), e);
+            throw new RuntimeException("Erreur lors du tÃ©lÃ©chargement du fichier: " + e.getMessage(), e);
         }
     }
 
@@ -96,7 +96,7 @@ public class MinioService {
                     .build()
             );
         } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de la génération de l'URL: " + e.getMessage(), e);
+            throw new RuntimeException("Erreur lors de la gÃ©nÃ©ration de l'URL: " + e.getMessage(), e);
         }
     }
 

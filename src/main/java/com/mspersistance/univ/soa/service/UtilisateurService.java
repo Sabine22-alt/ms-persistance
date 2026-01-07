@@ -1,21 +1,29 @@
 package com.mspersistance.univ.soa.service;
 
-import com.mspersistance.univ.soa.dto.UtilisateurDTO;
-import com.mspersistance.univ.soa.exception.ResourceNotFoundException;
-import com.mspersistance.univ.soa.factory.UtilisateurFactory;
-import com.mspersistance.univ.soa.model.Aliment;
-import com.mspersistance.univ.soa.model.PasswordResetToken;
-import com.mspersistance.univ.soa.model.Utilisateur;
-import com.mspersistance.univ.soa.repository.AlimentRepository;
-import com.mspersistance.univ.soa.repository.PasswordResetTokenRepository;
-import com.mspersistance.univ.soa.repository.UtilisateurRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import com.mspersistance.univ.soa.dto.UtilisateurDTO;
+import com.mspersistance.univ.soa.exception.ResourceNotFoundException;
+import com.mspersistance.univ.soa.factory.UtilisateurFactory;
+import com.mspersistance.univ.soa.model.Aliment;
+import com.mspersistance.univ.soa.model.Allergene;
+import com.mspersistance.univ.soa.model.PasswordResetToken;
+import com.mspersistance.univ.soa.model.RegimeAlimentaire;
+import com.mspersistance.univ.soa.model.TypeCuisine;
+import com.mspersistance.univ.soa.model.Utilisateur;
+import com.mspersistance.univ.soa.repository.AlimentRepository;
+import com.mspersistance.univ.soa.repository.AllergeneRepository;
+import com.mspersistance.univ.soa.repository.PasswordResetTokenRepository;
+import com.mspersistance.univ.soa.repository.RegimeAlimentaireRepository;
+import com.mspersistance.univ.soa.repository.TypeCuisineRepository;
+import com.mspersistance.univ.soa.repository.UtilisateurRepository;
 
 /**
  * Service pour la gestion des utilisateurs.
@@ -28,19 +36,32 @@ public class UtilisateurService {
     private final PasswordEncoder passwordEncoder;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final UtilisateurFactory utilisateurFactory;
+    private final RegimeAlimentaireRepository regimeAlimentaireRepository;
+    private final AllergeneRepository allergeneRepository;
+    private final TypeCuisineRepository typeCuisineRepository;
 
     public UtilisateurService(
             UtilisateurRepository utilisateurRepository,
             AlimentRepository alimentRepository,
             PasswordEncoder passwordEncoder,
             PasswordResetTokenRepository passwordResetTokenRepository,
-            UtilisateurFactory utilisateurFactory) {
+            UtilisateurFactory utilisateurFactory,
+            RegimeAlimentaireRepository regimeAlimentaireRepository,
+            AllergeneRepository allergeneRepository,
+            TypeCuisineRepository typeCuisineRepository) {
         this.utilisateurRepository = utilisateurRepository;
         this.alimentRepository = alimentRepository;
         this.passwordEncoder = passwordEncoder;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.utilisateurFactory = utilisateurFactory;
+        this.regimeAlimentaireRepository = regimeAlimentaireRepository;
+        this.allergeneRepository = allergeneRepository;
+        this.typeCuisineRepository = typeCuisineRepository;
     }
+
+    // ===============================
+    // OPÃ‰RATIONS CRUD DE BASE
+    // ===============================
 
     public List<Utilisateur> findAll() {
         return utilisateurRepository.findAll();
@@ -101,7 +122,42 @@ public class UtilisateurService {
     }
 
     @Transactional
+    public void delete(Long id) {
+        if (!utilisateurRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + id);
+        }
+        utilisateurRepository.deleteById(id);
+    }
+
+    @Transactional
     public Utilisateur saveFromDTO(UtilisateurDTO dto) {
+        // Validation des régimes alimentaires
+        if (dto.regimesIds() != null && !dto.regimesIds().isEmpty()) {
+            for (Long regimeId : dto.regimesIds()) {
+                if (!regimeAlimentaireRepository.existsById(regimeId)) {
+                    throw new ResourceNotFoundException("Régime alimentaire non trouvé avec l'ID: " + regimeId);
+                }
+            }
+        }
+
+        // Validation des allergènes
+        if (dto.allergenesIds() != null && !dto.allergenesIds().isEmpty()) {
+            for (Long allergeneId : dto.allergenesIds()) {
+                if (!allergeneRepository.existsById(allergeneId)) {
+                    throw new ResourceNotFoundException("Allergène non trouvé avec l'ID: " + allergeneId);
+                }
+            }
+        }
+
+        // Validation des types de cuisine
+        if (dto.typesCuisinePreferesIds() != null && !dto.typesCuisinePreferesIds().isEmpty()) {
+            for (Long typeCuisineId : dto.typesCuisinePreferesIds()) {
+                if (!typeCuisineRepository.existsById(typeCuisineId)) {
+                    throw new ResourceNotFoundException("Type de cuisine non trouvé avec l'ID: " + typeCuisineId);
+                }
+            }
+        }
+
         return utilisateurRepository.save(
                 utilisateurFactory.createFromDTO(dto)
         );
@@ -117,13 +173,9 @@ public class UtilisateurService {
         );
     }
 
-    @Transactional
-    public void deleteById(Long id) {
-        if (!utilisateurRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + id);
-        }
-        utilisateurRepository.deleteById(id);
-    }
+    // ===============================
+    // GESTION DES TOKENS DE RÃ‰INITIALISATION
+    // ===============================
 
     @Transactional
     public void addAlimentExclu(Long userId, Long alimentId) {
@@ -145,6 +197,92 @@ public class UtilisateurService {
         utilisateur.getAlimentsExclus().removeIf(a -> a.getId().equals(alimentId));
         utilisateurRepository.save(utilisateur);
     }
+
+    // ===============================
+    // GESTION DES PRÉFÉRENCES ALIMENTAIRES
+    // ===============================
+
+    @Transactional
+    public void addRegime(Long userId, Long regimeId) {
+        Utilisateur utilisateur = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+        RegimeAlimentaire regime = regimeAlimentaireRepository.findById(regimeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Régime non trouvé"));
+
+        utilisateur.getRegimesAlimentaires().add(regime);
+        utilisateurRepository.save(utilisateur);
+    }
+
+    @Transactional
+    public void removeRegime(Long userId, Long regimeId) {
+        Utilisateur utilisateur = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+
+        utilisateur.getRegimesAlimentaires().removeIf(r -> r.getId().equals(regimeId));
+        utilisateurRepository.save(utilisateur);
+    }
+
+    @Transactional
+    public void addAllergene(Long userId, Long allergeneId) {
+        Utilisateur utilisateur = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+        Allergene allergene = allergeneRepository.findById(allergeneId)
+                .orElseThrow(() -> new ResourceNotFoundException("Allergène non trouvé"));
+
+        utilisateur.getAllergenes().add(allergene);
+        utilisateurRepository.save(utilisateur);
+    }
+
+    @Transactional
+    public void removeAllergene(Long userId, Long allergeneId) {
+        Utilisateur utilisateur = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+
+        utilisateur.getAllergenes().removeIf(a -> a.getId().equals(allergeneId));
+        utilisateurRepository.save(utilisateur);
+    }
+
+    @Transactional
+    public void addTypeCuisine(Long userId, Long typeCuisineId) {
+        Utilisateur utilisateur = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+        TypeCuisine typeCuisine = typeCuisineRepository.findById(typeCuisineId)
+                .orElseThrow(() -> new ResourceNotFoundException("Type de cuisine non trouvé"));
+
+        utilisateur.getTypesCuisinePreferences().add(typeCuisine);
+        utilisateurRepository.save(utilisateur);
+    }
+
+    @Transactional
+    public void removeTypeCuisine(Long userId, Long typeCuisineId) {
+        Utilisateur utilisateur = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+
+        utilisateur.getTypesCuisinePreferences().removeIf(t -> t.getId().equals(typeCuisineId));
+        utilisateurRepository.save(utilisateur);
+    }
+
+    public Set<RegimeAlimentaire> getRegimes(Long userId) {
+        return utilisateurRepository.findById(userId)
+                .map(Utilisateur::getRegimesAlimentaires)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+    }
+
+    public Set<Allergene> getAllergenes(Long userId) {
+        return utilisateurRepository.findById(userId)
+                .map(Utilisateur::getAllergenes)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+    }
+
+    public Set<TypeCuisine> getTypesCuisinePreferences(Long userId) {
+        return utilisateurRepository.findById(userId)
+                .map(Utilisateur::getTypesCuisinePreferences)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+    }
+
+    // ===============================
+    // GESTION DES TOKENS DE RÉINITIALISATION
+    // ===============================
 
     @Transactional
     public String generatePasswordResetToken(Long utilisateurId) {
@@ -182,5 +320,28 @@ public class UtilisateurService {
         passwordResetTokenRepository.save(resetToken);
 
         return true;
+    }
+
+    public Optional<PasswordResetToken> findValidToken(String token) {
+        return passwordResetTokenRepository.findByToken(token)
+                .filter(PasswordResetToken::isValid);
+    }
+
+    @Transactional
+    public void updatePassword(Long userId, String hashedPassword) {
+        Utilisateur utilisateur = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé avec l'ID: " + userId));
+        utilisateur.setMotDePasse(hashedPassword);
+        utilisateurRepository.save(utilisateur);
+    }
+
+    @Transactional
+    public void markTokenAsUsed(String token) {
+        Optional<PasswordResetToken> resetTokenOpt = passwordResetTokenRepository.findByToken(token);
+        if (resetTokenOpt.isPresent()) {
+            PasswordResetToken resetToken = resetTokenOpt.get();
+            resetToken.setUsed(true);
+            passwordResetTokenRepository.save(resetToken);
+        }
     }
 }

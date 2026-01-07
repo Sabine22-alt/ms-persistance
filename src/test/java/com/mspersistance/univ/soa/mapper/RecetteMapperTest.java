@@ -36,7 +36,7 @@ class RecetteMapperTest {
     // ==================== Tests pour toDTO() ====================
 
     @Test
-    @DisplayName("toDTO - avec entité complète, devrait convertir en DTO")
+    @DisplayName("toDTO - avec entitÃ© complÃ¨te, devrait convertir en DTO")
     void toDTO_avecEntiteComplete_devraitConvertirEnDTO() {
         // Given
         Aliment aliment = new Aliment();
@@ -104,7 +104,7 @@ class RecetteMapperTest {
     }
 
     @Test
-    @DisplayName("toDTO - avec entité null, devrait retourner null")
+    @DisplayName("toDTO - avec entitÃ© null, devrait retourner null")
     void toDTO_avecEntiteNull_devraitRetournerNull() {
         // When
         RecetteDTO dto = recetteMapper.toDTO(null);
@@ -114,7 +114,7 @@ class RecetteMapperTest {
     }
 
     @Test
-    @DisplayName("toDTO - sans ingrédients, liste devrait être null")
+    @DisplayName("toDTO - sans ingrÃ©dients, liste devrait Ãªtre null")
     void toDTO_sansIngredients_listeDevraitEtreNull() {
         // Given
         Recette recette = new Recette();
@@ -131,7 +131,7 @@ class RecetteMapperTest {
     }
 
     @Test
-    @DisplayName("toDTO - sans étapes, liste devrait être null")
+    @DisplayName("toDTO - sans Ã©tapes, liste devrait Ãªtre null")
     void toDTO_sansEtapes_listeDevraitEtreNull() {
         // Given
         Recette recette = new Recette();
@@ -148,7 +148,7 @@ class RecetteMapperTest {
     }
 
     @Test
-    @DisplayName("toDTO - ingrédient sans unité, unite devrait être null")
+    @DisplayName("toDTO - ingrÃ©dient sans unitÃ©, unite devrait Ãªtre null")
     void toDTO_ingredientSansUnite_uniteDevraitEtreNull() {
         // Given
         Aliment aliment = new Aliment();
@@ -176,12 +176,12 @@ class RecetteMapperTest {
     }
 
     @Test
-    @DisplayName("toDTO - ingrédient sans aliment référencé, devrait utiliser nomAliment")
+    @DisplayName("toDTO - ingrÃ©dient sans aliment rÃ©fÃ©rencÃ©, devrait utiliser nomAliment")
     void toDTO_ingredientSansAlimentReference_devraitUtiliserNomAliment() {
         // Given
         Ingredient ingredient = new Ingredient();
         ingredient.setId(1L);
-        ingredient.setAliment(null);  // Pas de référence aliment
+        ingredient.setAliment(null);  // Pas de rÃ©fÃ©rence aliment
         ingredient.setNomAliment("Sel de mer");  // Nom libre
         ingredient.setQuantite(5.0f);
         ingredient.setUnite(Ingredient.Unite.GRAMME);
@@ -206,10 +206,10 @@ class RecetteMapperTest {
     // ==================== Tests pour toEntity() ====================
 
     @Test
-    @DisplayName("toEntity - avec DTO valide, devrait convertir en entité")
+    @DisplayName("toEntity - avec DTO valide, devrait convertir en entitÃ©")
     void toEntity_avecDTOValide_devraitConvertirEnEntite() {
         RecetteDTO dto = new RecetteDTO(
-            10L, "Pâtes", null, 25, 300, "http://example.com/pates.jpg",
+            10L, "PÃ¢tes", null, 25, 300, "http://example.com/pates.jpg",
             Recette.Difficulte.MOYEN, null, null, null, null, null, null, null, null, null
         );
 
@@ -217,7 +217,7 @@ class RecetteMapperTest {
 
         assertNotNull(recette);
         assertEquals(10L, recette.getId());
-        assertEquals("Pâtes", recette.getTitre());
+        assertEquals("PÃ¢tes", recette.getTitre());
         assertEquals(25, recette.getTempsTotal());
         assertEquals(300, recette.getKcal());
         assertEquals("http://example.com/pates.jpg", recette.getImageUrl());
@@ -255,7 +255,7 @@ class RecetteMapperTest {
     // ==================== Tests de conversion bidirectionnelle ====================
 
     @Test
-    @DisplayName("conversion bidirectionnelle - devrait préserver les données principales")
+    @DisplayName("conversion bidirectionnelle - devrait prÃ©server les donnÃ©es principales")
     void conversionBidirectionnelle_devraitPreserverLesDonneesPrincipales() {
         // Given
         Recette original = new Recette();

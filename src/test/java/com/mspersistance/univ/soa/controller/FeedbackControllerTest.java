@@ -133,7 +133,7 @@ class FeedbackControllerTest {
     // ==================== Tests pour POST /api/persistance/feedbacks ====================
 
     @Test
-    @DisplayName("POST /api/persistance/feedbacks - avec données valides, devrait créer le feedback")
+    @DisplayName("POST /api/persistance/feedbacks - avec donnÃ©es valides, devrait crÃ©er le feedback")
     void createFeedback_avecDonneesValides_devraitCreerFeedback() throws Exception {
         // Given
         FeedbackDTO newDTO = new FeedbackDTO(null, 1L, 1L, 4, "Bon", null, null);
@@ -192,7 +192,7 @@ class FeedbackControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/persistance/feedbacks - avec évaluation invalide, devrait retourner 400")
+    @DisplayName("POST /api/persistance/feedbacks - avec Ã©valuation invalide, devrait retourner 400")
     void createFeedback_avecEvaluationInvalide_devraitRetourner400() throws Exception {
         FeedbackDTO dto = new FeedbackDTO(null, 1L, 1L, 6, null, null, null);
 
@@ -200,13 +200,13 @@ class FeedbackControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("L'évaluation doit être comprise entre 1 et 5 étoiles"));
+                .andExpect(jsonPath("$.error").value("L'Ã©valuation doit Ãªtre comprise entre 1 et 5 Ã©toiles"));
 
         verify(feedbackService, never()).save(any(), any(), any());
     }
 
     @Test
-    @DisplayName("POST /api/persistance/feedbacks - avec feedback déjà existant, devrait retourner 409")
+    @DisplayName("POST /api/persistance/feedbacks - avec feedback dÃ©jÃ  existant, devrait retourner 409")
     void createFeedback_avecFeedbackDejaExistant_devraitRetourner409() throws Exception {
         // Given
         FeedbackDTO dto = new FeedbackDTO(null, 1L, 1L, 4, null, null, null);
@@ -219,7 +219,7 @@ class FeedbackControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("Vous avez déjà noté cette recette."));
+                .andExpect(jsonPath("$.error").value("Vous avez dÃ©jÃ  notÃ© cette recette."));
 
         verify(feedbackService, never()).save(any(), any(), any());
     }
@@ -227,7 +227,7 @@ class FeedbackControllerTest {
     // ==================== Tests pour PUT /api/persistance/feedbacks/{id} ====================
 
     @Test
-    @DisplayName("PUT /api/persistance/feedbacks/{id} - avec données valides, devrait mettre à jour")
+    @DisplayName("PUT /api/persistance/feedbacks/{id} - avec donnÃ©es valides, devrait mettre Ã  jour")
     void updateFeedback_avecDonneesValides_devraitMettreAJour() throws Exception {
         // Given
         FeedbackDTO updateDTO = new FeedbackDTO(null, null, null, 3, "Moyen", null, null);

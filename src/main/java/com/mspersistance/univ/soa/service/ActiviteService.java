@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Service pour la gestion des activités utilisateur.
+ * Service pour la gestion des activitÃ©s utilisateur.
  * Design Patterns: Constructor Injection + Builder + Cache-Aside
  */
 @Service
@@ -22,7 +22,7 @@ public class ActiviteService {
     }
 
     /**
-     * Log une activité utilisateur avec Builder Pattern
+     * Log une activitÃ© utilisateur avec Builder Pattern
      */
     @Transactional
     public Activite logActivite(Long utilisateurId, Activite.TypeActivite type, String description) {
@@ -30,7 +30,7 @@ public class ActiviteService {
     }
 
     /**
-     * Log une activité avec détails (JSON) - Utilisation du Builder
+     * Log une activitÃ© avec dÃ©tails (JSON) - Utilisation du Builder
      */
     @Transactional
     public Activite logActiviteWithDetails(Long utilisateurId, Activite.TypeActivite type, String description, String details) {
@@ -45,7 +45,7 @@ public class ActiviteService {
     }
 
     /**
-     * Récupère l'historique d'activité d'un utilisateur
+     * RÃ©cupÃ¨re l'historique d'activitÃ© d'un utilisateur
      */
     @Transactional(readOnly = true)
     @Cacheable(value = "activites", key = "'user:' + #utilisateurId")
@@ -54,7 +54,7 @@ public class ActiviteService {
     }
 
     /**
-     * Récupère les 10 dernières activités d'un utilisateur
+     * RÃ©cupÃ¨re les 10 derniÃ¨res activitÃ©s d'un utilisateur
      */
     @Transactional(readOnly = true)
     public List<Activite> getLast10Activites(Long utilisateurId) {

@@ -14,8 +14,8 @@ import java.util.Optional;
 public interface RecetteRepository extends JpaRepository<Recette, Long> {
 
     /**
-     * Récupère toutes les recettes SANS collections (ultra rapide, pas de N+1)
-     * Les collections seront chargées uniquement si nécessaire via DTO projection
+     * RÃ©cupÃ¨re toutes les recettes SANS collections (ultra rapide, pas de N+1)
+     * Les collections seront chargÃ©es uniquement si nÃ©cessaire via DTO projection
      */
     @Query("SELECT r FROM Recette r ORDER BY r.dateCreation DESC")
     List<Recette> findAllOptimized();
@@ -27,7 +27,7 @@ public interface RecetteRepository extends JpaRepository<Recette, Long> {
     List<Recette> findByUtilisateurIdOptimized(@Param("utilisateurId") Long utilisateurId);
 
     /**
-     * Récupère une recette par ID avec TOUTES ses collections en 3 queries (pas N+1)
+     * RÃ©cupÃ¨re une recette par ID avec TOUTES ses collections en 3 queries (pas N+1)
      * Query 1: Recette + ingredients (JOIN FETCH)
      * Query 2: etapes (SUBSELECT)
      * Query 3: fichiers (SUBSELECT)
@@ -39,13 +39,13 @@ public interface RecetteRepository extends JpaRepository<Recette, Long> {
     Optional<Recette> findByIdOptimized(@Param("id") Long id);
 
     /**
-     * Récupère une recette par ID SANS les collections lazy
-     * Utilisé dans les services pour les opérations d'écriture où on n'a besoin que de la recette de base
+     * RÃ©cupÃ¨re une recette par ID SANS les collections lazy
+     * UtilisÃ© dans les services pour les opÃ©rations d'Ã©criture oÃ¹ on n'a besoin que de la recette de base
      */
     @Query("SELECT r FROM Recette r WHERE r.id = :id")
     Optional<Recette> findByIdSimple(@Param("id") Long id);
 
-    // Méthodes originales pour compatibilité
+    // MÃ©thodes originales pour compatibilitÃ©
     List<Recette> findByStatut(StatutRecette statut);
     List<Recette> findByUtilisateurId(Long utilisateurId);
     List<Recette> findByUtilisateurIdOrderByDateCreationDesc(Long utilisateurId);

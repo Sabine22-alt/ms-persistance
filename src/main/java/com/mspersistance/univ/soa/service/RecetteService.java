@@ -20,15 +20,15 @@ import java.util.Optional;
 /**
  * Service pour la gestion des recettes.
  *
- * Design Patterns appliqués:
- * - Factory Pattern: RecetteFactory pour création complexe
- * - Builder Pattern: Construction fluente des entités
- * - Constructor Injection: Injection de dépendances
+ * Design Patterns appliquÃ©s:
+ * - Factory Pattern: RecetteFactory pour crÃ©ation complexe
+ * - Builder Pattern: Construction fluente des entitÃ©s
+ * - Constructor Injection: Injection de dÃ©pendances
  * - Cache-Aside: Redis pour performance
- * - Strategy Pattern: Résolution d'aliments (nom/ID)
+ * - Strategy Pattern: RÃ©solution d'aliments (nom/ID)
  *
- * Réduction de code: -65% (521 → 180 lignes)
- * Performance: +80% (grâce au cache et factory)
+ * RÃ©duction de code: -65% (521 â†’ 180 lignes)
+ * Performance: +80% (grÃ¢ce au cache et factory)
  */
 @Service
 public class RecetteService {
@@ -56,7 +56,7 @@ public class RecetteService {
         this.recetteFactory = recetteFactory;
     }
 
-    // ============ MÉTHODES DE LECTURE (avec Cache) ============
+    // ============ MÃ‰THODES DE LECTURE (avec Cache) ============
 
     @Transactional(readOnly = true)
     @Cacheable(value = "recettes", key = "'all'")
@@ -86,7 +86,7 @@ public class RecetteService {
     public Recette save(Recette recette) {
         recette.setId(null);
 
-        // Traiter les ingrédients
+        // Traiter les ingrÃ©dients
         if (recette.getIngredients() != null && !recette.getIngredients().isEmpty()) {
             for (Ingredient ingredient : recette.getIngredients()) {
                 ingredient.setId(null);
@@ -94,7 +94,7 @@ public class RecetteService {
                 if (ingredient.getAliment() != null && ingredient.getAliment().getId() != null) {
                     Aliment aliment = alimentRepository.findById(ingredient.getAliment().getId())
                             .orElseThrow(() -> new ResourceNotFoundException(
-                                    "Aliment non trouvé avec l'ID: " + ingredient.getAliment().getId()
+                                    "Aliment non trouvÃ© avec l'ID: " + ingredient.getAliment().getId()
                             ));
                     ingredient.setAliment(aliment);
                 }
@@ -102,7 +102,7 @@ public class RecetteService {
             }
         }
 
-        // Traiter les étapes
+        // Traiter les Ã©tapes
         if (recette.getEtapes() != null && !recette.getEtapes().isEmpty()) {
             for (Etape etape : recette.getEtapes()) {
                 etape.setId(null);
@@ -116,9 +116,9 @@ public class RecetteService {
     @Transactional
     public Recette update(Long id, Recette recette) {
         Recette existing = recetteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvÃ©e avec l'ID: " + id));
 
-        // Mise à jour des champs de base
+        // Mise Ã  jour des champs de base
         existing.setTitre(recette.getTitre());
         existing.setDescription(recette.getDescription());
         existing.setTempsTotal(recette.getTempsTotal());
@@ -129,7 +129,7 @@ public class RecetteService {
         existing.setStatut(recette.getStatut());
         existing.setMotifRejet(recette.getMotifRejet());
 
-        // Mise à jour des ingrédients
+        // Mise Ã  jour des ingrÃ©dients
         if (recette.getIngredients() != null) {
             existing.getIngredients().clear();
 
@@ -139,7 +139,7 @@ public class RecetteService {
                 if (ingredient.getAliment() != null && ingredient.getAliment().getId() != null) {
                     Aliment aliment = alimentRepository.findById(ingredient.getAliment().getId())
                             .orElseThrow(() -> new ResourceNotFoundException(
-                                    "Aliment non trouvé avec l'ID: " + ingredient.getAliment().getId()
+                                    "Aliment non trouvÃ© avec l'ID: " + ingredient.getAliment().getId()
                             ));
                     ingredient.setAliment(aliment);
                     ingredient.setRecette(existing);
@@ -148,7 +148,7 @@ public class RecetteService {
             }
         }
 
-        // Mise à jour des étapes
+        // Mise Ã  jour des Ã©tapes
         if (recette.getEtapes() != null) {
             existing.getEtapes().clear();
 
@@ -162,23 +162,23 @@ public class RecetteService {
         return recetteRepository.save(existing);
     }
 
-    // ============ CRÉATION/MISE À JOUR (avec Factory + Cache Eviction) ============
+    // ============ CRÃ‰ATION/MISE Ã€ JOUR (avec Factory + Cache Eviction) ============
 
     /**
-     * Crée une recette depuis un DTO en utilisant le Factory Pattern.
-     * Avant: 250 lignes de code répétitif
-     * Après: 15 lignes - Gain de -94% !
+     * CrÃ©e une recette depuis un DTO en utilisant le Factory Pattern.
+     * Avant: 250 lignes de code rÃ©pÃ©titif
+     * AprÃ¨s: 15 lignes - Gain de -94% !
      */
     @Transactional
     @CacheEvict(value = "recettes", allEntries = true)
     public Recette saveFromDTO(RecetteDTO dto) {
-        // Création via Factory (gère ingrédients/étapes)
+        // CrÃ©ation via Factory (gÃ¨re ingrÃ©dients/Ã©tapes)
         Recette recette = recetteFactory.createFromDTO(dto);
 
         // Sauvegarde
         Recette saved = recetteRepository.save(recette);
 
-        // Logger l'activité
+        // Logger l'activitÃ©
         logRecetteCreee(saved);
 
         // Notifier les admins
@@ -188,23 +188,23 @@ public class RecetteService {
     }
 
     /**
-     * Met à jour une recette depuis un DTO en utilisant le Factory Pattern.
+     * Met Ã  jour une recette depuis un DTO en utilisant le Factory Pattern.
      * Avant: 150 lignes
-     * Après: 10 lignes - Gain de -93% !
+     * AprÃ¨s: 10 lignes - Gain de -93% !
      */
     @Transactional
     @CachePut(value = "recettes", key = "#id")
     @CacheEvict(value = "recettes", key = "'all'")
     public Recette updateFromDTO(Long id, RecetteDTO dto) {
         Recette existing = recetteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvÃ©e avec l'ID: " + id));
 
-        // Mise à jour via Factory
+        // Mise Ã  jour via Factory
         recetteFactory.updateFromDTO(existing, dto);
 
         Recette saved = recetteRepository.save(existing);
 
-        // Logger l'activité
+        // Logger l'activitÃ©
         logRecetteModifiee(saved);
 
         return saved;
@@ -213,20 +213,20 @@ public class RecetteService {
     @Transactional
     public void deleteById(Long id) {
         if (!recetteRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Recette non trouvée avec l'ID: " + id);
+            throw new ResourceNotFoundException("Recette non trouvÃ©e avec l'ID: " + id);
         }
         recetteRepository.deleteById(id);
     }
 
     /**
-     * Valider une recette (passer à VALIDEE et actif=true)
+     * Valider une recette (passer Ã  VALIDEE et actif=true)
      */
     @Transactional
     @CachePut(value = "recettes", key = "#id")
     @CacheEvict(value = "recettes", allEntries = true)
     public Recette validerRecette(Long id) {
         Recette recette = recetteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvÃ©e avec l'ID: " + id));
 
         recette.setActif(true);
         recette.setStatut(Recette.StatutRecette.VALIDEE);
@@ -241,14 +241,14 @@ public class RecetteService {
     }
 
     /**
-     * Rejeter une recette (passer à REJETEE avec motif)
+     * Rejeter une recette (passer Ã  REJETEE avec motif)
      */
     @Transactional
     @CachePut(value = "recettes", key = "#id")
     @CacheEvict(value = "recettes", allEntries = true)
     public Recette rejeterRecette(Long id, String motif) {
         Recette recette = recetteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvÃ©e avec l'ID: " + id));
 
         recette.setActif(false);
         recette.setStatut(Recette.StatutRecette.REJETEE);
@@ -263,14 +263,14 @@ public class RecetteService {
     }
 
     /**
-     * Récupérer toutes les notifications d'un utilisateur
+     * RÃ©cupÃ©rer toutes les notifications d'un utilisateur
      */
     public List<Notification> getNotificationsByUtilisateur(Long utilisateurId) {
         return notificationRepository.findByUtilisateurIdOrderByDateCreationDesc(utilisateurId);
     }
 
     /**
-     * Récupérer les notifications non lues d'un utilisateur
+     * RÃ©cupÃ©rer les notifications non lues d'un utilisateur
      */
     public List<Notification> getNotificationsNonLues(Long utilisateurId) {
         return notificationRepository.findByUtilisateurIdAndLueOrderByDateCreationDesc(utilisateurId, false);
@@ -289,7 +289,7 @@ public class RecetteService {
     @Transactional
     public Notification marquerNotificationCommeLue(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Notification non trouvée avec l'ID: " + notificationId));
+                .orElseThrow(() -> new ResourceNotFoundException("Notification non trouvÃ©e avec l'ID: " + notificationId));
 
         notification.setLue(true);
         return notificationRepository.save(notification);
@@ -311,35 +311,35 @@ public class RecetteService {
     @Transactional
     public void deleteNotification(Long id) {
         if (!notificationRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Notification non trouvée avec l'ID: " + id);
+            throw new ResourceNotFoundException("Notification non trouvÃ©e avec l'ID: " + id);
         }
         notificationRepository.deleteById(id);
     }
 
-    // ============ MÉTHODES PRIVÉES (Extraction de logique) ============
+    // ============ MÃ‰THODES PRIVÃ‰ES (Extraction de logique) ============
 
     /**
-     * Logger l'activité de création de recette
+     * Logger l'activitÃ© de crÃ©ation de recette
      */
     private void logRecetteCreee(Recette recette) {
         if (recette.getUtilisateurId() != null) {
             activiteService.logActivite(
                     recette.getUtilisateurId(),
                     Activite.TypeActivite.RECETTE_CREEE,
-                    "Recette créée : " + recette.getTitre()
+                    "Recette crÃ©Ã©e : " + recette.getTitre()
             );
         }
     }
 
     /**
-     * Logger l'activité de modification de recette
+     * Logger l'activitÃ© de modification de recette
      */
     private void logRecetteModifiee(Recette recette) {
         if (recette.getUtilisateurId() != null) {
             activiteService.logActivite(
                     recette.getUtilisateurId(),
                     Activite.TypeActivite.RECETTE_MODIFIEE,
-                    "Recette modifiée : " + recette.getTitre()
+                    "Recette modifiÃ©e : " + recette.getTitre()
             );
         }
     }
@@ -362,8 +362,8 @@ public class RecetteService {
                 notificationRepository.save(notification);
             }
         } catch (Exception e) {
-            // Ne pas bloquer la création si notification échoue
-            System.err.println("⚠️ Erreur notifications admin: " + e.getMessage());
+            // Ne pas bloquer la crÃ©ation si notification Ã©choue
+            System.err.println("âš ï¸ Erreur notifications admin: " + e.getMessage());
         }
     }
 
@@ -377,7 +377,7 @@ public class RecetteService {
                     .recetteId(recette.getId())
                     .recetteTitre(recette.getTitre())
                     .type(Notification.TypeNotification.VALIDEE)
-                    .message("Votre recette \"" + recette.getTitre() + "\" a été validée !")
+                    .message("Votre recette \"" + recette.getTitre() + "\" a Ã©tÃ© validÃ©e !")
                     .lue(false)
                     .build();
             notificationRepository.save(notification);
@@ -394,7 +394,7 @@ public class RecetteService {
                     .recetteId(recette.getId())
                     .recetteTitre(recette.getTitre())
                     .type(Notification.TypeNotification.REJETEE)
-                    .message("Recette \"" + recette.getTitre() + "\" rejetée. Motif : " + motif)
+                    .message("Recette \"" + recette.getTitre() + "\" rejetÃ©e. Motif : " + motif)
                     .lue(false)
                     .build();
             notificationRepository.save(notification);

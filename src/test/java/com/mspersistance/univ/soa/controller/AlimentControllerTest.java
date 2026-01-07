@@ -123,7 +123,7 @@ class AlimentControllerTest {
     // ==================== Tests pour POST /api/persistance/aliments ====================
 
     @Test
-    @DisplayName("POST /api/persistance/aliments - avec données valides, devrait créer l'aliment")
+    @DisplayName("POST /api/persistance/aliments - avec donnÃ©es valides, devrait crÃ©er l'aliment")
     void createAliment_avecDonneesValides_devraitCreerAliment() throws Exception {
         AlimentDTO newDTO = new AlimentDTO(null, "Pomme", null, null, null, null, null, Aliment.CategorieAliment.FRUIT);
 
@@ -178,7 +178,7 @@ class AlimentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Le nom doit contenir au moins 2 caractères"));
+                .andExpect(jsonPath("$.error").value("Le nom doit contenir au moins 2 caractÃ¨res"));
 
         verify(alimentService, never()).save(any());
     }
@@ -194,13 +194,13 @@ class AlimentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("Un aliment avec ce nom existe déjà"));
+                .andExpect(jsonPath("$.error").value("Un aliment avec ce nom existe dÃ©jÃ "));
 
         verify(alimentService, never()).save(any());
     }
 
     @Test
-    @DisplayName("POST /api/persistance/aliments - sans catégorie, devrait retourner 400")
+    @DisplayName("POST /api/persistance/aliments - sans catÃ©gorie, devrait retourner 400")
     void createAliment_sansCategorie_devraitRetourner400() throws Exception {
         AlimentDTO dto = new AlimentDTO(null, "Pomme", null, null, null, null, null, null);
 
@@ -210,7 +210,7 @@ class AlimentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("La catégorie est obligatoire"));
+                .andExpect(jsonPath("$.error").value("La catÃ©gorie est obligatoire"));
 
         verify(alimentService, never()).save(any());
     }
@@ -218,7 +218,7 @@ class AlimentControllerTest {
     // ==================== Tests pour PUT /api/persistance/aliments/{id} ====================
 
     @Test
-    @DisplayName("PUT /api/persistance/aliments/{id} - avec données valides, devrait mettre à jour")
+    @DisplayName("PUT /api/persistance/aliments/{id} - avec donnÃ©es valides, devrait mettre Ã  jour")
     void updateAliment_avecDonneesValides_devraitMettreAJour() throws Exception {
         AlimentDTO updateDTO = new AlimentDTO(null, "Tomate cerise", null, null, null, null, null, Aliment.CategorieAliment.FRUIT);
 
@@ -256,7 +256,7 @@ class AlimentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("Aliment non trouvé avec l'ID: 999"));
+                .andExpect(jsonPath("$.error").value("Aliment non trouvÃ© avec l'ID: 999"));
 
         verify(alimentService, never()).update(any(), any());
     }
@@ -286,7 +286,7 @@ class AlimentControllerTest {
         // When & Then
         mockMvc.perform(delete("/api/persistance/aliments/999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("Aliment non trouvé avec l'ID: 999"));
+                .andExpect(jsonPath("$.error").value("Aliment non trouvÃ© avec l'ID: 999"));
 
         verify(alimentService, never()).deleteById(any());
     }

@@ -161,7 +161,7 @@ class AlimentServiceTest {
     // ==================== Tests pour save() ====================
 
     @Test
-    @DisplayName("save - avec aliment valide, devrait créer et retourner l'aliment")
+    @DisplayName("save - avec aliment valide, devrait crÃ©er et retourner l'aliment")
     void save_avecAlimentValide_devraitCreerEtRetournerAliment() {
         // Given
         Aliment nouveauAliment = new Aliment();
@@ -183,12 +183,12 @@ class AlimentServiceTest {
         assertNotNull(result.getId());
         assertEquals("Poivron", result.getNom());
         assertEquals(CategorieAliment.LEGUME, result.getCategorieAliment());
-        assertNull(nouveauAliment.getId()); // Vérifie que l'ID est bien mis à null avant save
+        assertNull(nouveauAliment.getId()); // VÃ©rifie que l'ID est bien mis Ã  null avant save
         verify(alimentRepository, times(1)).save(any(Aliment.class));
     }
 
     @Test
-    @DisplayName("save - devrait mettre l'ID à null même si fourni")
+    @DisplayName("save - devrait mettre l'ID Ã  null mÃªme si fourni")
     void save_devraitMettreIdANullMemeSiFourni() {
         // Given
         Aliment alimentAvecId = new Aliment();
@@ -197,7 +197,7 @@ class AlimentServiceTest {
         alimentAvecId.setCategorieAliment(CategorieAliment.LEGUME);
 
         Aliment alimentSauvegarde = new Aliment();
-        alimentSauvegarde.setId(4L); // Nouvel ID généré
+        alimentSauvegarde.setId(4L); // Nouvel ID gÃ©nÃ©rÃ©
         alimentSauvegarde.setNom("Courgette");
         alimentSauvegarde.setCategorieAliment(CategorieAliment.LEGUME);
 
@@ -209,14 +209,14 @@ class AlimentServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(4L, result.getId()); // Nouvel ID
-        assertNull(alimentAvecId.getId()); // ID original mis à null
+        assertNull(alimentAvecId.getId()); // ID original mis Ã  null
         verify(alimentRepository, times(1)).save(any(Aliment.class));
     }
 
     // ==================== Tests pour update() ====================
 
     @Test
-    @DisplayName("update - avec ID existant, devrait mettre à jour l'aliment")
+    @DisplayName("update - avec ID existant, devrait mettre Ã  jour l'aliment")
     void update_avecIdExistant_devraitMettreAJourAliment() {
         // Given
         Aliment alimentMisAJour = new Aliment();
@@ -253,7 +253,7 @@ class AlimentServiceTest {
                 () -> alimentService.update(999L, alimentMisAJour)
         );
 
-        assertEquals("Aliment non trouvé avec l'ID: 999", exception.getMessage());
+        assertEquals("Aliment non trouvÃ© avec l'ID: 999", exception.getMessage());
         verify(alimentRepository, times(1)).findById(999L);
         verify(alimentRepository, never()).save(any());
     }
@@ -287,7 +287,7 @@ class AlimentServiceTest {
                 () -> alimentService.deleteById(999L)
         );
 
-        assertEquals("Aliment non trouvé avec l'ID: 999", exception.getMessage());
+        assertEquals("Aliment non trouvÃ© avec l'ID: 999", exception.getMessage());
         verify(alimentRepository, times(1)).existsById(999L);
         verify(alimentRepository, never()).deleteById(any());
     }

@@ -1,19 +1,28 @@
 package com.mspersistance.univ.soa.controller;
 
-import com.mspersistance.univ.soa.dto.UtilisateurDTO;
-import com.mspersistance.univ.soa.mapper.UtilisateurMapper;
-import com.mspersistance.univ.soa.model.Utilisateur;
-import com.mspersistance.univ.soa.service.UtilisateurService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mspersistance.univ.soa.dto.UtilisateurDTO;
+import com.mspersistance.univ.soa.mapper.UtilisateurMapper;
+import com.mspersistance.univ.soa.model.Utilisateur;
+import com.mspersistance.univ.soa.service.UtilisateurService;
 
 @RestController
 @RequestMapping("/api/persistance/utilisateurs")
@@ -31,7 +40,7 @@ public class UtilisateurController {
     }
 
     /**
-     * GET /api/persistance/utilisateurs - Récupérer tous les utilisateurs
+     * GET /api/persistance/utilisateurs - RÃ©cupÃ©rer tous les utilisateurs
      */
     @GetMapping
     public ResponseEntity<List<UtilisateurDTO>> getAllUtilisateurs() {
@@ -42,7 +51,7 @@ public class UtilisateurController {
     }
 
     /**
-     * GET /api/persistance/utilisateurs/{id} - Récupérer un utilisateur par ID
+     * GET /api/persistance/utilisateurs/{id} - RÃ©cupÃ©rer un utilisateur par ID
      */
     @GetMapping("/{id}")
     public ResponseEntity<UtilisateurDTO> getUtilisateurById(@PathVariable Long id) {
@@ -53,7 +62,7 @@ public class UtilisateurController {
     }
 
     /**
-     * GET /api/persistance/utilisateurs/email/{email} - Récupérer un utilisateur par email
+     * GET /api/persistance/utilisateurs/email/{email} - RÃ©cupÃ©rer un utilisateur par email
      */
     @GetMapping("/email/{email}")
     public ResponseEntity<UtilisateurDTO> getUtilisateurByEmail(@PathVariable String email) {
@@ -64,7 +73,7 @@ public class UtilisateurController {
     }
 
     /**
-     * POST /api/persistance/utilisateurs - Créer un nouvel utilisateur
+     * POST /api/persistance/utilisateurs - CrÃ©er un nouvel utilisateur
      */
     @PostMapping
     public ResponseEntity<?> createUtilisateur(@RequestBody UtilisateurDTO dto) {
@@ -98,7 +107,7 @@ public class UtilisateurController {
                     .body(createErrorResponse("Le mot de passe doit contenir au moins 6 caractères"));
         }
 
-        // Validation : nom et prénom requis
+        // Validation : nom et prÃ©nom requis
         if (dto.nom() == null || dto.nom().trim().isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(createErrorResponse("Le nom est obligatoire"));
@@ -114,7 +123,7 @@ public class UtilisateurController {
                 dto.role() != Utilisateur.Role.USER &&
                 dto.role() != Utilisateur.Role.ADMIN) {
             return ResponseEntity.badRequest()
-                    .body(createErrorResponse("Le rôle doit être USER ou ADMIN"));
+                    .body(createErrorResponse("Le rÃ´le doit Ãªtre USER ou ADMIN"));
         }
 
         try {
@@ -123,19 +132,19 @@ public class UtilisateurController {
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("Erreur lors de la création: " + e.getMessage()));
+                    .body(createErrorResponse("Erreur lors de la crÃ©ation: " + e.getMessage()));
         }
     }
 
     /**
-     * PUT /api/persistance/utilisateurs/{id} - Mettre à jour un utilisateur
+     * PUT /api/persistance/utilisateurs/{id} - Mettre Ã  jour un utilisateur
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUtilisateur(
             @PathVariable Long id,
             @RequestBody UtilisateurDTO dto) {
 
-        // Vérifier que l'utilisateur existe
+        // VÃ©rifier que l'utilisateur existe
         if (utilisateurService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -156,10 +165,10 @@ public class UtilisateurController {
         java.util.Optional<Utilisateur> existingOpt = utilisateurService.findByEmail(dto.email());
         if (existingOpt.isPresent() && !existingOpt.get().getId().equals(id)) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(createErrorResponse("Un autre utilisateur utilise déjà cet email"));
+                    .body(createErrorResponse("Un autre utilisateur utilise dÃ©jÃ  cet email"));
         }
 
-        // Validation : si mot de passe fourni, vérifier la longueur
+        // Validation : si mot de passe fourni, vÃ©rifier la longueur
         if (dto.motDePasse() != null && !dto.motDePasse().trim().isEmpty()) {
             if (dto.motDePasse().length() < 6) {
                 return ResponseEntity.badRequest()
@@ -167,7 +176,7 @@ public class UtilisateurController {
             }
         }
 
-        // Validation : nom et prénom requis
+        // Validation : nom et prÃ©nom requis
         if (dto.nom() == null || dto.nom().trim().isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(createErrorResponse("Le nom est obligatoire"));
@@ -184,7 +193,7 @@ public class UtilisateurController {
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("Erreur lors de la mise à jour: " + e.getMessage()));
+                    .body(createErrorResponse("Erreur lors de la mise Ã  jour: " + e.getMessage()));
         }
     }
 
@@ -193,14 +202,14 @@ public class UtilisateurController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUtilisateur(@PathVariable Long id) {
-        // Vérifier que l'utilisateur existe
+        // VÃ©rifier que l'utilisateur existe
         if (utilisateurService.findById(id).isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Utilisateur non trouvé avec l'ID: " + id));
         }
 
         try {
-            utilisateurService.deleteById(id);
+            utilisateurService.delete(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -208,68 +217,6 @@ public class UtilisateurController {
         }
     }
 
-    /**
-     * POST /api/persistance/utilisateurs/forgot-password - Demander réinitialisation
-     * ENDPOINT PUBLIC - SANS AUTHENTIFICATION REQUISE
-     */
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-
-        if (email == null || email.trim().isEmpty()) {
-            return ResponseEntity.badRequest()
-                .body(createErrorResponse("L'email est requis"));
-        }
-
-        Optional<Utilisateur> userOpt = utilisateurService.findByEmail(email);
-
-        // Important : ne pas révéler si l'email existe (sécurité)
-        if (userOpt.isPresent()) {
-            String token = utilisateurService.generatePasswordResetToken(userOpt.get().getId());
-            // TODO: Envoyer l'email avec le lien de réinitialisation
-            // emailService.sendPasswordResetEmail(email, token);
-            System.out.println("🔑 Token de réinitialisation généré : " + token);
-        }
-
-        return ResponseEntity.ok(Map.of("message",
-            "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé"));
-    }
-
-    /**
-     * POST /api/persistance/utilisateurs/reset-password - Réinitialiser le mot de passe
-     * ENDPOINT PUBLIC - SANS AUTHENTIFICATION REQUISE
-     */
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
-        String token = request.get("token");
-        String newPassword = request.get("newPassword");
-
-        if (token == null || token.trim().isEmpty()) {
-            return ResponseEntity.badRequest()
-                .body(createErrorResponse("Le token est requis"));
-        }
-
-        if (newPassword == null || newPassword.trim().isEmpty()) {
-            return ResponseEntity.badRequest()
-                .body(createErrorResponse("Le nouveau mot de passe est requis"));
-        }
-
-        if (newPassword.length() < 6) {
-            return ResponseEntity.badRequest()
-                .body(createErrorResponse("Le mot de passe doit contenir au moins 6 caractères"));
-        }
-
-        boolean success = utilisateurService.resetPasswordWithToken(token, newPassword);
-
-        if (!success) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(createErrorResponse("Token invalide, expiré ou déjà utilisé"));
-        }
-
-        return ResponseEntity.ok(Map.of("message", "Mot de passe réinitialisé avec succès"));
-    }
-
-    // Méthodes utilitaires
     private boolean isValidEmail(String email) {
         return email != null && email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
@@ -278,5 +225,23 @@ public class UtilisateurController {
         Map<String, String> error = new HashMap<>();
         error.put("error", message);
         return error;
+    }
+
+    /**
+     * GET /api/persistance/utilisateurs/auth/{email} - RÃ©cupÃ©rer les infos d'authentification
+     * Cet endpoint retourne le hash du mot de passe pour permettre la validation cÃ´tÃ© ms-utilisateur
+     */
+    @GetMapping("/auth/{email}")
+    public ResponseEntity<UtilisateurDTO> getUtilisateurForAuth(@PathVariable String email) {
+        Optional<Utilisateur> utilisateurOpt = utilisateurService.findByEmail(email);
+
+        if (utilisateurOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Utiliser le mapper pour convertir l'utilisateur en DTO
+        UtilisateurDTO dto = utilisateurMapper.toDTO(utilisateurOpt.get());
+
+        return ResponseEntity.ok(dto);
     }
 }

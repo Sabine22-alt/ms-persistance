@@ -46,9 +46,9 @@ class NotificationControllerTest {
         notification1.setId(1L);
         notification1.setUtilisateurId(1L);
         notification1.setRecetteId(1L);
-        notification1.setRecetteTitre("Recette validée");
+        notification1.setRecetteTitre("Recette validÃ©e");
         notification1.setType(Notification.TypeNotification.VALIDEE);
-        notification1.setMessage("Votre recette a été validée");
+        notification1.setMessage("Votre recette a Ã©tÃ© validÃ©e");
         notification1.setLue(false);
         notification1.setDateCreation(LocalDateTime.now());
 
@@ -56,25 +56,25 @@ class NotificationControllerTest {
         notification2.setId(2L);
         notification2.setUtilisateurId(1L);
         notification2.setRecetteId(2L);
-        notification2.setRecetteTitre("Recette rejetée");
+        notification2.setRecetteTitre("Recette rejetÃ©e");
         notification2.setType(Notification.TypeNotification.REJETEE);
-        notification2.setMessage("Votre recette a été rejetée");
+        notification2.setMessage("Votre recette a Ã©tÃ© rejetÃ©e");
         notification2.setLue(true);
         notification2.setDateCreation(LocalDateTime.now());
 
         notificationDTO1 = new NotificationDTO(
-            1L, 1L, 1L, "Recette validée", "VALIDEE",
-            "Votre recette a été validée", false, LocalDateTime.now()
+            1L, 1L, 1L, "Recette validÃ©e", "VALIDEE",
+            "Votre recette a Ã©tÃ© validÃ©e", false, LocalDateTime.now()
         );
 
         notificationDTO2 = new NotificationDTO(
-            2L, 1L, 2L, "Recette rejetée", "REJETEE",
-            "Votre recette a été rejetée", true, LocalDateTime.now()
+            2L, 1L, 2L, "Recette rejetÃ©e", "REJETEE",
+            "Votre recette a Ã©tÃ© rejetÃ©e", true, LocalDateTime.now()
         );
     }
 
     @Test
-    @DisplayName("GET /notifications/utilisateur/{id} - Récupérer toutes les notifications")
+    @DisplayName("GET /notifications/utilisateur/{id} - RÃ©cupÃ©rer toutes les notifications")
     void testGetNotificationsByUtilisateur() {
         // Given
         when(recetteService.getNotificationsByUtilisateur(1L))
@@ -93,7 +93,7 @@ class NotificationControllerTest {
     }
 
     @Test
-    @DisplayName("GET /notifications/utilisateur/{id}/non-lues - Récupérer notifications non lues")
+    @DisplayName("GET /notifications/utilisateur/{id}/non-lues - RÃ©cupÃ©rer notifications non lues")
     void testGetNotificationsNonLues() {
         when(recetteService.getNotificationsNonLues(1L))
                 .thenReturn(Arrays.asList(notification1));
@@ -126,8 +126,8 @@ class NotificationControllerTest {
     void testMarquerCommeLue() {
         notification1.setLue(true);
         NotificationDTO notificationLueDTO = new NotificationDTO(
-            1L, 1L, 1L, "Recette validée", "VALIDEE",
-            "Votre recette a été validée", true, LocalDateTime.now()
+            1L, 1L, 1L, "Recette validÃ©e", "VALIDEE",
+            "Votre recette a Ã©tÃ© validÃ©e", true, LocalDateTime.now()
         );
         when(recetteService.marquerNotificationCommeLue(1L)).thenReturn(notification1);
         when(notificationMapper.toDTO(notification1)).thenReturn(notificationLueDTO);
@@ -152,7 +152,7 @@ class NotificationControllerTest {
         // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("Toutes les notifications ont été marquées comme lues", response.getBody().get("message"));
+        assertEquals("Toutes les notifications ont Ã©tÃ© marquÃ©es comme lues", response.getBody().get("message"));
         verify(recetteService).marquerToutesNotificationsCommeLues(1L);
     }
 }

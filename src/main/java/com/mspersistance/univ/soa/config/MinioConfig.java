@@ -38,7 +38,7 @@ public class MinioConfig {
             createBucketIfNotExists(minioClient, documentsBucket);
 
             setPublicReadPolicy(minioClient, recettesBucket);
-            System.out.println("MinIO configuré : bucket '" + recettesBucket + "' en accès public");
+            System.out.println("MinIO configurÃ© : bucket '" + recettesBucket + "' en accÃ¨s public");
         } catch (Exception e) {
             throw new RuntimeException("Erreur lors de l'initialisation de MinIO: " + e.getMessage(), e);
         }
@@ -50,16 +50,16 @@ public class MinioConfig {
         boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
         if (!exists) {
             minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
-            System.out.println("📦 Bucket créé : " + bucketName);
+            System.out.println("ðŸ“¦ Bucket crÃ©Ã© : " + bucketName);
         }
     }
 
     /**
-     * Définir une politique d'accès public (lecture seule) pour un bucket.
-     * Permet d'accéder aux images via http://localhost:9002/bucket/object
+     * DÃ©finir une politique d'accÃ¨s public (lecture seule) pour un bucket.
+     * Permet d'accÃ©der aux images via http://localhost:9002/bucket/object
      */
     private void setPublicReadPolicy(MinioClient minioClient, String bucketName) throws Exception {
-        // Politique JSON pour accès public en lecture seule
+        // Politique JSON pour accÃ¨s public en lecture seule
         String policy = String.format(
             "{\"Version\":\"2012-10-17\"," +
             "\"Statement\":[{" +
@@ -78,7 +78,7 @@ public class MinioConfig {
                 .build()
         );
 
-        System.out.println("🔓 Politique d'accès public configurée pour : " + bucketName);
+        System.out.println("ðŸ”“ Politique d'accÃ¨s public configurÃ©e pour : " + bucketName);
     }
 }
 

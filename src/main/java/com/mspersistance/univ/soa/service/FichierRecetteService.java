@@ -48,14 +48,14 @@ public class FichierRecetteService {
     @CacheEvict(value = {"recettes", "fichiers"}, allEntries = true)
     public FichierRecetteDTO uploadImage(Long recetteId, MultipartFile file) {
         Recette recette = recetteRepository.findById(recetteId)
-            .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
+            .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvÃ©e avec l'ID: " + recetteId));
 
         if (!IMAGE_TYPES.contains(file.getContentType())) {
-            throw new IllegalArgumentException("Type de fichier non autorisé. Types acceptés: JPEG, PNG, GIF, WEBP");
+            throw new IllegalArgumentException("Type de fichier non autorisÃ©. Types acceptÃ©s: JPEG, PNG, GIF, WEBP");
         }
 
         if (file.getSize() > 10 * 1024 * 1024) {
-            throw new IllegalArgumentException("La taille du fichier ne peut pas dépasser 10MB");
+            throw new IllegalArgumentException("La taille du fichier ne peut pas dÃ©passer 10MB");
         }
 
         String uniqueFileName = minioService.generateUniqueFileName(file.getOriginalFilename());
@@ -74,14 +74,14 @@ public class FichierRecetteService {
 
         fichier = fichierRecetteRepository.save(fichier);
 
-        // URL publique absolue (backend streaming) accessible depuis n'importe où
+        // URL publique absolue (backend streaming) accessible depuis n'importe oÃ¹
         String streamUrl = String.format("%s/api/persistance/recettes/%d/fichiers/images/%d/content",
             serverPublicUrl, recetteId, fichier.getId());
 
         recette.setImageUrl(streamUrl);
         recetteRepository.save(recette);
 
-        System.out.println("✅ Image uploadée; URL publique absolue: " + streamUrl);
+        System.out.println("âœ… Image uploadÃ©e; URL publique absolue: " + streamUrl);
 
         return toDTO(fichier);
     }
@@ -90,14 +90,14 @@ public class FichierRecetteService {
     @CacheEvict(value = {"recettes", "fichiers"}, allEntries = true)
     public FichierRecetteDTO uploadDocument(Long recetteId, MultipartFile file) {
         Recette recette = recetteRepository.findById(recetteId)
-            .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
+            .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvÃ©e avec l'ID: " + recetteId));
 
         if (!DOCUMENT_TYPES.contains(file.getContentType())) {
-            throw new IllegalArgumentException("Type de fichier non autorisé. Types acceptés: PDF, DOC, DOCX, TXT");
+            throw new IllegalArgumentException("Type de fichier non autorisÃ©. Types acceptÃ©s: PDF, DOC, DOCX, TXT");
         }
 
         if (file.getSize() > 10 * 1024 * 1024) {
-            throw new IllegalArgumentException("La taille du fichier ne peut pas dépasser 10MB");
+            throw new IllegalArgumentException("La taille du fichier ne peut pas dÃ©passer 10MB");
         }
 
         String uniqueFileName = minioService.generateUniqueFileName(file.getOriginalFilename());
@@ -142,7 +142,7 @@ public class FichierRecetteService {
 
     public InputStream downloadFichier(Long fichierId) {
         FichierRecette fichier = fichierRecetteRepository.findById(fichierId)
-            .orElseThrow(() -> new ResourceNotFoundException("Fichier non trouvé avec l'ID: " + fichierId));
+            .orElseThrow(() -> new ResourceNotFoundException("Fichier non trouvÃ© avec l'ID: " + fichierId));
 
         String bucketName = fichier.getType() == FichierRecette.TypeFichier.IMAGE
             ? minioService.getRecettesBucket()
@@ -154,7 +154,7 @@ public class FichierRecetteService {
     @Cacheable(value = "fichiers", key = "#fichierId")
     public FichierRecetteDTO getFichierById(Long fichierId) {
         FichierRecette fichier = fichierRecetteRepository.findById(fichierId)
-            .orElseThrow(() -> new ResourceNotFoundException("Fichier non trouvé avec l'ID: " + fichierId));
+            .orElseThrow(() -> new ResourceNotFoundException("Fichier non trouvÃ© avec l'ID: " + fichierId));
         return toDTO(fichier);
     }
 
@@ -162,7 +162,7 @@ public class FichierRecetteService {
     @CacheEvict(value = {"recettes", "fichiers"}, allEntries = true)
     public void deleteFichier(Long fichierId) {
         FichierRecette fichier = fichierRecetteRepository.findById(fichierId)
-            .orElseThrow(() -> new ResourceNotFoundException("Fichier non trouvé avec l'ID: " + fichierId));
+            .orElseThrow(() -> new ResourceNotFoundException("Fichier non trouvÃ© avec l'ID: " + fichierId));
 
         String bucketName = fichier.getType() == FichierRecette.TypeFichier.IMAGE
             ? minioService.getRecettesBucket()

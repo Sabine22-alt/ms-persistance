@@ -24,18 +24,18 @@ public class RepasPlannifie {
 
     @Column(nullable = false)
     @Enumerated(EnumType.ORDINAL)
-    private TypeRepas typeRepas; // 0=petit-déj, 1=déjeuner, 2=dîner
+    private TypeRepas typeRepas; // 0=petit-dÃ©j, 1=dÃ©jeuner, 2=dÃ®ner
 
     @Column(name = "recette_id")
-    private Long recetteId; // Nullable, référence à une recette
+    private Long recetteId; // Nullable, rÃ©fÃ©rence Ã  une recette
 
     @Column(columnDefinition = "TEXT")
     private String noteLibre; // Description manuelle si pas de recette
 
     public enum TypeRepas {
-        PETIT_DEJEUNER(0, "Petit-déjeuner"),
-        DEJEUNER(1, "Déjeuner"),
-        DINER(2, "Dîner");
+        PETIT_DEJEUNER(0, "Petit-dÃ©jeuner"),
+        DEJEUNER(1, "DÃ©jeuner"),
+        DINER(2, "DÃ®ner");
 
         private final int value;
         private final String label;

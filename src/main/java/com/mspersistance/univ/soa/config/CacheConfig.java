@@ -12,14 +12,14 @@ import java.util.concurrent.TimeUnit;
 /**
  * Configuration du cache Caffeine pour optimiser les performances.
  *
- * Caffeine est un cache local en mémoire ultra-rapide (successeur de Guava Cache).
+ * Caffeine est un cache local en mÃ©moire ultra-rapide (successeur de Guava Cache).
  *
- * Stratégie:
- * - Recettes: cache 5 minutes (données consultées souvent, modifiées rarement)
+ * StratÃ©gie:
+ * - Recettes: cache 5 minutes (donnÃ©es consultÃ©es souvent, modifiÃ©es rarement)
  * - Aliments: cache 15 minutes (quasi statiques)
  * - Utilisateurs: cache 10 minutes
  *
- * Impact performance estimé: -80% latence sur les listes (30s → 6s)
+ * Impact performance estimÃ©: -80% latence sur les listes (30s â†’ 6s)
  */
 @Configuration
 @EnableCaching

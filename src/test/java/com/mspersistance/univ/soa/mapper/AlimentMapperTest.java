@@ -21,7 +21,7 @@ class AlimentMapperTest {
     // ==================== Tests pour toDTO() ====================
 
     @Test
-    @DisplayName("toDTO - avec entité valide, devrait convertir en DTO")
+    @DisplayName("toDTO - avec entitÃ© valide, devrait convertir en DTO")
     void toDTO_avecEntiteValide_devraitConvertirEnDTO() {
         // Given
         Aliment aliment = new Aliment();
@@ -40,7 +40,7 @@ class AlimentMapperTest {
     }
 
     @Test
-    @DisplayName("toDTO - avec entité null, devrait retourner null")
+    @DisplayName("toDTO - avec entitÃ© null, devrait retourner null")
     void toDTO_avecEntiteNull_devraitRetournerNull() {
         // When
         AlimentDTO dto = alimentMapper.toDTO(null);
@@ -69,7 +69,7 @@ class AlimentMapperTest {
     // ==================== Tests pour toEntity() ====================
 
     @Test
-    @DisplayName("toEntity - avec DTO valide, devrait convertir en entité")
+    @DisplayName("toEntity - avec DTO valide, devrait convertir en entitÃ©")
     void toEntity_avecDTOValide_devraitConvertirEnEntite() {
         AlimentDTO dto = new AlimentDTO(1L, "Pomme", null, null, null, null, null, Aliment.CategorieAliment.FRUIT);
         Aliment aliment = alimentMapper.toEntity(dto);
@@ -102,7 +102,7 @@ class AlimentMapperTest {
     // ==================== Tests de conversion bidirectionnelle ====================
 
     @Test
-    @DisplayName("conversion bidirectionnelle - devrait préserver les données")
+    @DisplayName("conversion bidirectionnelle - devrait prÃ©server les donnÃ©es")
     void conversionBidirectionnelle_devraitPreserverLesDonnees() {
         // Given
         Aliment original = new Aliment();
