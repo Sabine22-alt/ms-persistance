@@ -3,10 +3,7 @@ package com.springbootTemplate.univ.soa.service;
 import com.springbootTemplate.univ.soa.dto.RecetteDTO;
 import com.springbootTemplate.univ.soa.exception.ResourceNotFoundException;
 import com.springbootTemplate.univ.soa.model.*;
-import com.springbootTemplate.univ.soa.repository.AlimentRepository;
-import com.springbootTemplate.univ.soa.repository.NotificationRepository;
-import com.springbootTemplate.univ.soa.repository.RecetteRepository;
-import com.springbootTemplate.univ.soa.repository.UtilisateurRepository;
+import com.springbootTemplate.univ.soa.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -516,5 +513,94 @@ public class RecetteService {
             throw new ResourceNotFoundException("Notification non trouvée avec l'ID: " + id);
         }
         notificationRepository.deleteById(id);
+    }
+
+    @Autowired
+    private FavoriRepository favoriRepository;
+
+    /**
+     * Ajouter une recette aux favoris
+     */
+    @Transactional
+    public void ajouterFavori(Long utilisateurId, Long recetteId) {
+        // Vérifier que la recette existe
+        Recette recette = recetteRepository.findById(recetteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Recette non trouvée avec l'ID: " + recetteId));
+
+        // Vérifier si déjà en favori
+        if (favoriRepository.existsByUtilisateurIdAndRecetteId(utilisateurId, recetteId)) {
+            throw new IllegalArgumentException("Cette recette est déjà dans vos favoris");
+        }
+
+        Favori favori = new Favori();
+        favori.setUtilisateurId(utilisateurId);
+        favori.setRecette(recette);
+
+        Favori saved = favoriRepository.save(favori);
+
+        // Logger l'activité
+        activiteService.logActivite(
+                utilisateurId,
+                Activite.TypeActivite.FAVORI_AJOUTE,
+                "Recette ajoutée aux favoris : " + recette.getTitre()
+        );
+
+    }
+
+    /**
+     * Retirer une recette des favoris
+     */
+    @Transactional
+    public void retirerFavori(Long utilisateurId, Long recetteId) {
+        // Vérifier que le favori existe
+        Favori favori = favoriRepository.findByUtilisateurIdAndRecetteId(utilisateurId, recetteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ce favori n'existe pas"));
+
+        String titreRecette = favori.getRecette().getTitre();
+
+        favoriRepository.delete(favori);
+
+        // Logger l'activité
+        activiteService.logActivite(
+                utilisateurId,
+                Activite.TypeActivite.FAVORI_RETIRE,
+                "Recette retirée des favoris : " + titreRecette
+        );
+    }
+
+    /**
+     * Basculer le statut favori (ajouter si absent, retirer si présent)
+     */
+    @Transactional
+    public boolean toggleFavori(Long utilisateurId, Long recetteId) {
+        if (favoriRepository.existsByUtilisateurIdAndRecetteId(utilisateurId, recetteId)) {
+            retirerFavori(utilisateurId, recetteId);
+            return false; // N'est plus en favori
+        } else {
+            ajouterFavori(utilisateurId, recetteId);
+            return true; // Est maintenant en favori
+        }
+    }
+
+    /**
+     * Vérifier si une recette est en favori
+     */
+    public boolean estEnFavori(Long utilisateurId, Long recetteId) {
+        return favoriRepository.existsByUtilisateurIdAndRecetteId(utilisateurId, recetteId);
+    }
+
+    /**
+     * Récupérer les recettes favorites d'un utilisateur
+     */
+    @Transactional(readOnly = true)
+    public List<Recette> getRecettesFavorites(Long utilisateurId) {
+        return favoriRepository.findRecettesFavoritesByUtilisateurId(utilisateurId);
+    }
+
+    /**
+     * Compter le nombre de favoris d'une recette
+     */
+    public long getNombreFavoris(Long recetteId) {
+        return favoriRepository.countByRecetteId(recetteId);
     }
 }

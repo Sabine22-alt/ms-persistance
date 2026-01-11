@@ -56,7 +56,9 @@ public class Activite {
         FAVORI_AJOUT,
         FAVORI_SUPPRIME,
         UTILISATEUR_INSCRIT,
-        PROFIL_MODIFIE
+        PROFIL_MODIFIE,
+        FAVORI_AJOUTE,
+        FAVORI_RETIRE
     }
 }
 

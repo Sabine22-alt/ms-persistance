@@ -369,4 +369,128 @@ public class RecetteController {
         error.put("error", message);
         return error;
     }
+
+    /**
+     * POST /api/persistance/recettes/{id}/favoris?utilisateurId={userId} - Ajouter aux favoris
+     */
+    @PostMapping("/{id}/favoris")
+    public ResponseEntity<?> ajouterFavori(
+            @PathVariable Long id,
+            @RequestParam Long utilisateurId) {
+
+        if (utilisateurId == null) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("L'ID utilisateur est requis"));
+        }
+
+        try {
+            recetteService.ajouterFavori(utilisateurId, id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Recette ajoutée aux favoris");
+            response.put("favori", true);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
+     * DELETE /api/persistance/recettes/{id}/favoris?utilisateurId={userId} - Retirer des favoris
+     */
+    @DeleteMapping("/{id}/favoris")
+    public ResponseEntity<?> retirerFavori(
+            @PathVariable Long id,
+            @RequestParam Long utilisateurId) {
+
+        if (utilisateurId == null) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("L'ID utilisateur est requis"));
+        }
+
+        try {
+            recetteService.retirerFavori(utilisateurId, id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Recette retirée des favoris");
+            response.put("favori", false);
+            return ResponseEntity.ok(response);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
+     * PUT /api/persistance/recettes/{id}/favoris/toggle?utilisateurId={userId} - Basculer favori
+     */
+    @PutMapping("/{id}/favoris/toggle")
+    public ResponseEntity<?> toggleFavori(
+            @PathVariable Long id,
+            @RequestParam Long utilisateurId) {
+
+        if (utilisateurId == null) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("L'ID utilisateur est requis"));
+        }
+
+        try {
+            boolean estFavori = recetteService.toggleFavori(utilisateurId, id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("favori", estFavori);
+            response.put("message", estFavori ? "Recette ajoutée aux favoris" : "Recette retirée des favoris");
+            return ResponseEntity.ok(response);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
+     * GET /api/persistance/recettes/{id}/favoris/check?utilisateurId={userId} - Vérifier si en favori
+     */
+    @GetMapping("/{id}/favoris/check")
+    public ResponseEntity<?> checkFavori(
+            @PathVariable Long id,
+            @RequestParam Long utilisateurId) {
+
+        if (utilisateurId == null) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse("L'ID utilisateur est requis"));
+        }
+
+        boolean estFavori = recetteService.estEnFavori(utilisateurId, id);
+        Map<String, Object> response = new HashMap<>();
+        response.put("favori", estFavori);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * GET /api/persistance/recettes/favoris?utilisateurId={userId} - Récupérer les recettes favorites
+     */
+    @GetMapping("/favoris")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<RecetteDTO>> getRecettesFavorites(@RequestParam Long utilisateurId) {
+        if (utilisateurId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<RecetteDTO> dtos = recetteService.getRecettesFavorites(utilisateurId).stream()
+                .map(recetteMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * GET /api/persistance/recettes/{id}/favoris/count - Compter le nombre de favoris
+     */
+    @GetMapping("/{id}/favoris/count")
+    public ResponseEntity<?> getNombreFavoris(@PathVariable Long id) {
+        long count = recetteService.getNombreFavoris(id);
+        Map<String, Object> response = new HashMap<>();
+        response.put("count", count);
+        return ResponseEntity.ok(response);
+    }
 }
